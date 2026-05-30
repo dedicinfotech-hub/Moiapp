@@ -1,2 +1,6 @@
 {
+  // Only show the root git repo in Source Control — ignore nested git repos
+  "git.ignoredRepositories": [
+    "/Applications/MAMP/htdocs/MoiApp/frontend"
+  ]
 }
