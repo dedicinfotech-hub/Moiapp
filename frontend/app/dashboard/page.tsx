@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { eventsApi, moiApi, exportCSV, Event, MoiEntry, authApi } from '@/lib/api';
@@ -217,18 +217,41 @@ export default function DashboardPage() {
 // ─────────────────────────────────────────────────────────────────────────────
 function NewEventModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const [form, setForm] = useState({ bride_name: '', groom_name: '', wedding_date: '', venue: '', description: '' });
+  const [coverFile,    setCoverFile]    = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const inp = 'w-full border border-[#E8E8E8] rounded-lg px-3 py-2.5 text-sm text-[#101010] placeholder-[#bbb] focus:outline-none focus:border-[#FFC107] transition-colors bg-white';
   const lbl = 'block text-xs font-semibold text-[#555] mb-1.5';
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  };
+
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await eventsApi.create(form);
+      const res = await eventsApi.create(form);
+      if (coverFile) {
+        const token = localStorage.getItem('moi_token');
+        const fd = new FormData();
+        fd.append('event_id', String(res.id));
+        fd.append('cover', coverFile);
+        await fetch(`${BASE_URL}/events.php?action=cover`, {
+          method: 'POST',
+          headers: { 'X-Auth-Token': `Bearer ${token}` },
+          body: fd,
+        });
+      }
       onCreated();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create event');
@@ -237,17 +260,13 @@ function NewEventModal({ onClose, onCreated }: { onClose: () => void; onCreated:
     }
   };
 
-  // Close on backdrop click
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-      onClick={handleBackdrop}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={handleBackdrop}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#F0F0F0]">
           <div className="flex items-center gap-2.5">
@@ -257,94 +276,68 @@ function NewEventModal({ onClose, onCreated }: { onClose: () => void; onCreated:
               <p className="text-[11px] text-[#999]">புதிய திருமண நிகழ்வு</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-full text-[#999] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors text-lg leading-none"
-          >
-            ×
-          </button>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full text-[#999] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors text-lg">×</button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm">
-              {error}
-            </div>
-          )}
+        <div className="px-6 py-5 space-y-4">
+          {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm">{error}</div>}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={lbl}>Bride Name <span className="text-[#FFC107]">*</span></label>
-              <input
-                required
-                value={form.bride_name}
-                onChange={(e) => setForm({ ...form, bride_name: e.target.value })}
-                className={inp}
-                placeholder="Priya"
-              />
-            </div>
-            <div>
-              <label className={lbl}>Groom Name <span className="text-[#FFC107]">*</span></label>
-              <input
-                required
-                value={form.groom_name}
-                onChange={(e) => setForm({ ...form, groom_name: e.target.value })}
-                className={inp}
-                placeholder="Ravi"
-              />
-            </div>
-          </div>
-
+          {/* Cover photo */}
           <div>
-            <label className={lbl}>Wedding Date <span className="text-[#FFC107]">*</span></label>
-            <input
-              required
-              type="date"
-              value={form.wedding_date}
-              onChange={(e) => setForm({ ...form, wedding_date: e.target.value })}
-              className={inp}
-            />
-          </div>
-
-          <div>
-            <label className={lbl}>Venue</label>
-            <input
-              value={form.venue}
-              onChange={(e) => setForm({ ...form, venue: e.target.value })}
-              className={inp}
-              placeholder="Sri Murugan Mahal, Chennai"
-            />
-          </div>
-
-          <div>
-            <label className={lbl}>Description</label>
-            <textarea
-              rows={3}
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className={`${inp} resize-none`}
-              placeholder="A brief note about the wedding…"
-            />
-          </div>
-
-          <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold hover:border-[#ccc] transition-colors"
+            <label className={lbl}>Cover Photo</label>
+            <div
+              onClick={() => fileRef.current?.click()}
+              className={`cursor-pointer rounded-xl overflow-hidden border-2 border-dashed transition-colors ${coverPreview ? 'border-[#FFC107]' : 'border-[#E8E8E8] hover:border-[#FFC107]'}`}
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Creating…' : 'Create Event →'}
-            </button>
+              {coverPreview ? (
+                <div className="relative h-32">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={coverPreview} alt="preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <p className="text-white text-xs font-semibold">Click to change</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-24 flex flex-col items-center justify-center gap-1.5 text-[#bbb]">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <p className="text-xs font-medium">Click to upload cover photo</p>
+                </div>
+              )}
+            </div>
+            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleCoverChange} />
           </div>
-        </form>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={lbl}>Bride Name <span className="text-[#FFC107]">*</span></label>
+                <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={inp} placeholder="Priya" />
+              </div>
+              <div>
+                <label className={lbl}>Groom Name <span className="text-[#FFC107]">*</span></label>
+                <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={inp} placeholder="Ravi" />
+              </div>
+            </div>
+            <div>
+              <label className={lbl}>Wedding Date <span className="text-[#FFC107]">*</span></label>
+              <input required type="date" value={form.wedding_date} onChange={(e) => setForm({ ...form, wedding_date: e.target.value })} className={inp} />
+            </div>
+            <div>
+              <label className={lbl}>Venue</label>
+              <input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} className={inp} placeholder="Sri Murugan Mahal, Chennai" />
+            </div>
+            <div>
+              <label className={lbl}>Description</label>
+              <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={`${inp} resize-none`} placeholder="A brief note about the wedding…" />
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button type="button" onClick={onClose} className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold hover:border-[#ccc] transition-colors">Cancel</button>
+              <button type="submit" disabled={loading} className="flex-1 bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
+                {loading ? 'Creating…' : 'Create Event →'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

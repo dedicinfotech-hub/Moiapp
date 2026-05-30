@@ -3,9 +3,57 @@ require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/cors.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
-$slug   = $_GET['slug'] ?? '';
+$slug   = $_GET['slug']   ?? '';
 $id     = intval($_GET['id'] ?? 0);
 $public = $_GET['public'] ?? '';
+$action = $_GET['action'] ?? '';
+
+// ── POST upload cover photo ───────────────────────────────────────────────────
+if ($method === 'POST' && $action === 'cover') {
+    $user = getAuthUser();
+    if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+
+    $evId = intval($_POST['event_id'] ?? 0);
+    if (!$evId || empty($_FILES['cover'])) {
+        http_response_code(400); echo json_encode(['error' => 'event_id and cover file required']); exit;
+    }
+
+    $db   = getDB();
+    $stmt = $db->prepare('SELECT id FROM events WHERE id = ? AND user_id = ?');
+    $stmt->bind_param('ii', $evId, $user['id']);
+    $stmt->execute();
+    if ($stmt->get_result()->num_rows === 0) {
+        http_response_code(403); echo json_encode(['error' => 'Forbidden']); exit;
+    }
+
+    $file     = $_FILES['cover'];
+    $allowed  = ['image/jpeg', 'image/png', 'image/webp'];
+    $mimeType = mime_content_type($file['tmp_name']);
+    if (!in_array($mimeType, $allowed)) {
+        http_response_code(400); echo json_encode(['error' => 'Only JPG, PNG, WEBP allowed']); exit;
+    }
+    if ($file['size'] > 10 * 1024 * 1024) {
+        http_response_code(400); echo json_encode(['error' => 'Max 10MB']); exit;
+    }
+
+    $ext      = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION) ?: 'jpg');
+    $subDir   = 'covers/' . date('Y/m');
+    $uploadDir = dirname(__DIR__) . '/uploads/' . $subDir . '/';
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+    $filename = 'cover_' . $evId . '_' . uniqid() . '.' . $ext;
+    move_uploaded_file($file['tmp_name'], $uploadDir . $filename);
+
+    $appUrl    = rtrim(env('APP_URL', 'http://localhost:8888/MoiApp'), '/');
+    $coverUrl  = $appUrl . '/uploads/' . $subDir . '/' . $filename;
+
+    $stmt = $db->prepare('UPDATE events SET cover_photo = ? WHERE id = ?');
+    $stmt->bind_param('si', $coverUrl, $evId);
+    $stmt->execute();
+
+    echo json_encode(['success' => true, 'url' => $coverUrl]);
+    exit;
+}
 
 // ── GET all events PUBLIC listing ─────────────────────────────────────────────
 if ($method === 'GET' && $public === '1') {
