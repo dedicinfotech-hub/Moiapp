@@ -1,0 +1,17 @@
+# ── PHP secrets ───────────────────────────────────────────────────────────────
+config/.env
+config/.env.production
+uploads/
+
+# ── Next.js ───────────────────────────────────────────────────────────────────
+frontend/.env.local
+frontend/.env.production
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+
+# ── Scripts output ────────────────────────────────────────────────────────────
+scripts/*.sql
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store

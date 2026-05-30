@@ -1,0 +1,44 @@
+Options -Indexes
+
+# ── Ensure all files in this directory are accessible ─────────────────────────
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+</IfModule>
+
+# ── Pass auth headers to PHP ───────────────────────────────────────────────────
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteRule .* - [E=HTTP_X_AUTH_TOKEN:%{HTTP:X-Auth-Token}]
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+SetEnvIf X-Auth-Token "(.*)" HTTP_X_AUTH_TOKEN=$1
+
+# ── CORS preflight — answer immediately before PHP ────────────────────────────
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^ - [R=200,L]
+
+# ── Serve real files and directories directly ─────────────────────────────────
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# ── Dynamic routes: rewrite any slug to the pre-built _ shell ─────────────────
+# /moiapp/e/<slug>  →  e/_.html
+RewriteCond %{REQUEST_URI} ^/moiapp/e/[^/]+/?$
+RewriteRule ^ e/_.html [L]
+
+# /moiapp/events/<slug>  →  events/_.html  (but not /events/new)
+RewriteCond %{REQUEST_URI} ^/moiapp/events/[^/]+/?$
+RewriteCond %{REQUEST_URI} !^/moiapp/events/new/?$
+RewriteRule ^ events/_.html [L]
+
+# ── Next.js static pages: try .html extension ─────────────────────────────────
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
+
+# ── Fallback: send everything else to index.html ──────────────────────────────
+RewriteCond %{DOCUMENT_ROOT}/moiapp/index.html -f
+RewriteRule ^ /moiapp/index.html [L]
