@@ -12,7 +12,11 @@ if ($method === 'GET' && $eventId) {
     $stmt = $db->prepare('SELECT * FROM photos WHERE event_id = ? ORDER BY uploaded_at DESC');
     $stmt->bind_param('i', $eventId);
     $stmt->execute();
-    echo json_encode($stmt->get_result()->fetch_all(MYSQLI_ASSOC));
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    foreach ($rows as &$row) {
+        $row['s3_url'] = normalizeCoverUrl($row['s3_url']);
+    }
+    echo json_encode($rows);
     exit;
 }
 

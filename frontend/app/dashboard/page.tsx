@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { eventsApi, moiApi, exportCSV, Event, MoiEntry, authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 
 type Module = 'dashboard' | 'events' | 'payments' | 'users' | 'analytics' | 'settings';
 
@@ -34,6 +35,7 @@ export default function DashboardPage() {
   const [module,   setModule]   = useState<Module>('dashboard');
   const [sideOpen, setSideOpen] = useState(false);
   const [showNew,  setShowNew]  = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
 
   const [events,     setEvents]     = useState<Event[]>([]);
   const [allEntries, setAllEntries] = useState<MoiEntry[]>([]);
@@ -42,6 +44,16 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!authLoading && !user) router.push('/login');
   }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const mod = params.get('module') as Module;
+      if (mod && ['dashboard', 'events', 'payments', 'users', 'analytics', 'settings'].includes(mod)) {
+        setModule(mod);
+      }
+    }
+  }, []);
 
   const loadAll = useCallback(async () => {
     if (!user) return;
@@ -190,9 +202,9 @@ export default function DashboardPage() {
           {/* Scrollable content */}
           <main className="flex-1 overflow-y-auto p-4 lg:p-6">
             {module === 'dashboard' && (
-              <ModuleDashboard events={events} entries={allEntries} totalMoi={totalMoi} onNavigate={setModule} onNewEvent={() => setShowNew(true)} />
+              <ModuleDashboard events={events} entries={allEntries} onNavigate={setModule} onNewEvent={() => setShowNew(true)} />
             )}
-            {module === 'events'    && <ModuleEvents    events={events} onRefresh={loadAll} onNewEvent={() => setShowNew(true)} />}
+            {module === 'events'    && <ModuleEvents    events={events} onRefresh={loadAll} onNewEvent={() => setShowNew(true)} onEdit={setEditingEvent} />}
             {module === 'payments'  && <ModulePayments  entries={allEntries} events={events} />}
             {module === 'users'     && <ModuleUsers     events={events} entries={allEntries} />}
             {module === 'analytics' && <ModuleAnalytics events={events} entries={allEntries} totalMoi={totalMoi} />}
@@ -206,6 +218,15 @@ export default function DashboardPage() {
         <NewEventModal
           onClose={() => setShowNew(false)}
           onCreated={() => { loadAll(); setShowNew(false); setModule('events'); }}
+        />
+      )}
+
+      {/* ── Edit Event Modal ── */}
+      {editingEvent && (
+        <EditEventModal
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onUpdated={() => { loadAll(); setEditingEvent(null); }}
         />
       )}
     </>
@@ -347,11 +368,10 @@ function NewEventModal({ onClose, onCreated }: { onClose: () => void; onCreated:
 // Module: Dashboard Overview
 // ─────────────────────────────────────────────────────────────────────────────
 function ModuleDashboard({
-  events, entries, totalMoi, onNavigate, onNewEvent,
+  events, entries, onNavigate, onNewEvent,
 }: {
   events: Event[];
   entries: MoiEntry[];
-  totalMoi: number;
   onNavigate: (m: Module) => void;
   onNewEvent: () => void;
 }) {
@@ -362,13 +382,21 @@ function ModuleDashboard({
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 4);
 
+  const totalCash = entries.filter(e => e.gift_type === 'cash' || !e.gift_type).reduce((s, e) => s + Number(e.amount), 0);
+  const totalGold = entries.filter(e => e.gift_type === 'gold').reduce((s, e) => s + Number(e.gold_weight || 0), 0);
+  const totalGifts = entries.filter(e => e.gift_type === 'gift').length;
+
   const stats = [
     { label: 'Total Events',   value: String(events.length),  icon: '💍', bg: 'bg-[#FFFCF5] border-[#FFE082]' },
-    { label: 'Total Collected', value: `₹${totalMoi.toLocaleString('en-IN')}`, icon: '💰', bg: 'bg-[#F0FFF4] border-[#BBF7D0]' },
+    { label: 'Total Cash',     value: `₹${totalCash.toLocaleString('en-IN')}`, icon: '💰', bg: 'bg-[#F0FFF4] border-[#BBF7D0]' },
+    { label: 'Total Gold',     value: `${totalGold}g`,        icon: '✨', bg: 'bg-[#FFF9E6] border-[#FFE082]' },
+    { label: 'Total Gifts',    value: `${totalGifts} items`,  icon: '🎁', bg: 'bg-[#FFF5F5] border-[#FECACA]' },
     { label: 'Total Guests',   value: String(entries.length), icon: '👥', bg: 'bg-[#EFF6FF] border-[#BFDBFE]' },
     {
-      label: 'Avg Gift',
-      value: entries.length ? `₹${Math.round(totalMoi / entries.length).toLocaleString('en-IN')}` : '₹0',
+      label: 'Avg Cash Gift',
+      value: entries.filter(e => e.gift_type === 'cash' || !e.gift_type).length
+        ? `₹${Math.round(totalCash / entries.filter(e => e.gift_type === 'cash' || !e.gift_type).length).toLocaleString('en-IN')}`
+        : '₹0',
       icon: '📈',
       bg: 'bg-[#FDF4FF] border-[#E9D5FF]',
     },
@@ -377,12 +405,12 @@ function ModuleDashboard({
   return (
     <div className="space-y-5">
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {stats.map((s) => (
           <div key={s.label} className={`rounded-xl border p-4 ${s.bg}`}>
             <span className="text-2xl">{s.icon}</span>
-            <p className="text-xl font-bold text-[#101010] mt-2">{s.value}</p>
-            <p className="text-xs text-[#666] mt-0.5">{s.label}</p>
+            <p className="text-lg font-bold text-[#101010] mt-2 whitespace-nowrap overflow-hidden text-ellipsis">{s.value}</p>
+            <p className="text-[10px] text-[#666] mt-0.5 truncate">{s.label}</p>
           </div>
         ))}
       </div>
@@ -410,11 +438,13 @@ function ModuleDashboard({
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-[#101010] truncate">{e.guest_name}</p>
                       <p className="text-xs text-[#999] truncate">
-                        {ev ? `${ev.bride_name} & ${ev.groom_name}` : '—'} · {e.payment_mode}
+                        {ev ? `${ev.bride_name} & ${ev.groom_name}` : '—'} · {e.city ? `${e.city} · ` : ''}{e.payment_mode}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-[#101010]">₹{Number(e.amount).toLocaleString('en-IN')}</p>
+                      <p className="text-sm font-bold text-[#101010]">
+                        {e.gift_type === 'gold' ? `✨ ${e.gold_weight}g Gold` : e.gift_type === 'gift' ? `🎁 ${e.gift_description}` : `₹${Number(e.amount).toLocaleString('en-IN')}`}
+                      </p>
                       <p className="text-[10px] text-[#bbb]">
                         {new Date(e.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
@@ -499,25 +529,36 @@ function ModuleDashboard({
 // Module: Events
 // ─────────────────────────────────────────────────────────────────────────────
 function ModuleEvents({
-  events, onRefresh, onNewEvent,
+  events, onRefresh, onNewEvent, onEdit,
 }: {
   events: Event[];
   onRefresh: () => void;
   onNewEvent: () => void;
+  onEdit: (ev: Event) => void;
 }) {
   const [search,   setSearch]   = useState('');
   const [deleting, setDeleting] = useState<number | null>(null);
-  const [addingTo, setAddingTo] = useState<Event | null>(null); // event for inline moi entry
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showConfirmDelete, setShowConfirmDelete] = useState<number | null>(null);
+  const itemsPerPage = 10;
 
   const filtered = events.filter((ev) =>
     `${ev.bride_name} ${ev.groom_name} ${ev.venue}`.toLowerCase().includes(search.toLowerCase())
   );
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedEvents = filtered.slice(startIndex, startIndex + itemsPerPage);
+
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this event and all its entries? This cannot be undone.')) return;
     setDeleting(id);
     try { await eventsApi.delete(id); onRefresh(); }
-    finally { setDeleting(null); }
+    finally { setDeleting(null); setShowConfirmDelete(null); }
   };
 
   return (
@@ -547,14 +588,7 @@ function ModuleEvents({
         </button>
       </div>
 
-      {/* Inline Add Moi Entry panel */}
-      {addingTo && (
-        <InlineMoiEntry
-          event={addingTo}
-          onClose={() => setAddingTo(null)}
-          onAdded={() => { onRefresh(); setAddingTo(null); }}
-        />
-      )}
+
 
       {/* Table card */}
       <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
@@ -565,176 +599,205 @@ function ModuleEvents({
             ) : 'No results found.'}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#F5F5F5] bg-[#fafafa] text-left">
-                  <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Event</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide hidden md:table-cell">Date</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide hidden lg:table-cell">Venue</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-center">Status</th>
-                  <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F8F8F8]">
-                {filtered.map((ev) => (
-                  <tr key={ev.id} className={`hover:bg-[#fafafa] transition-colors ${addingTo?.id === ev.id ? 'bg-[#FFFBEE]' : ''}`}>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#FFFCF5] border border-[#FFE082] flex items-center justify-center text-base shrink-0">💍</div>
-                        <div>
-                          <p className="font-semibold text-[#101010]">{ev.bride_name} &amp; {ev.groom_name}</p>
-                          <p className="text-xs text-[#bbb]">/{ev.slug}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-[#666] hidden md:table-cell whitespace-nowrap">
-                      {new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-4 py-3.5 text-[#666] hidden lg:table-cell max-w-[160px] truncate">{ev.venue || '—'}</td>
-                    <td className="px-4 py-3.5 text-center">
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${ev.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                        {ev.is_active ? 'Active' : 'Draft'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center justify-end gap-1">
-                        {/* ✏️ Add Moi (manual entry) */}
-                        <button
-                          onClick={() => setAddingTo(addingTo?.id === ev.id ? null : ev)}
-                          title="Add manual moi entry"
-                          className={`p-1.5 transition-colors rounded ${addingTo?.id === ev.id ? 'text-[#FFC107]' : 'text-[#bbb] hover:text-[#FFC107]'}`}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        </button>
-                        <Link href={`/e/${ev.slug}`} target="_blank" title="View public page"
-                          className="p-1.5 text-[#bbb] hover:text-[#101010] transition-colors">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                        </Link>
-                        <Link href={`/events/${ev.slug}`} title="Manage"
-                          className="p-1.5 text-[#bbb] hover:text-[#101010] transition-colors">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        </Link>
-                        <button onClick={() => exportCSV(ev.id)} title="Export CSV"
-                          className="p-1.5 text-[#bbb] hover:text-[#101010] transition-colors">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        </button>
-                        <button onClick={() => handleDelete(ev.id)} disabled={deleting === ev.id} title="Delete"
-                          className="p-1.5 text-[#ddd] hover:text-red-400 transition-colors disabled:opacity-40">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#F5F5F5] bg-[#fafafa] text-left">
+                    <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Event</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide hidden md:table-cell">Date</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide hidden lg:table-cell">Venue</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-center">Status</th>
+                    <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[#F8F8F8]">
+                  {paginatedEvents.map((ev) => (
+                    <tr key={ev.id} className="hover:bg-[#fafafa] transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-[#FFFCF5] border border-[#FFE082] flex items-center justify-center text-base shrink-0">💍</div>
+                          <div>
+                            <p className="font-semibold text-[#101010]">{ev.bride_name} &amp; {ev.groom_name}</p>
+                            <p className="text-xs text-[#bbb]">/{ev.slug}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-[#666] hidden md:table-cell whitespace-nowrap">
+                        {new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="px-4 py-3.5 text-[#666] hidden lg:table-cell max-w-[160px] truncate">{ev.venue || '—'}</td>
+                      <td className="px-4 py-3.5 text-center">
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${ev.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                          {ev.is_active ? 'Active' : 'Draft'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center justify-end gap-1">
+                          {/* 👤 Add Moi (manual entry) */}
+                          <Link
+                            href={`/events/${ev.slug}`}
+                            title="Add manual moi entry"
+                            className="p-1.5 text-[#bbb] hover:text-[#FFC107] transition-colors rounded"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                              <circle cx="9" cy="7" r="4" />
+                              <line x1="19" y1="8" x2="19" y2="14" />
+                              <line x1="22" y1="11" x2="16" y2="11" />
+                            </svg>
+                          </Link>
+                          <Link href={`/e/${ev.slug}`} target="_blank" title="View public page"
+                            className="p-1.5 text-[#bbb] hover:text-[#101010] transition-colors">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                          </Link>
+                          <button
+                            onClick={() => onEdit(ev)}
+                            title="Edit event"
+                            className="p-1.5 text-[#bbb] hover:text-[#101010] transition-colors"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          </button>
+                          <button onClick={() => exportCSV(ev.id)} title="Export CSV"
+                            className="p-1.5 text-[#bbb] hover:text-[#101010] transition-colors">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                          </button>
+                          <button onClick={() => setShowConfirmDelete(ev.id)} disabled={deleting === ev.id} title="Delete"
+                            className="p-1.5 text-[#ddd] hover:text-red-400 transition-colors disabled:opacity-40">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Grid View */}
+            <div className="block sm:hidden divide-y divide-[#F8F8F8]">
+              {paginatedEvents.map((ev) => (
+                <div key={ev.id} className="p-4 space-y-3 bg-white transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#FFFCF5] border border-[#FFE082] flex items-center justify-center text-base shrink-0">💍</div>
+                      <div>
+                        <p className="font-semibold text-[#101010] text-sm">{ev.bride_name} &amp; {ev.groom_name}</p>
+                        <p className="text-xs text-[#bbb]">/{ev.slug}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ev.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {ev.is_active ? 'Active' : 'Draft'}
+                    </span>
+                  </div>
+
+                  <div className="text-xs text-[#666] space-y-1 pl-11">
+                    <p>📅 {new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    {ev.venue && <p>📍 {ev.venue}</p>}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-[#F8F8F8] pl-11">
+                    <span className="text-[10px] text-[#999]">Actions:</span>
+                    <div className="flex items-center gap-2">
+                      {/* 👤 Add Moi (manual entry) */}
+                      <Link
+                        href={`/events/${ev.slug}`}
+                        title="Add manual moi entry"
+                        className="p-1.5 text-[#bbb] hover:text-[#FFC107] transition-colors rounded"
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <line x1="19" y1="8" x2="19" y2="14" />
+                          <line x1="22" y1="11" x2="16" y2="11" />
+                        </svg>
+                      </Link>
+                      <Link href={`/e/${ev.slug}`} target="_blank" title="View public page"
+                        className="p-1.5 text-[#bbb] hover:text-[#101010] transition-colors">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      </Link>
+                      <button
+                        onClick={() => onEdit(ev)}
+                        title="Edit event"
+                        className="p-1.5 text-[#bbb] hover:text-[#101010] transition-colors"
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
+                      <button onClick={() => exportCSV(ev.id)} title="Export CSV"
+                        className="p-1.5 text-[#bbb] hover:text-[#101010] transition-colors">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      </button>
+                      <button onClick={() => setShowConfirmDelete(ev.id)} disabled={deleting === ev.id} title="Delete"
+                        className="p-1.5 text-[#ddd] hover:text-red-400 transition-colors disabled:opacity-40">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E8E8E8] px-5 py-3.5 bg-white">
+                <div className="text-xs text-[#999] font-medium">
+                  Showing <span className="font-semibold text-[#101010]">{startIndex + 1}</span> to <span className="font-semibold text-[#101010]">{Math.min(startIndex + itemsPerPage, totalItems)}</span> of <span className="font-semibold text-[#101010]">{totalItems}</span>
+                </div>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-2.5 py-1.5 rounded-lg border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                  >
+                    Prev
+                  </button>
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNum = idx + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          currentPage === pageNum
+                            ? 'bg-[#FFC107] text-black border border-[#FFC107] shadow-sm'
+                            : 'border border-[#E8E8E8] hover:bg-[#fafafa] text-[#555] bg-white'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-2.5 py-1.5 rounded-lg border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
       <p className="text-xs text-[#bbb]">{filtered.length} event{filtered.length !== 1 ? 's' : ''}</p>
+
+      {showConfirmDelete !== null && (
+        <ConfirmDeleteModal
+          isOpen={showConfirmDelete !== null}
+          title="Delete Wedding Event"
+          message="Are you sure you want to delete this event and all its entries? This cannot be undone."
+          onConfirm={() => handleDelete(showConfirmDelete)}
+          onCancel={() => setShowConfirmDelete(null)}
+          isLoading={deleting === showConfirmDelete}
+        />
+      )}
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Inline Manual Moi Entry (shown below the events table)
-// ─────────────────────────────────────────────────────────────────────────────
-function InlineMoiEntry({ event, onClose, onAdded }: { event: Event; onClose: () => void; onAdded: () => void }) {
-  const [form, setForm] = useState({ guest_name: '', amount: '', relation: 'friend', payment_mode: 'cash', note: '', entered_by: '' });
-  const [adding,  setAdding]  = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error,   setError]   = useState('');
 
-  const inp = 'w-full border border-[#E8E8E8] rounded-lg px-3 py-2.5 text-sm text-[#101010] placeholder-[#bbb] focus:outline-none focus:border-[#FFC107] transition-colors bg-white';
-
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(''); setAdding(true);
-    try {
-      await moiApi.add({
-        event_id:     event.id,
-        guest_name:   form.guest_name,
-        amount:       parseFloat(form.amount),
-        relation:     form.relation     as MoiEntry['relation'],
-        payment_mode: form.payment_mode as MoiEntry['payment_mode'],
-        note:         form.note,
-        entered_by:   form.entered_by,
-      });
-      setSuccess(`✓ Entry for ${form.guest_name} added`);
-      setForm({ guest_name: '', amount: '', relation: 'friend', payment_mode: 'cash', note: '', entered_by: '' });
-      setTimeout(() => { setSuccess(''); onAdded(); }, 1500);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to add entry');
-    } finally {
-      setAdding(false);
-    }
-  };
-
-  return (
-    <div className="bg-[#FFFBEE] border border-[#FFE082] rounded-xl p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="font-semibold text-[#101010] text-sm">✏️ Add Manual Moi Entry</h3>
-          <p className="text-xs text-[#999] mt-0.5">{event.bride_name} &amp; {event.groom_name}</p>
-        </div>
-        <button onClick={onClose} className="text-[#bbb] hover:text-[#666] text-xl leading-none">×</button>
-      </div>
-
-      {success && <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-2.5 text-sm mb-3">{success}</div>}
-      {error   && <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm mb-3">{error}</div>}
-
-      <form onSubmit={handleAdd} className="space-y-3">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Guest Name *</label>
-            <input required value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className={inp} placeholder="Murugan" />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Amount (₹) *</label>
-            <input required type="number" min="1" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inp} placeholder="1000" />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Relation</label>
-            <select value={form.relation} onChange={(e) => setForm({ ...form, relation: e.target.value })} className={inp}>
-              <option value="family">Family</option>
-              <option value="friend">Friend</option>
-              <option value="colleague">Colleague</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Payment Mode</label>
-            <select value={form.payment_mode} onChange={(e) => setForm({ ...form, payment_mode: e.target.value })} className={inp}>
-              <option value="cash">Cash</option>
-              <option value="upi">UPI</option>
-              <option value="card">Card</option>
-              <option value="cheque">Cheque</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Note</label>
-            <input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} className={inp} placeholder="Optional" />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Entered By</label>
-            <input value={form.entered_by} onChange={(e) => setForm({ ...form, entered_by: e.target.value })} className={inp} placeholder="Your name" />
-          </div>
-        </div>
-        <div className="flex gap-2 pt-1">
-          <button type="submit" disabled={adding}
-            className="bg-[#FFC107] text-black px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
-            {adding ? 'Adding…' : '+ Add Entry'}
-          </button>
-          <button type="button" onClick={onClose}
-            className="border border-[#E8E8E8] text-[#666] px-4 py-2 rounded-lg text-sm font-medium hover:border-[#ccc] transition-colors">
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Module: Payments
@@ -743,15 +806,34 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
   const [search,      setSearch]      = useState('');
   const [filterMode,  setFilterMode]  = useState('all');
   const [filterEvent, setFilterEvent] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const filtered = entries.filter((e) => {
-    const ms = e.guest_name.toLowerCase().includes(search.toLowerCase());
-    const mm = filterMode  === 'all' || e.payment_mode === filterMode;
+    const ms = e.guest_name.toLowerCase().includes(search.toLowerCase()) ||
+               (e.city && e.city.toLowerCase().includes(search.toLowerCase())) ||
+               (e.note && e.note.toLowerCase().includes(search.toLowerCase()));
+    const mm = filterMode  === 'all' ||
+               (filterMode === 'gold' && e.gift_type === 'gold') ||
+               (filterMode === 'gift' && e.gift_type === 'gift') ||
+               (e.gift_type === 'cash' && e.payment_mode === filterMode);
     const me = filterEvent === 'all' || String(e.event_id) === filterEvent;
     return ms && mm && me;
   });
 
-  const total = filtered.reduce((s, e) => s + Number(e.amount), 0);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterMode, filterEvent]);
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedEntries = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  const totalCash = filtered.filter(e => e.gift_type === 'cash' || !e.gift_type).reduce((s, e) => s + Number(e.amount), 0);
+  const totalGold = filtered.filter(e => e.gift_type === 'gold').reduce((s, e) => s + Number(e.gold_weight || 0), 0);
+  const totalGifts = filtered.filter(e => e.gift_type === 'gift').length;
+
   const payEmoji: Record<string, string> = { cash: '💵', upi: '📱', card: '💳', cheque: '📄' };
   const relEmoji: Record<string, string> = { family: '👨‍👩‍👧', friend: '👫', colleague: '💼', other: '🤝' };
 
@@ -760,7 +842,7 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
       {/* Mode summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {(['cash', 'upi', 'card', 'cheque'] as const).map((mode) => {
-          const me = entries.filter((e) => e.payment_mode === mode);
+          const me = entries.filter((e) => (e.gift_type === 'cash' || !e.gift_type) && e.payment_mode === mode);
           const mt = me.reduce((s, e) => s + Number(e.amount), 0);
           return (
             <div key={mode} className="bg-white border border-[#EBEBEB] rounded-xl p-4">
@@ -778,8 +860,8 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search guest…"
-            className="border border-[#E8E8E8] rounded-lg pl-9 pr-3 py-2 text-sm text-[#101010] placeholder-[#bbb] focus:outline-none focus:border-[#FFC107] transition-colors w-48"
+            placeholder="Search guest, place, notes…"
+            className="border border-[#E8E8E8] rounded-lg pl-9 pr-3 py-2 text-sm text-[#101010] placeholder-[#bbb] focus:outline-none focus:border-[#FFC107] transition-colors w-64"
           />
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bbb]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11.5" cy="11.5" r="9.5" stroke="currentColor" strokeWidth="2"/><path d="M18.5 18.5L22 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
@@ -787,11 +869,13 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
         </div>
         <select value={filterMode} onChange={(e) => setFilterMode(e.target.value)}
           className="border border-[#E8E8E8] rounded-lg px-3 py-2 text-sm text-[#444] focus:outline-none focus:border-[#FFC107] bg-white">
-          <option value="all">All Modes</option>
-          <option value="cash">Cash</option>
-          <option value="upi">UPI</option>
-          <option value="card">Card</option>
-          <option value="cheque">Cheque</option>
+          <option value="all">All Contribution Types</option>
+          <option value="cash">Cash Mode: Cash</option>
+          <option value="upi">Cash Mode: UPI</option>
+          <option value="card">Cash Mode: Card</option>
+          <option value="cheque">Cash Mode: Cheque</option>
+          <option value="gold">✨ Gold Only</option>
+          <option value="gift">🎁 Gifts Only</option>
         </select>
         <select value={filterEvent} onChange={(e) => setFilterEvent(e.target.value)}
           className="border border-[#E8E8E8] rounded-lg px-3 py-2 text-sm text-[#444] focus:outline-none focus:border-[#FFC107] bg-white max-w-[200px]">
@@ -803,7 +887,7 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
+      <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden shadow-sm">
         {filtered.length === 0 ? (
           <div className="py-16 text-center text-[#bbb] text-sm">No payments found.</div>
         ) : (
@@ -812,16 +896,16 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[#F5F5F5] bg-[#fafafa] text-left">
-                    <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Guest</th>
+                    <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Guest / Location / Note</th>
                     <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide hidden md:table-cell">Event</th>
                     <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide hidden sm:table-cell">Relation</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Mode</th>
-                    <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-right">Amount</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Mode / Type</th>
+                    <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-right">Contribution</th>
                     <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-right hidden lg:table-cell">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F8F8F8]">
-                  {filtered.map((e) => {
+                  {paginatedEntries.map((e) => {
                     const ev = events.find((ev) => ev.id === e.event_id);
                     return (
                       <tr key={e.id} className="hover:bg-[#fafafa] transition-colors">
@@ -832,7 +916,10 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
                             </div>
                             <div>
                               <p className="font-semibold text-[#101010]">{e.guest_name}</p>
-                              {e.note && <p className="text-xs text-[#bbb]">{e.note}</p>}
+                              <p className="text-xs text-[#999] flex flex-wrap gap-1.5 items-center mt-0.5">
+                                {e.city && <span className="bg-gray-100 text-[#444] px-1.5 py-0.5 rounded text-[10px]">📍 {e.city}</span>}
+                                {e.note && <span className="text-[#666] font-medium">({e.note})</span>}
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -843,12 +930,28 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
                           <span className="text-xs capitalize text-[#666]">{relEmoji[e.relation]} {e.relation}</span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-xs capitalize bg-[#F5F5F5] text-[#444] px-2 py-0.5 rounded-full font-medium">
-                            {payEmoji[e.payment_mode]} {e.payment_mode}
-                          </span>
+                          {e.gift_type === 'gold' ? (
+                            <span className="text-xs bg-[#FFF9E6] text-[#B8860B] border border-[#FFE082] px-2 py-0.5 rounded-full font-medium">
+                              ✨ Gold
+                            </span>
+                          ) : e.gift_type === 'gift' ? (
+                            <span className="text-xs bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-full font-medium">
+                              🎁 Gift
+                            </span>
+                          ) : (
+                            <span className="text-xs capitalize bg-[#F5F5F5] text-[#444] px-2 py-0.5 rounded-full font-medium">
+                              {payEmoji[e.payment_mode]} {e.payment_mode}
+                            </span>
+                          )}
                         </td>
                         <td className="px-5 py-3 text-right font-bold text-[#101010]">
-                          ₹{Number(e.amount).toLocaleString('en-IN')}
+                          {e.gift_type === 'gold' ? (
+                            <span className="text-[#B8860B]">{e.gold_weight}g Gold</span>
+                          ) : e.gift_type === 'gift' ? (
+                            <span className="text-red-600 truncate max-w-[150px] inline-block">{e.gift_description}</span>
+                          ) : (
+                            <span>₹{Number(e.amount).toLocaleString('en-IN')}</span>
+                          )}
                         </td>
                         <td className="px-5 py-3 text-right text-[#bbb] text-xs hidden lg:table-cell whitespace-nowrap">
                           {new Date(e.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -859,9 +962,54 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
                 </tbody>
               </table>
             </div>
-            <div className="px-5 py-3 bg-[#FFFCF5] border-t border-[#FFE082] flex justify-between items-center">
-              <span className="text-sm text-[#666]">{filtered.length} entries</span>
-              <span className="font-bold text-[#101010]">Total: ₹{total.toLocaleString('en-IN')}</span>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E8E8E8] px-5 py-3.5 bg-white">
+                <div className="text-xs text-[#999] font-medium">
+                  Showing <span className="font-semibold text-[#101010]">{startIndex + 1}</span> to <span className="font-semibold text-[#101010]">{Math.min(startIndex + itemsPerPage, totalItems)}</span> of <span className="font-semibold text-[#101010]">{totalItems}</span>
+                </div>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-2.5 py-1.5 rounded-lg border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                  >
+                    Prev
+                  </button>
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNum = idx + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          currentPage === pageNum
+                            ? 'bg-[#FFC107] text-black border border-[#FFC107] shadow-sm'
+                            : 'border border-[#E8E8E8] hover:bg-[#fafafa] text-[#555] bg-white'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-2.5 py-1.5 rounded-lg border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className="px-5 py-3 bg-[#FFFCF5] border-t border-[#FFE082] flex flex-wrap gap-4 justify-between items-center text-sm font-semibold text-[#101010]">
+              <span className="text-[#666]">{filtered.length} entries</span>
+              <div className="flex flex-wrap gap-4 text-xs md:text-sm">
+                <span className="text-[#101010]">Total Cash: <strong className="text-green-600">₹{totalCash.toLocaleString('en-IN')}</strong></span>
+                <span className="text-[#101010]">Total Gold: <strong className="text-[#B8860B]">{totalGold}g</strong></span>
+                <span className="text-[#101010]">Total Gifts: <strong className="text-red-600">{totalGifts} items</strong></span>
+              </div>
             </div>
           </>
         )}
@@ -875,20 +1023,39 @@ function ModulePayments({ entries, events }: { entries: MoiEntry[]; events: Even
 // ─────────────────────────────────────────────────────────────────────────────
 function ModuleUsers({ entries }: { events: Event[]; entries: MoiEntry[] }) {
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
-  const guestMap = entries.reduce<Record<string, { name: string; count: number; total: number; lastDate: string; eventIds: Set<number> }>>((acc, e) => {
+  interface GuestSummary {
+    name: string;
+    count: number;
+    total: number;
+    lastDate: string;
+    eventIds: Set<number>;
+  }
+
+  const guestMap = entries.reduce((acc: Record<string, GuestSummary>, e) => {
     const key = e.guest_name.toLowerCase().trim();
-    if (!acc[key]) acc[key] = { name: e.guest_name, count: 0, total: 0, lastDate: e.created_at, eventIds: new Set() };
+    if (!acc[key]) acc[key] = { name: e.guest_name, count: 0, total: 0, lastDate: e.created_at, eventIds: new Set<number>() };
     acc[key].count++;
     acc[key].total += Number(e.amount);
     acc[key].eventIds.add(e.event_id);
     if (new Date(e.created_at) > new Date(acc[key].lastDate)) acc[key].lastDate = e.created_at;
     return acc;
-  }, {});
+  }, {} as Record<string, GuestSummary>);
 
   const guests = Object.values(guestMap)
     .sort((a, b) => b.total - a.total)
     .filter((g) => g.name.toLowerCase().includes(search.toLowerCase()));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const totalItems = guests.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedGuests = guests.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="space-y-4">
@@ -911,43 +1078,86 @@ function ModuleUsers({ entries }: { events: Event[]; entries: MoiEntry[] }) {
         {guests.length === 0 ? (
           <div className="py-16 text-center text-[#bbb] text-sm">No guests found.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#F5F5F5] bg-[#fafafa] text-left">
-                  <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">#</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Guest</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-center hidden sm:table-cell">Entries</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-center hidden md:table-cell">Events</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-right hidden lg:table-cell">Last Seen</th>
-                  <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-right">Total Paid</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F8F8F8]">
-                {guests.map((g, i) => (
-                  <tr key={g.name} className="hover:bg-[#fafafa] transition-colors">
-                    <td className="px-5 py-3 text-[#ddd] text-xs">{i + 1}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-[#FFFCF5] border border-[#FFE082] flex items-center justify-center text-[#B8860B] font-bold text-xs shrink-0">
-                          {g.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="font-semibold text-[#101010]">{g.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-center text-[#666] hidden sm:table-cell">{g.count}</td>
-                    <td className="px-4 py-3 text-center text-[#666] hidden md:table-cell">{g.eventIds.size}</td>
-                    <td className="px-4 py-3 text-right text-[#bbb] text-xs hidden lg:table-cell whitespace-nowrap">
-                      {new Date(g.lastDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-5 py-3 text-right font-bold text-[#101010]">
-                      ₹{g.total.toLocaleString('en-IN')}
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#F5F5F5] bg-[#fafafa] text-left">
+                    <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">#</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide">Guest</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-center hidden sm:table-cell">Entries</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-center hidden md:table-cell">Events</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-right hidden lg:table-cell">Last Seen</th>
+                    <th className="px-5 py-3 text-xs font-semibold text-[#999] uppercase tracking-wide text-right">Total Paid</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[#F8F8F8]">
+                  {paginatedGuests.map((g, i) => (
+                    <tr key={g.name} className="hover:bg-[#fafafa] transition-colors">
+                      <td className="px-5 py-3 text-[#ddd] text-xs">{startIndex + i + 1}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-[#FFFCF5] border border-[#FFE082] flex items-center justify-center text-[#B8860B] font-bold text-xs shrink-0">
+                            {g.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-semibold text-[#101010]">{g.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center text-[#666] hidden sm:table-cell">{g.count}</td>
+                      <td className="px-4 py-3 text-center text-[#666] hidden md:table-cell">{g.eventIds.size}</td>
+                      <td className="px-4 py-3 text-right text-[#bbb] text-xs hidden lg:table-cell whitespace-nowrap">
+                        {new Date(g.lastDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="px-5 py-3 text-right font-bold text-[#101010]">
+                        ₹{g.total.toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E8E8E8] px-5 py-3.5 bg-white">
+                <div className="text-xs text-[#999] font-medium">
+                  Showing <span className="font-semibold text-[#101010]">{startIndex + 1}</span> to <span className="font-semibold text-[#101010]">{Math.min(startIndex + itemsPerPage, totalItems)}</span> of <span className="font-semibold text-[#101010]">{totalItems}</span>
+                </div>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-2.5 py-1.5 rounded-lg border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                  >
+                    Prev
+                  </button>
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNum = idx + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          currentPage === pageNum
+                            ? 'bg-[#FFC107] text-black border border-[#FFC107] shadow-sm'
+                            : 'border border-[#E8E8E8] hover:bg-[#fafafa] text-[#555] bg-white'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-2.5 py-1.5 rounded-lg border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -964,12 +1174,12 @@ function ModuleAnalytics({ events, entries, totalMoi }: { events: Event[]; entri
     return { ev, count: evE.length, total: evT, avg: evE.length ? Math.round(evT / evE.length) : 0 };
   }).sort((a, b) => b.total - a.total);
 
-  const byRelation = entries.reduce<Record<string, number>>((acc, e) => {
+  const byRelation = entries.reduce((acc: Record<string, number>, e) => {
     acc[e.relation] = (acc[e.relation] || 0) + Number(e.amount); return acc;
-  }, {});
-  const byMode = entries.reduce<Record<string, number>>((acc, e) => {
+  }, {} as Record<string, number>);
+  const byMode = entries.reduce((acc: Record<string, number>, e) => {
     acc[e.payment_mode] = (acc[e.payment_mode] || 0) + Number(e.amount); return acc;
-  }, {});
+  }, {} as Record<string, number>);
   const top5 = [...entries].sort((a, b) => Number(b.amount) - Number(a.amount)).slice(0, 5);
 
   const relEmoji: Record<string, string> = { family: '👨‍👩‍👧', friend: '👫', colleague: '💼', other: '🤝' };
@@ -1268,6 +1478,151 @@ function ModuleSettings({ user, onLogout }: { user: { id: number; name: string; 
             className="px-4 py-2 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 transition-colors">
             Sign Out
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Edit Event Modal
+// ─────────────────────────────────────────────────────────────────────────────
+function EditEventModal({
+  event,
+  onClose,
+  onUpdated,
+}: {
+  event: Event;
+  onClose: () => void;
+  onUpdated: () => void;
+}) {
+  const [form, setForm] = useState({
+    bride_name: event.bride_name,
+    groom_name: event.groom_name,
+    wedding_date: event.wedding_date,
+    venue: event.venue || '',
+    description: event.description || '',
+  });
+  const [coverFile,    setCoverFile]    = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(event.cover_photo);
+  const [error,   setError]   = useState('');
+  const [loading, setLoading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const inp = 'w-full border border-[#E8E8E8] rounded-lg px-3 py-2.5 text-sm text-[#101010] placeholder-[#bbb] focus:outline-none focus:border-[#FFC107] transition-colors bg-white';
+  const lbl = 'block text-xs font-semibold text-[#555] mb-1.5';
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  };
+
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      await eventsApi.update(event.id, form);
+      if (coverFile) {
+        const token = localStorage.getItem('moi_token');
+        const fd = new FormData();
+        fd.append('event_id', String(event.id));
+        fd.append('cover', coverFile);
+        await fetch(`${BASE_URL}/events.php?action=cover`, {
+          method: 'POST',
+          headers: { 'X-Auth-Token': `Bearer ${token}` },
+          body: fd,
+        });
+      }
+      onUpdated();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to update event');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={handleBackdrop}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#F0F0F0]">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xl">✏️</span>
+            <div>
+              <h2 className="font-bold text-[#101010] text-base leading-tight">Edit Wedding Event</h2>
+              <p className="text-[11px] text-[#999]">திருமண நிகழ்வு திருத்தம்</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full text-[#999] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors text-lg">×</button>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm">{error}</div>}
+
+          {/* Cover photo */}
+          <div>
+            <label className={lbl}>Cover Photo</label>
+            <div
+              onClick={() => fileRef.current?.click()}
+              className={`cursor-pointer rounded-xl overflow-hidden border-2 border-dashed transition-colors ${coverPreview ? 'border-[#FFC107]' : 'border-[#E8E8E8] hover:border-[#FFC107]'}`}
+            >
+              {coverPreview ? (
+                <div className="relative h-32">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={coverPreview} alt="preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <p className="text-white text-xs font-semibold">Click to change</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-24 flex flex-col items-center justify-center gap-1.5 text-[#bbb]">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <p className="text-xs font-medium">Click to upload cover photo</p>
+                </div>
+              )}
+            </div>
+            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleCoverChange} />
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={lbl}>Bride Name <span className="text-[#FFC107]">*</span></label>
+                <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={inp} placeholder="Priya" />
+              </div>
+              <div>
+                <label className={lbl}>Groom Name <span className="text-[#FFC107]">*</span></label>
+                <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={inp} placeholder="Ravi" />
+              </div>
+            </div>
+            <div>
+              <label className={lbl}>Wedding Date <span className="text-[#FFC107]">*</span></label>
+              <input required type="date" value={form.wedding_date} onChange={(e) => setForm({ ...form, wedding_date: e.target.value })} className={inp} />
+            </div>
+            <div>
+              <label className={lbl}>Venue</label>
+              <input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} className={inp} placeholder="Sri Murugan Mahal, Chennai" />
+            </div>
+            <div>
+              <label className={lbl}>Description</label>
+              <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={`${inp} resize-none`} placeholder="A brief note about the wedding…" />
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button type="button" onClick={onClose} className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold hover:border-[#ccc] transition-colors">Cancel</button>
+              <button type="submit" disabled={loading} className="flex-1 bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
+                {loading ? 'Saving…' : 'Save Changes →'}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

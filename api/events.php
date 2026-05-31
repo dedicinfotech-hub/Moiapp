@@ -70,7 +70,11 @@ if ($method === 'GET' && $public === '1') {
          ORDER BY e.wedding_date ASC'
     );
     $stmt->execute();
-    echo json_encode($stmt->get_result()->fetch_all(MYSQLI_ASSOC));
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    foreach ($rows as &$row) {
+        $row['cover_photo'] = normalizeCoverUrl($row['cover_photo']);
+    }
+    echo json_encode($rows);
     exit;
 }
 
@@ -93,6 +97,8 @@ if ($method === 'GET' && $slug) {
         echo json_encode(['error' => 'Event not found']);
         exit;
     }
+
+    $event['cover_photo'] = normalizeCoverUrl($event['cover_photo']);
 
     // Public stats
     $stmt2 = $db->prepare('SELECT COUNT(*) as guest_count, COALESCE(SUM(amount),0) as total FROM moi_entries WHERE event_id = ?');
@@ -120,7 +126,11 @@ if ($method === 'GET') {
     );
     $stmt->bind_param('i', $user['id']);
     $stmt->execute();
-    echo json_encode($stmt->get_result()->fetch_all(MYSQLI_ASSOC));
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    foreach ($rows as &$row) {
+        $row['cover_photo'] = normalizeCoverUrl($row['cover_photo']);
+    }
+    echo json_encode($rows);
     exit;
 }
 

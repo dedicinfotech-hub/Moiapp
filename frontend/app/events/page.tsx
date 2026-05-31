@@ -9,10 +9,16 @@ export default function EventsListingPage() {
   const [loading, setLoading] = useState(true);
   const [search,  setSearch]  = useState('');
   const [filter,  setFilter]  = useState<'all' | 'upcoming' | 'past'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   useEffect(() => {
     eventsApi.listPublic().then(setEvents).finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter]);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -31,6 +37,11 @@ export default function EventsListingPage() {
 
   const upcoming = events.filter((e) => e.wedding_date >= today).length;
   const past     = events.filter((e) => e.wedding_date <  today).length;
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedEvents = filtered.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="bg-[#FAFAFA] text-[#101010] min-h-screen">
@@ -98,11 +109,54 @@ export default function EventsListingPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filtered.map((ev) => (
-              <EventCard key={ev.id} event={ev} isPast={ev.wedding_date < today} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {paginatedEvents.map((ev) => (
+                <EventCard key={ev.id} event={ev} isPast={ev.wedding_date < today} />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E8E8E8] px-4 py-4 bg-white mt-8 rounded-2xl shadow-sm">
+                <div className="text-xs text-[#999] font-medium">
+                  Showing <span className="font-semibold text-[#101010]">{startIndex + 1}</span> to <span className="font-semibold text-[#101010]">{Math.min(startIndex + itemsPerPage, totalItems)}</span> of <span className="font-semibold text-[#101010]">{totalItems}</span>
+                </div>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 rounded-xl border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                  >
+                    Previous
+                  </button>
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNum = idx + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
+                          currentPage === pageNum
+                            ? 'bg-[#FFC107] text-black border border-[#FFC107] shadow-sm'
+                            : 'border border-[#E8E8E8] hover:bg-[#fafafa] text-[#555] bg-white'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 rounded-xl border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -178,16 +232,9 @@ function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
           )}
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-xs text-[#666]">
-                <span>👥</span>
-                <span className="font-semibold">{event.guest_count || 0}</span>
-              </div>
-              {Number(event.total_moi) > 0 && (
-                <div className="text-xs font-bold text-[#101010]">
-                  ₹{Number(event.total_moi).toLocaleString('en-IN')}
-                </div>
-              )}
+            <div className="flex items-center gap-1.5 text-xs text-[#666]">
+              <span>👥</span>
+              <span className="font-medium"><strong className="font-bold text-[#101010]">{event.guest_count || 0}</strong> guests registered</span>
             </div>
             <span className={`text-xs font-bold px-3 py-1.5 rounded-full transition-colors ${
               isPast

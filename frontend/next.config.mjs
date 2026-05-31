@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 
-// next.config.mjs is evaluated before .env files are loaded by Next.js,
-// so we read them manually to decide basePath at config time.
 import { readFileSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -24,22 +22,41 @@ function readEnvFile(filename) {
   return out;
 }
 
+// next.config.mjs runs before Next.js loads .env files, so read manually.
 const prodEnv  = readEnvFile('.env.production');
 const localEnv = readEnvFile('.env.local');
+
+// In production build: NEXT_PUBLIC_BASE_PATH=/moiapp is set in .env.production
+// In local dev:        NEXT_PUBLIC_BASE_PATH is empty in .env.local
 const basePath = prodEnv.NEXT_PUBLIC_BASE_PATH || localEnv.NEXT_PUBLIC_BASE_PATH || '';
+const isProd   = process.env.NODE_ENV === 'production';
 
 const nextConfig = {
-  // Static export — works on any shared host (Hostinger, cPanel, etc.)
-  output: 'export',
+  // Static export ONLY for production build (npm run build).
+  // Local dev (npm run dev) runs as a normal Next.js server with rewrites.
+  ...(isProd ? { output: 'export' } : {}),
 
-  // Subpath: /moiapp in production, empty in local dev
   basePath,
 
-  // Image optimisation requires a Node server — disable for static export
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
+
   images: { unoptimized: true },
 
-  // No trailing slash — .htaccess maps /path → /path.html
   trailingSlash: false,
+
+  // Rewrites only work in dev (Next.js server mode).
+  // In production static export the browser calls NEXT_PUBLIC_API_URL directly.
+  async rewrites() {
+    if (isProd) return [];
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:8888/MoiApp/api/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,8 +1,15 @@
-// In production (static export) NEXT_PUBLIC_API_URL is the full PHP backend URL.
-// In local dev it's empty and we use the Next.js rewrite proxy (/api/*).
-const BASE = process.env.NEXT_PUBLIC_API_URL
-  ? process.env.NEXT_PUBLIC_API_URL          // e.g. https://dsitesai.com/moiapp/api
-  : (process.env.NEXT_PUBLIC_BASE_PATH ?? '') + '/api'; // e.g. /api (proxied by Next.js)
+// ── API base URL ──────────────────────────────────────────────────────────────
+// LOCAL DEV  (npm run dev):
+//   Both env vars are empty. BASE = '/api'
+//   Next.js dev server rewrites /api/* → http://localhost:8888/MoiApp/api/*
+//   No CORS issues — browser only talks to localhost:3000.
+//
+// PRODUCTION (npm run build + static export):
+//   NEXT_PUBLIC_API_URL = https://dsitesai.com/moiapp/api
+//   Browser calls the PHP backend directly.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const BASE: string = process.env.NEXT_PUBLIC_API_URL || `${basePath}/api`;
+export const API_BASE = BASE;
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -171,7 +178,11 @@ export interface MoiEntry {
   id: number;
   event_id: number;
   guest_name: string;
+  city?: string | null;
   amount: number;
+  gift_type: 'cash' | 'gold' | 'gift';
+  gold_weight?: number | null;
+  gift_description?: string | null;
   relation: 'family' | 'friend' | 'colleague' | 'other';
   payment_mode: 'cash' | 'upi' | 'card' | 'cheque';
   note: string;

@@ -10,8 +10,10 @@ import { eventsApi, moiApi, photosApi, Event, Photo } from '@/lib/api';
 function useSlug(): string {
   const [slug, setSlug] = useState('');
   useEffect(() => {
-    // Path: /moiapp/e/<slug>  →  split and take last non-empty segment
-    const parts = window.location.pathname.replace(/\/$/, '').split('/');
+    let path = window.location.pathname.split('?')[0].split('#')[0];
+    path = path.replace(/\/(index\.html?)$/i, '');
+    path = path.replace(/\/$/, '');
+    const parts = path.split('/');
     const s = parts[parts.length - 1];
     setSlug(s === '_' ? '' : s);
   }, []);
@@ -74,7 +76,6 @@ export default function PublicEventPage() {
 function EventDetailView({ event, photos, onGiveMoi }: { event: Event; photos: Photo[]; onGiveMoi: () => void }) {
   const [showMore, setShowMore]   = useState(false);
   const [copied, setCopied]       = useState(false);
-  const total      = Number(event.stats?.total || 0);
   const guestCount = Number(event.stats?.guest_count || 0);
 
   const weddingDate = new Date(event.wedding_date).toLocaleDateString('en-IN', {
@@ -176,18 +177,13 @@ function EventDetailView({ event, photos, onGiveMoi }: { event: Event; photos: P
             )}
 
             {/* Stats */}
-            {(total > 0 || guestCount > 0) && (
+            {guestCount > 0 && (
               <div className="py-6 border-b border-[#E8E8E8]">
                 <h2 className="text-xl font-bold mb-4">Moi Summary</h2>
                 <div className="flex gap-6">
                   <div>
-                    <p className="text-2xl font-bold text-[#101010]">₹{total.toLocaleString('en-IN')}</p>
-                    <p className="text-sm text-[#666666] mt-0.5">Total Collected</p>
-                  </div>
-                  <div className="w-px bg-[#E8E8E8]" />
-                  <div>
                     <p className="text-2xl font-bold text-[#101010]">{guestCount}</p>
-                    <p className="text-sm text-[#666666] mt-0.5">Guests</p>
+                    <p className="text-sm text-[#666666] mt-0.5">Guests registered</p>
                   </div>
                 </div>
               </div>
@@ -285,10 +281,9 @@ function EventDetailView({ event, photos, onGiveMoi }: { event: Event; photos: P
                 <h3 className="text-2xl font-bold text-[#101010]">Give Moi 💍</h3>
                 <p className="text-sm text-[#666666] mt-1">மொய் கொடுக்க இங்கே அழுத்துங்கள்</p>
               </div>
-              {(total > 0 || guestCount > 0) && (
+              {guestCount > 0 && (
                 <div className="flex gap-4 text-sm text-[#666666]">
-                  <span>👥 {guestCount} guests</span>
-                  <span>₹{total.toLocaleString('en-IN')} collected</span>
+                  <span>👥 {guestCount} guests registered</span>
                 </div>
               )}
               <button

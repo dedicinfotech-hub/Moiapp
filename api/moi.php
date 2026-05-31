@@ -36,20 +36,59 @@ if ($method === 'GET' && $eventId) {
 // ── POST add moi entry ────────────────────────────────────────────────────────
 // Guest (public): sends slug — no auth needed
 // Admin:          sends event_id + auth token
+// ── POST add moi entry ────────────────────────────────────────────────────────
+// Guest (public): sends slug — no auth needed
+// Admin:          sends event_id + auth token
 if ($method === 'POST') {
-    $data        = json_decode(file_get_contents('php://input'), true);
-    $guestName   = trim($data['guest_name']   ?? '');
-    $amount      = floatval($data['amount']   ?? 0);
-    $relation    = $data['relation']           ?? 'friend';
-    $paymentMode = $data['payment_mode']       ?? 'cash';
-    $note        = trim($data['note']         ?? '');
-    $enteredBy   = trim($data['entered_by']   ?? $guestName);
-    $eventSlug   = trim($data['slug']         ?? '');
-    $evId        = intval($data['event_id']   ?? 0);
+    $data            = json_decode(file_get_contents('php://input'), true);
+    $guestName       = trim($data['guest_name']       ?? '');
+    $city            = isset($data['city']) && trim($data['city']) !== '' ? trim($data['city']) : null;
+    $giftType        = trim($data['gift_type']        ?? 'cash');
+    $amount          = floatval($data['amount']       ?? 0);
+    $goldWeight      = isset($data['gold_weight']) && $data['gold_weight'] !== '' ? floatval($data['gold_weight']) : null;
+    $giftDescription = isset($data['gift_description']) && trim($data['gift_description']) !== '' ? trim($data['gift_description']) : null;
+    $relation        = $data['relation']              ?? 'friend';
+    $paymentMode     = $data['payment_mode']          ?? 'cash';
+    $note            = trim($data['note']             ?? '');
+    $enteredBy       = trim($data['entered_by']       ?? $guestName);
+    $eventSlug       = trim($data['slug']             ?? '');
+    $evId            = intval($data['event_id']       ?? 0);
 
-    if (!$guestName || $amount <= 0) {
+    if (!$guestName) {
         http_response_code(400);
-        echo json_encode(['error' => 'Guest name and amount are required']);
+        echo json_encode(['error' => 'Guest name is required']);
+        exit;
+    }
+
+    if ($giftType === 'cash') {
+        if ($amount <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Amount is required for cash entries']);
+            exit;
+        }
+        $goldWeight = null;
+        $giftDescription = null;
+    } elseif ($giftType === 'gold') {
+        if (!$goldWeight || $goldWeight <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Gold weight is required for gold entries']);
+            exit;
+        }
+        $amount = 0;
+        $paymentMode = 'cash'; // Reset or default
+        $giftDescription = null;
+    } elseif ($giftType === 'gift') {
+        if (!$giftDescription) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Gift description is required for gift entries']);
+            exit;
+        }
+        $amount = 0;
+        $goldWeight = null;
+        $paymentMode = 'cash'; // Reset or default
+    } else {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid gift type']);
         exit;
     }
 
@@ -87,8 +126,8 @@ if ($method === 'POST') {
         exit;
     }
 
-    $stmt = $db->prepare('INSERT INTO moi_entries (event_id, guest_name, amount, relation, payment_mode, note, entered_by) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    $stmt->bind_param('isdssss', $evId, $guestName, $amount, $relation, $paymentMode, $note, $enteredBy);
+    $stmt = $db->prepare('INSERT INTO moi_entries (event_id, guest_name, city, amount, gift_type, gold_weight, gift_description, relation, payment_mode, note, entered_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $stmt->bind_param('issdsdsssss', $evId, $guestName, $city, $amount, $giftType, $goldWeight, $giftDescription, $relation, $paymentMode, $note, $enteredBy);
     $stmt->execute();
 
     echo json_encode(['success' => true, 'id' => $db->insert_id]);

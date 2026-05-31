@@ -18,7 +18,6 @@ export default function HomePage() {
   const upcoming = events.filter((e) => e.wedding_date >= new Date().toISOString().split('T')[0]);
   const featuredEvent = upcoming[0] ?? events[0] ?? null;
   const totalGuests = events.reduce((s, e) => s + Number(e.guest_count || 0), 0);
-  const totalMoi    = events.reduce((s, e) => s + Number(e.total_moi   || 0), 0);
 
   return (
     <div className="bg-white text-[#101010]">
@@ -73,11 +72,6 @@ export default function HomePage() {
                   <p className="text-2xl font-extrabold text-[#101010]">{totalGuests.toLocaleString('en-IN')}</p>
                   <p className="text-xs text-[#888]">Guests gifted</p>
                 </div>
-                <div className="w-px h-10 bg-[#E8E8E8]" />
-                <div className="text-center lg:text-left">
-                  <p className="text-2xl font-extrabold text-[#101010]">₹{(totalMoi / 100000).toFixed(1)}L+</p>
-                  <p className="text-xs text-[#888]">Moi collected</p>
-                </div>
               </div>
             )}
           </div>
@@ -115,13 +109,8 @@ export default function HomePage() {
                   )}
                   <div className="flex gap-4 mb-4">
                     <div>
-                      <p className="text-lg font-extrabold text-[#101010]">₹{Number(featuredEvent.total_moi || 0).toLocaleString('en-IN')}</p>
-                      <p className="text-[10px] text-[#888]">Total Moi</p>
-                    </div>
-                    <div className="w-px bg-[#F0F0F0]" />
-                    <div>
                       <p className="text-lg font-extrabold text-[#101010]">{featuredEvent.guest_count || 0}</p>
-                      <p className="text-[10px] text-[#888]">Guests</p>
+                      <p className="text-[10px] text-[#888]">Guests registered</p>
                     </div>
                   </div>
                   <Link href={`/e/${featuredEvent.slug}`}
@@ -265,9 +254,9 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-xs text-[#666]">
-                      <span>👥 {ev.guest_count || 0}</span>
-                      {Number(ev.total_moi) > 0 && <span className="font-semibold text-[#444]">₹{Number(ev.total_moi).toLocaleString('en-IN')}</span>}
+                    <div className="flex items-center gap-1.5 text-xs text-[#666]">
+                      <span>👥</span>
+                      <span>{ev.guest_count || 0} guests registered</span>
                     </div>
                     <span className="text-xs font-bold text-[#FFC107] group-hover:underline">Give Moi →</span>
                   </div>

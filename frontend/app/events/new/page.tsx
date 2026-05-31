@@ -2,11 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { eventsApi } from '@/lib/api';
+import { eventsApi, API_BASE } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
-
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 export default function NewEventPage() {
   const router = useRouter();
@@ -50,7 +48,7 @@ export default function NewEventPage() {
         const fd = new FormData();
         fd.append('event_id', String(res.id));
         fd.append('cover', coverFile);
-        await fetch(`${BASE}/events.php?action=cover`, {
+        await fetch(`${API_BASE}/events.php?action=cover`, {
           method: 'POST',
           headers: { 'X-Auth-Token': `Bearer ${token}` },
           body: fd,
