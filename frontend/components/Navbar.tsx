@@ -45,16 +45,19 @@ export default function Navbar() {
             </Link>
 
             {user ? (
-              <>
-                <Link href="/dashboard" className="text-sm font-medium text-[#444444] hover:text-[#101010] px-3 py-1.5 transition-colors">
-                  Dashboard
-                </Link>
-                <Link href="/events/new" className="text-sm font-medium px-3 py-1.5 text-[#444444] hover:text-[#101010] transition-colors">
-                  List Event
-                </Link>
+               <>
+                 <Link href="/dashboard" className="text-sm font-medium text-[#444444] hover:text-[#101010] px-3 py-1.5 transition-colors">
+                   Dashboard
+                 </Link>
+                 <Link href="/events/new" className="text-sm font-medium px-3 py-1.5 text-[#444444] hover:text-[#101010] transition-colors">
+                   List Event
+                 </Link>
+                 <Link href="/dashboard?module=events" className="text-sm font-medium px-3 py-1.5 text-[#444444] hover:text-[#101010] transition-colors">
+                   Import
+                 </Link>
 
-                {/* User avatar with dropdown */}
-                <div className="relative ml-1" ref={dropRef}>
+                 {/* User avatar with dropdown */}
+                 <div className="relative ml-1" ref={dropRef}>
                   <button
                     onClick={() => setDropOpen((v) => !v)}
                     className="flex items-center gap-1.5 focus:outline-none"
@@ -154,14 +157,17 @@ export default function Navbar() {
             </Link>
 
             {user ? (
-              <>
-                <Link href="/dashboard" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
-                  <span>📊</span> Dashboard
-                </Link>
-                <Link href="/events/new" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
-                  <span>➕</span> List Event
-                </Link>
-                <div className="border-t border-[#F5F5F5] mt-2 pt-2">
+               <>
+                 <Link href="/dashboard" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
+                   <span>📊</span> Dashboard
+                 </Link>
+                 <Link href="/events/new" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
+                   <span>➕</span> List Event
+                 </Link>
+                 <Link href="/dashboard?module=events" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
+                   <span>📥</span> Import
+                 </Link>
+                 <div className="border-t border-[#F5F5F5] mt-2 pt-2">
                   <div className="px-3 py-2 mb-1">
                     <p className="font-semibold text-[#101010] text-sm">{user.name}</p>
                     <p className="text-xs text-[#999]">{user.email}</p>

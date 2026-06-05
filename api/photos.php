@@ -38,15 +38,22 @@ if ($method === 'POST') {
         exit;
     }
 
-    // Verify the event belongs to this user
+    // Verify the event belongs to this user or user is admin
     $db   = getDB();
-    $stmt = $db->prepare('SELECT id FROM events WHERE id = ? AND user_id = ?');
-    $stmt->bind_param('ii', $evId, $user['id']);
-    $stmt->execute();
-    if ($stmt->get_result()->num_rows === 0) {
-        http_response_code(403);
-        echo json_encode(['error' => 'Forbidden']);
-        exit;
+    $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+    $stmtRole->bind_param('i', $user['id']);
+    $stmtRole->execute();
+    $roleRow = $stmtRole->get_result()->fetch_assoc();
+    $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+    if (!$isAdmin) {
+        $stmt = $db->prepare('SELECT id FROM events WHERE id = ? AND user_id = ?');
+        $stmt->bind_param('ii', $evId, $user['id']);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows === 0) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Forbidden']);
+            exit;
+        }
     }
 
     $file     = $_FILES['photo'];
@@ -117,13 +124,25 @@ if ($method === 'DELETE' && $photoId) {
 
     $db   = getDB();
 
+    // Check if admin
+    $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+    $stmtRole->bind_param('i', $user['id']);
+    $stmtRole->execute();
+    $roleRow = $stmtRole->get_result()->fetch_assoc();
+    $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+
     // Fetch the file key before deleting so we can remove the file too
-    $stmt = $db->prepare(
-        'SELECT p.s3_key FROM photos p
-         JOIN events e ON p.event_id = e.id
-         WHERE p.id = ? AND e.user_id = ?'
-    );
-    $stmt->bind_param('ii', $photoId, $user['id']);
+    if ($isAdmin) {
+        $stmt = $db->prepare('SELECT p.s3_key FROM photos p WHERE p.id = ?');
+        $stmt->bind_param('i', $photoId);
+    } else {
+        $stmt = $db->prepare(
+            'SELECT p.s3_key FROM photos p
+             JOIN events e ON p.event_id = e.id
+             WHERE p.id = ? AND e.user_id = ?'
+        );
+        $stmt->bind_param('ii', $photoId, $user['id']);
+    }
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
 

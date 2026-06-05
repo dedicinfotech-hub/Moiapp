@@ -58,6 +58,15 @@ export const authApi = {
 };
 
 // ── Events ────────────────────────────────────────────────────────────────────
+export const featuresApi = {
+  list: () => request<{ toggles: { feature_key: string; is_enabled: number; description: string }[] }>('/features.php'),
+  update: (feature_key: string, is_enabled: number) =>
+    request<{ success: boolean }>('/features.php', {
+      method: 'PUT',
+      body: JSON.stringify({ feature_key, is_enabled }),
+    }),
+};
+
 export const eventsApi = {
   listPublic: () => request<Event[]>('/events.php?public=1'),
 
@@ -136,6 +145,60 @@ export function exportCSV(eventId: number) {
     });
 }
 
+export function emailPDF(eventId: number): Promise<{ success: boolean; message: string }> {
+  const token = getToken();
+  return request<{ success: boolean; message: string }>(`/pdf.php?event_id=${eventId}`, {
+    headers: { 'X-Auth-Token': `Bearer ${token}` },
+  });
+}
+
+// ── Bulk Import ────────────────────────────────────────────────────────────────
+export function bulkImportCSV(eventId: number, file: File): Promise<{ success: boolean; imported: number; errors: string[]; message: string }> {
+  const token = getToken();
+  const form = new FormData();
+  form.append('event_id', String(eventId));
+  form.append('csv_file', file);
+  return fetch(`${BASE}/bulk-import.php?action=csv`, {
+    method: 'POST',
+    headers: { 'X-Auth-Token': `Bearer ${token}` },
+    body: form,
+  }).then((r) => r.json());
+}
+
+export function addDigitizedEntry(eventId: number, data: Record<string, unknown>): Promise<{ success: boolean; id: number }> {
+  const token = getToken();
+  return request<{ success: boolean; id: number }>(`/bulk-import.php?action=add`, {
+    method: 'POST',
+    headers: { 'X-Auth-Token': `Bearer ${token}` },
+    body: JSON.stringify({ event_id: eventId, ...data }),
+  });
+}
+
+// ── Organizers ─────────────────────────────────────────────────────────────────
+export function listOrganizers(eventId: number): Promise<{ organizers: Array<{ id: number; user_id: number; name: string; email: string; role: string; added_at: string }> }> {
+  const token = getToken();
+  return request(`/organizers.php?event_id=${eventId}`, {
+    headers: { 'X-Auth-Token': `Bearer ${token}` },
+  });
+}
+
+export function addOrganizer(eventId: number, email: string, role: string = 'organizer'): Promise<{ success: boolean; organizer: { id: number; user_id: number; name: string; email: string; role: string } }> {
+  const token = getToken();
+  return request(`/organizers.php?action=add`, {
+    method: 'POST',
+    headers: { 'X-Auth-Token': `Bearer ${token}` },
+    body: JSON.stringify({ event_id: eventId, email, role }),
+  });
+}
+
+export function removeOrganizer(organizerId: number): Promise<{ success: boolean }> {
+  const token = getToken();
+  return request<{ success: boolean }>(`/organizers.php?id=${organizerId}`, {
+    method: 'DELETE',
+    headers: { 'X-Auth-Token': `Bearer ${token}` },
+  });
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface User {
   id: number;
@@ -147,18 +210,31 @@ export interface User {
   account_number?: string;
   ifsc_code?: string;
   account_holder?: string;
+  role?: 'admin' | 'user';
 }
 
 export interface Event {
   id: number;
   user_id: number;
   slug: string;
-  bride_name: string;
-  groom_name: string;
+  event_type: 'wedding' | 'birthday' | 'engagement' | 'valakaappu' | 'housewarming' | 'custom';
+  custom_title?: string;
+  bride_name?: string;
+  groom_name?: string;
+  birthday_person_name?: string;
+  birthday_person_age?: number;
+  parent1_name?: string;
+  parent2_name?: string;
+  mother_name?: string;
+  father_name?: string;
+  host_name?: string;
+  spouse_name?: string;
   wedding_date: string;
-  venue: string;
+  venue?: string;
+  venue_latitude?: number;
+  venue_longitude?: number;
   cover_photo: string | null;
-  description: string;
+  description?: string;
   is_active: number;
   created_at: string;
   guest_count?: number;

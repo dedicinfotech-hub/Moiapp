@@ -15,3 +15,16 @@ function getDB(): mysqli {
     $conn->set_charset('utf8mb4');
     return $conn;
 }
+
+function getPDO(): PDO {
+    try {
+        $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+        return new PDO($dsn, DB_USER, DB_PASS, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
+    } catch (PDOException $e) {
+        http_response_code(500);
+        die(json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]));
+    }
+}

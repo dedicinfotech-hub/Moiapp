@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
     account_number   VARCHAR(50),
     ifsc_code        VARCHAR(20),
     account_holder   VARCHAR(100),
+    role             ENUM('admin', 'user') DEFAULT 'user',
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -29,19 +30,31 @@ CREATE TABLE IF NOT EXISTS users (
 -- ALTER TABLE users ADD COLUMN IF NOT EXISTS ifsc_code VARCHAR(20);
 -- ALTER TABLE users ADD COLUMN IF NOT EXISTS account_holder VARCHAR(100);
 
--- Wedding events
+-- Events
 CREATE TABLE IF NOT EXISTS events (
-    id           INT AUTO_INCREMENT PRIMARY KEY,
-    user_id      INT          NOT NULL,
-    slug         VARCHAR(100) UNIQUE NOT NULL,
-    bride_name   VARCHAR(100) NOT NULL,
-    groom_name   VARCHAR(100) NOT NULL,
-    wedding_date DATE         NOT NULL,
-    venue        VARCHAR(255),
-    cover_photo  VARCHAR(500),
-    description  TEXT,
-    is_active    TINYINT(1)   DEFAULT 1,
-    created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    id               INT AUTO_INCREMENT PRIMARY KEY,
+    user_id          INT          NOT NULL,
+    slug             VARCHAR(100) UNIQUE NOT NULL,
+    event_type       ENUM('wedding', 'birthday', 'engagement', 'valakaappu', 'housewarming', 'custom') NOT NULL DEFAULT 'wedding',
+    custom_title     VARCHAR(100),
+    bride_name       VARCHAR(100),
+    groom_name       VARCHAR(100),
+    birthday_person_name VARCHAR(100),
+    birthday_person_age  INT,
+    parent1_name     VARCHAR(100),
+    parent2_name     VARCHAR(100),
+    mother_name      VARCHAR(100),
+    father_name      VARCHAR(100),
+    host_name        VARCHAR(100),
+    spouse_name      VARCHAR(100),
+    wedding_date     DATE         NOT NULL,
+    venue            VARCHAR(255),
+    venue_latitude   DECIMAL(10, 8),
+    venue_longitude  DECIMAL(11, 8),
+    cover_photo      VARCHAR(500),
+    description      TEXT,
+    is_active        TINYINT(1)   DEFAULT 1,
+    created_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -74,6 +87,29 @@ CREATE TABLE IF NOT EXISTS photos (
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Event Organizers (multi-user access)
+CREATE TABLE IF NOT EXISTS event_organizers (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    event_id   INT NOT NULL,
+    user_id    INT NOT NULL,
+    role       ENUM('organizer', 'admin') NOT NULL DEFAULT 'organizer',
+    added_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_event_organizer (event_id, user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Feature toggles (admin only)
+CREATE TABLE IF NOT EXISTS feature_toggles (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    feature_key  VARCHAR(100) NOT NULL UNIQUE,
+    is_enabled   TINYINT(1)   NOT NULL DEFAULT 1,
+    description  TEXT,
+    updated_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by   INT          NULL,
+    FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Password reset tokens (future use)
 CREATE TABLE IF NOT EXISTS password_resets (
     id         INT AUTO_INCREMENT PRIMARY KEY,
@@ -83,4 +119,12 @@ CREATE TABLE IF NOT EXISTS password_resets (
     created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Add missing columns to existing events table (run if table already exists)
+SET FOREIGN_KEY_CHECKS = 0;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS parent1_name VARCHAR(100) NULL;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS parent2_name VARCHAR(100) NULL;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS mother_name VARCHAR(100) NULL;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS father_name VARCHAR(100) NULL;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS host_name VARCHAR(100) NULL;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS spouse_name VARCHAR(100) NULL;
 SET FOREIGN_KEY_CHECKS = 1;

@@ -14,8 +14,19 @@ $eventId = intval($_GET['event_id'] ?? 0);
 $format  = $_GET['format'] ?? 'csv';
 
 $db   = getDB();
-$stmt = $db->prepare('SELECT e.*, u.name as creator FROM events e JOIN users u ON e.user_id=u.id WHERE e.id=? AND e.user_id=?');
-$stmt->bind_param('ii', $eventId, $user['id']);
+$stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+$stmtRole->bind_param('i', $user['id']);
+$stmtRole->execute();
+$roleRow = $stmtRole->get_result()->fetch_assoc();
+$isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+
+if ($isAdmin) {
+    $stmt = $db->prepare('SELECT e.*, u.name as creator FROM events e JOIN users u ON e.user_id=u.id WHERE e.id=?');
+    $stmt->bind_param('i', $eventId);
+} else {
+    $stmt = $db->prepare('SELECT e.*, u.name as creator FROM events e JOIN users u ON e.user_id=u.id WHERE e.id=? AND e.user_id=?');
+    $stmt->bind_param('ii', $eventId, $user['id']);
+}
 $stmt->execute();
 $event = $stmt->get_result()->fetch_assoc();
 

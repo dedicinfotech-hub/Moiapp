@@ -13,18 +13,31 @@ CREATE TABLE IF NOT EXISTS users (
     account_number VARCHAR(50),
     ifsc_code VARCHAR(20),
     account_holder VARCHAR(100),
+    role ENUM('admin', 'user') DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Events (weddings)
+-- Events
 CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     slug VARCHAR(100) UNIQUE NOT NULL,
-    bride_name VARCHAR(100) NOT NULL,
-    groom_name VARCHAR(100) NOT NULL,
+    event_type ENUM('wedding', 'birthday', 'engagement', 'valakaappu', 'housewarming', 'custom') NOT NULL DEFAULT 'wedding',
+    custom_title VARCHAR(100),
+    bride_name VARCHAR(100),
+    groom_name VARCHAR(100),
+    birthday_person_name VARCHAR(100),
+    birthday_person_age INT,
+    parent1_name VARCHAR(100),
+    parent2_name VARCHAR(100),
+    mother_name VARCHAR(100),
+    father_name VARCHAR(100),
+    host_name VARCHAR(100),
+    spouse_name VARCHAR(100),
     wedding_date DATE NOT NULL,
     venue VARCHAR(255),
+    venue_latitude DECIMAL(10, 8),
+    venue_longitude DECIMAL(11, 8),
     cover_photo VARCHAR(500),
     description TEXT,
     is_active TINYINT(1) DEFAULT 1,
@@ -59,6 +72,29 @@ CREATE TABLE IF NOT EXISTS photos (
     caption VARCHAR(255),
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+);
+
+-- Event Organizers (multi-user access)
+CREATE TABLE IF NOT EXISTS event_organizers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role ENUM('organizer', 'admin') NOT NULL DEFAULT 'organizer',
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_event_organizer (event_id, user_id)
+);
+
+-- Feature toggles (admin only)
+CREATE TABLE IF NOT EXISTS feature_toggles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    feature_key VARCHAR(100) NOT NULL UNIQUE,
+    is_enabled TINYINT(1) NOT NULL DEFAULT 1,
+    description TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT NULL,
+    FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Password reset tokens

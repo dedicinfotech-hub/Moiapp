@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
+import { FeaturesProvider } from '@/lib/features';
 import ConditionalNavbar from '@/components/ConditionalNavbar';
 
 export const metadata: Metadata = {
@@ -13,8 +14,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen bg-[#FFFDF0]">
         <AuthProvider>
-          <ConditionalNavbar />
-          <main>{children}</main>
+          <FeaturesProvider>
+            <ConditionalNavbar />
+            <main>{children}</main>
+          </FeaturesProvider>
         </AuthProvider>
       </body>
     </html>

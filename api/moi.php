@@ -6,17 +6,26 @@ $method  = $_SERVER['REQUEST_METHOD'];
 $eventId = intval($_GET['event_id'] ?? 0);
 $entryId = intval($_GET['id']       ?? 0);
 
-// ── GET all moi entries (admin — requires auth + ownership) ───────────────────
+// ── GET all moi entries (admin sees all, user sees own) ───────────────────────
 if ($method === 'GET' && $eventId) {
     $user = getAuthUser();
     if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
     $db   = getDB();
-    $stmt = $db->prepare('SELECT id FROM events WHERE id=? AND user_id=?');
-    $stmt->bind_param('ii', $eventId, $user['id']);
-    $stmt->execute();
-    if ($stmt->get_result()->num_rows === 0) {
-        http_response_code(403); echo json_encode(['error' => 'Forbidden']); exit;
+    // Check if admin
+    $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+    $stmtRole->bind_param('i', $user['id']);
+    $stmtRole->execute();
+    $roleRow = $stmtRole->get_result()->fetch_assoc();
+    $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+
+    if (!$isAdmin) {
+        $stmt = $db->prepare('SELECT id FROM events WHERE id=? AND user_id=?');
+        $stmt->bind_param('ii', $eventId, $user['id']);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows === 0) {
+            http_response_code(403); echo json_encode(['error' => 'Forbidden']); exit;
+        }
     }
 
     $stmt = $db->prepare('SELECT * FROM moi_entries WHERE event_id=? ORDER BY created_at DESC');
@@ -108,15 +117,22 @@ if ($method === 'POST') {
         $evId = $row['id'];
     }
 
-    // Admin flow — verify ownership
+    // Admin flow — verify ownership or admin access
     if (!$eventSlug && $evId) {
         $user = getAuthUser();
         if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
-        $stmt = $db->prepare('SELECT id FROM events WHERE id=? AND user_id=?');
-        $stmt->bind_param('ii', $evId, $user['id']);
-        $stmt->execute();
-        if ($stmt->get_result()->num_rows === 0) {
-            http_response_code(403); echo json_encode(['error' => 'Forbidden']); exit;
+        $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+        $stmtRole->bind_param('i', $user['id']);
+        $stmtRole->execute();
+        $roleRow = $stmtRole->get_result()->fetch_assoc();
+        $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+        if (!$isAdmin) {
+            $stmt = $db->prepare('SELECT id FROM events WHERE id=? AND user_id=?');
+            $stmt->bind_param('ii', $evId, $user['id']);
+            $stmt->execute();
+            if ($stmt->get_result()->num_rows === 0) {
+                http_response_code(403); echo json_encode(['error' => 'Forbidden']); exit;
+            }
         }
     }
 
@@ -134,14 +150,25 @@ if ($method === 'POST') {
     exit;
 }
 
-// ── DELETE moi entry (admin only) ─────────────────────────────────────────────
+// ── DELETE moi entry (admin can delete any, user can delete own) ──────────────
 if ($method === 'DELETE' && $entryId) {
     $user = getAuthUser();
     if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
     $db   = getDB();
-    $stmt = $db->prepare('DELETE m FROM moi_entries m JOIN events e ON m.event_id = e.id WHERE m.id=? AND e.user_id=?');
-    $stmt->bind_param('ii', $entryId, $user['id']);
+    $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+    $stmtRole->bind_param('i', $user['id']);
+    $stmtRole->execute();
+    $roleRow = $stmtRole->get_result()->fetch_assoc();
+    $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+
+    if ($isAdmin) {
+        $stmt = $db->prepare('DELETE FROM moi_entries WHERE id=?');
+        $stmt->bind_param('i', $entryId);
+    } else {
+        $stmt = $db->prepare('DELETE m FROM moi_entries m JOIN events e ON m.event_id = e.id WHERE m.id=? AND e.user_id=?');
+        $stmt->bind_param('ii', $entryId, $user['id']);
+    }
     $stmt->execute();
     echo json_encode(['success' => true]);
     exit;

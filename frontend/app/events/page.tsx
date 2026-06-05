@@ -24,8 +24,8 @@ export default function EventsListingPage() {
 
   const filtered = events.filter((e) => {
     const q = search.toLowerCase();
-    const matchSearch = e.bride_name.toLowerCase().includes(q) ||
-                        e.groom_name.toLowerCase().includes(q) ||
+    const matchSearch = (e.bride_name || '').toLowerCase().includes(q) ||
+                        (e.groom_name || '').toLowerCase().includes(q) ||
                         (e.venue || '').toLowerCase().includes(q);
     const matchFilter = filter === 'all'
       ? true
@@ -186,8 +186,10 @@ function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-              <span className="text-5xl">💍</span>
-              <p className="text-[#B8860B] text-xs font-semibold">Wedding Event</p>
+              <span className="text-5xl">{event.event_type === 'birthday' ? '🎂' : '💍'}</span>
+              <p className="text-[#B8860B] text-xs font-semibold">
+                {event.event_type === 'birthday' ? 'Birthday Event' : 'Wedding Event'}
+              </p>
             </div>
           )}
 

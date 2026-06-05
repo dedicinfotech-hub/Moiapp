@@ -36,7 +36,7 @@ if ($method === 'POST' && $action === 'register') {
     $userId = $db->insert_id;
 
     $token = makeToken($userId, $email);
-    echo json_encode(['success' => true, 'token' => $token, 'user' => ['id' => $userId, 'name' => $name, 'email' => $email]]);
+    echo json_encode(['success' => true, 'token' => $token, 'user' => ['id' => $userId, 'name' => $name, 'email' => $email, 'role' => 'user']]);
     exit;
 }
 
@@ -53,7 +53,7 @@ if ($method === 'POST' && $action === 'login') {
     }
 
     $db   = getDB();
-    $stmt = $db->prepare('SELECT id, name, email, password FROM users WHERE email = ?');
+    $stmt = $db->prepare('SELECT id, name, email, password, role FROM users WHERE email = ?');
     $stmt->bind_param('s', $email);
     $stmt->execute();
     $user = $stmt->get_result()->fetch_assoc();
@@ -65,7 +65,7 @@ if ($method === 'POST' && $action === 'login') {
     }
 
     $token = makeToken($user['id'], $user['email']);
-    echo json_encode(['success' => true, 'token' => $token, 'user' => ['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email']]]);
+    echo json_encode(['success' => true, 'token' => $token, 'user' => ['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email'], 'role' => $user['role'] ?? 'user']]);
     exit;
 }
 
@@ -75,7 +75,7 @@ if ($method === 'GET' && $action === 'me') {
     if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
     $db   = getDB();
-    $stmt = $db->prepare('SELECT id, name, email, phone, upi_id, bank_name, account_number, ifsc_code, account_holder FROM users WHERE id = ?');
+    $stmt = $db->prepare('SELECT id, name, email, phone, upi_id, bank_name, account_number, ifsc_code, account_holder, role FROM users WHERE id = ?');
     $stmt->bind_param('i', $user['id']);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
@@ -106,6 +106,13 @@ if ($method === 'PUT' && $action === 'profile') {
     $stmt->bind_param('sssssssi', $name, $phone, $upi_id, $bank_name, $account_number, $ifsc_code, $account_holder, $user['id']);
     $stmt->execute();
 
+    // Fetch the role from database
+    $stmt = $db->prepare('SELECT role FROM users WHERE id = ?');
+    $stmt->bind_param('i', $user['id']);
+    $stmt->execute();
+    $roleRow = $stmt->get_result()->fetch_assoc();
+    $userRole = $roleRow['role'] ?? 'user';
+
     echo json_encode(['success' => true, 'user' => [
         'id'             => $user['id'],
         'name'           => $name,
@@ -116,6 +123,7 @@ if ($method === 'PUT' && $action === 'profile') {
         'account_number' => $account_number,
         'ifsc_code'      => $ifsc_code,
         'account_holder' => $account_holder,
+        'role'           => $userRole,
     ]]);
     exit;
 }
