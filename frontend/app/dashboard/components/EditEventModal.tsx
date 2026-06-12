@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Event, eventsApi } from '@/lib/api';
+import { Event, eventsApi, showSuccess } from '@/lib/api';
+import ApprovalBanner from '@/components/ApprovalBanner';
 
 interface EditEventModalProps {
   event: Event;
@@ -99,7 +100,12 @@ export default function EditEventModal({
         submitData.spouse_name = form.spouse_name;
       }
 
-      await eventsApi.update(event.id, submitData);
+      const res = await eventsApi.update(event.id, submitData);
+      if (res.resubmitted) {
+        showSuccess('Changes saved and resubmitted for approval');
+      } else {
+        showSuccess('Event updated');
+      }
       if (coverFile) {
         const token = localStorage.getItem('moi_token');
         const fd = new FormData();
@@ -173,6 +179,7 @@ export default function EditEventModal({
 
         <div className="px-6 py-5 space-y-4">
           {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm">{error}</div>}
+          <ApprovalBanner event={event} />
 
           {/* Event Type Selector */}
           <div>

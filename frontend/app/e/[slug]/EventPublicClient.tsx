@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { eventsApi, moiApi, photosApi, Event, Photo } from '@/lib/api';
 import { useFeatures } from '@/lib/features';
+import { canAcceptGuestMoi } from '@/lib/eventHelpers';
 
 // In static export useParams() always returns the placeholder slug '_'.
 // Read the real slug from the URL path instead.
@@ -70,14 +71,19 @@ export default function PublicEventPage() {
     </div>
   );
 
-  if (step === 'form')    return <MoiForm    event={event} onBack={() => setStep('event')} onSuccess={(amount) => { (window as Window & { __paidAmount?: number }).__paidAmount = amount; setStep('success'); }} />;
+  if (step === 'form') {
+    if (!canAcceptGuestMoi(event)) {
+      return <EventDetailView event={event} photos={photos} onGiveMoi={() => {}} guestMoiClosed />;
+    }
+    return <MoiForm event={event} onBack={() => setStep('event')} onSuccess={(amount) => { (window as Window & { __paidAmount?: number }).__paidAmount = amount; setStep('success'); }} />;
+  }
   if (step === 'success') return <SuccessView event={event} onBack={() => setStep('event')} amount={(window as Window & { __paidAmount?: number }).__paidAmount} />;
 
-  return <EventDetailView event={event} photos={photos} onGiveMoi={() => setStep('form')} />;
+  return <EventDetailView event={event} photos={photos} onGiveMoi={() => setStep('form')} guestMoiClosed={!canAcceptGuestMoi(event)} />;
 }
 
 // ── Event Detail View (TicketNadu layout) ─────────────────────────────────────
-function EventDetailView({ event, photos, onGiveMoi }: { event: Event; photos: Photo[]; onGiveMoi: () => void }) {
+function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: Event; photos: Photo[]; onGiveMoi: () => void; guestMoiClosed?: boolean }) {
   const [showMore, setShowMore]   = useState(false);
   const [copied, setCopied]       = useState(false);
   const guestCount = Number(event.stats?.guest_count || 0);
@@ -175,9 +181,9 @@ function EventDetailView({ event, photos, onGiveMoi }: { event: Event; photos: P
             {/* Category pill + title + date/venue */}
             <div className="pb-6 pt-4 lg:pt-0">
               <div className="flex items-center gap-1 border border-[#FFC107] bg-[#FFFCF5] ps-2 pe-3 py-1.5 rounded-full w-fit text-sm font-semibold text-[#FFC107] mb-3">
-                <span>{event.event_type === 'birthday' ? '🎂' : '💍'}</span>
-                <span>{event.event_type === 'birthday' ? 'Birthday' : 'Wedding'}</span>
-              </div>
+                 <span>{event.event_type === 'birthday' ? '🎂' : event.event_type === 'graduation' ? '🎓' : event.event_type === 'housewarming' ? '🏠' : '💍'}</span>
+                 <span>{event.event_type === 'birthday' ? 'Birthday' : event.event_type === 'graduation' ? 'Graduation' : event.event_type === 'housewarming' ? 'Housewarming' : 'Wedding'}</span>
+               </div>
               <h1 className="font-bold text-xl lg:text-[32px] leading-tight">
                 {event.bride_name || ''} &amp; {event.groom_name || ''}
               </h1>
@@ -278,20 +284,53 @@ function EventDetailView({ event, photos, onGiveMoi }: { event: Event; photos: P
                       <VenueMap venue={event.venue} />
                     </>
                   )}
-                  <div className="flex gap-3 items-start">
-                    <span className="text-[#444444] mt-0.5">👰</span>
-                    <div>
-                      <p className="text-xs text-[#666666]">Bride</p>
-                      <p className="font-medium text-[#101010]">{event.bride_name || ''}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 items-start">
-                    <span className="text-[#444444] mt-0.5">🤵</span>
-                    <div>
-                      <p className="text-xs text-[#666666]">Groom</p>
-                      <p className="font-medium text-[#101010]">{event.groom_name || ''}</p>
-                    </div>
-                  </div>
+                  {event.event_type === 'wedding' && (
+                   <>
+                     <div className="flex gap-3 items-start">
+                       <span className="text-[#444444] mt-0.5">👰</span>
+                       <div>
+                         <p className="text-xs text-[#666666]">Bride</p>
+                         <p className="font-medium text-[#101010]">{event.bride_name || ''}</p>
+                       </div>
+                     </div>
+                     <div className="flex gap-3 items-start">
+                       <span className="text-[#444444] mt-0.5">🤵</span>
+                       <div>
+                         <p className="text-xs text-[#666666]">Groom</p>
+                         <p className="font-medium text-[#101010]">{event.groom_name || ''}</p>
+                       </div>
+                     </div>
+                   </>
+                   )}
+                   {event.event_type === 'graduation' && (
+                   <div className="flex gap-3 items-start">
+                     <span className="text-[#444444] mt-0.5">🎓</span>
+                     <div>
+                       <p className="text-xs text-[#666666]">Graduate</p>
+                       <p className="font-medium text-[#101010]">{event.graduate_name || ''}</p>
+                     </div>
+                   </div>
+                   )}
+                   {event.event_type === 'housewarming' && (
+                   <>
+                     <div className="flex gap-3 items-start">
+                       <span className="text-[#444444] mt-0.5">👨</span>
+                       <div>
+                         <p className="text-xs text-[#666666]">Host</p>
+                         <p className="font-medium text-[#101010]">{event.host_name || ''}</p>
+                       </div>
+                     </div>
+                     {event.spouse_name && (
+                     <div className="flex gap-3 items-start">
+                       <span className="text-[#444444] mt-0.5">👩</span>
+                       <div>
+                         <p className="text-xs text-[#666666]">Spouse</p>
+                         <p className="font-medium text-[#101010]">{event.spouse_name || ''}</p>
+                       </div>
+                     </div>
+                     )}
+                   </>
+                   )}
                 </div>
               </div>
             </div>
@@ -346,7 +385,17 @@ function EventDetailView({ event, photos, onGiveMoi }: { event: Event; photos: P
                   {event.bride_name?.charAt(0) || '?'}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-[#222222]">{event.bride_name || ''} &amp; {event.groom_name || ''}</h4>
+                  <h4 className="font-semibold text-[#222222]">
+            {event.event_type === 'graduation' 
+              ? event.graduate_name 
+              : event.event_type === 'birthday'
+              ? event.birthday_person_name
+              : event.event_type === 'housewarming'
+              ? `${event.host_name || ''}${event.spouse_name ? ' & ' + event.spouse_name : ''}`
+              : event.event_type === 'custom'
+              ? event.custom_title
+              : `${event.bride_name || ''} & ${event.groom_name || ''}`}
+          </h4>
                   {event.creator_name && (
                     <p className="text-sm text-[#666666] mt-0.5">Listed by {event.creator_name}</p>
                   )}
@@ -357,21 +406,31 @@ function EventDetailView({ event, photos, onGiveMoi }: { event: Event; photos: P
             {/* Desktop: Give Moi card */}
             <div className="hidden lg:flex flex-col border border-[#E8E8E8] rounded-xl p-6 gap-5">
               <div>
-                <p className="text-sm text-[#666666] mb-1">{event.event_type === 'birthday' ? 'Birthday Gift' : 'Wedding Gift'}</p>
-                <h3 className="text-2xl font-bold text-[#101010]">Give Moi {event.event_type === 'birthday' ? '🎂' : '💍'}</h3>
+                <p className="text-sm text-[#666666] mb-1">{event.event_type === 'birthday' ? 'Birthday Gift' : event.event_type === 'graduation' ? 'Graduation Gift' : event.event_type === 'housewarming' ? 'Housewarming Gift' : 'Wedding Gift'}</p>
+               <h3 className="text-2xl font-bold text-[#101010]">Give Moi {event.event_type === 'birthday' ? '🎂' : event.event_type === 'graduation' ? '🎓' : event.event_type === 'housewarming' ? '🏠' : '💍'}</h3>
                 <p className="text-sm text-[#666666] mt-1">மொய் கொடுக்க இங்கே அழுத்துங்கள்</p>
               </div>
-              {guestCount > 0 && (
-                <div className="flex gap-4 text-sm text-[#666666]">
-                  <span>👥 {guestCount} guests registered</span>
-                </div>
+              {guestMoiClosed ? (
+                <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+                  {event.event_mode === 'past'
+                    ? 'This is a past event — guest moi collection is not available.'
+                    : 'Guest payments will open after admin approves this function.'}
+                </p>
+              ) : (
+                <>
+                  {guestCount > 0 && (
+                    <div className="flex gap-4 text-sm text-[#666666]">
+                      <span>👥 {guestCount} guests registered</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={onGiveMoi}
+                    className="bg-[#FFC107] border border-[#FFC107] h-[50px] flex justify-center items-center text-center text-[#000000] font-semibold rounded-lg cursor-pointer hover:bg-[#E6AC00] transition-colors"
+                  >
+                    Give Moi Now
+                  </button>
+                </>
               )}
-              <button
-                onClick={onGiveMoi}
-                className="bg-[#FFC107] border border-[#FFC107] h-[50px] flex justify-center items-center text-center text-[#000000] font-semibold rounded-lg cursor-pointer hover:bg-[#E6AC00] transition-colors"
-              >
-                Give Moi Now
-              </button>
             </div>
 
           </div>
@@ -379,18 +438,20 @@ function EventDetailView({ event, photos, onGiveMoi }: { event: Event; photos: P
       </section>
 
       {/* ── Mobile: sticky bottom bar ── */}
-      <div className="sticky bottom-0 left-0 flex justify-between bg-white py-4 px-4 items-center border-t border-[#F5F5F5] shadow-lg lg:hidden">
-        <div className="flex-1">
-          <p className="text-xs text-[#666666]">{event.event_type === 'birthday' ? 'Birthday Gift' : 'Wedding Gift'}</p>
-          <h3 className="text-lg font-bold text-[#101010]">Give Moi {event.event_type === 'birthday' ? '🎂' : '💍'}</h3>
+      {!guestMoiClosed && (
+        <div className="sticky bottom-0 left-0 flex justify-between bg-white py-4 px-4 items-center border-t border-[#F5F5F5] shadow-lg lg:hidden">
+          <div className="flex-1">
+            <p className="text-xs text-[#666666]">{event.event_type === 'birthday' ? 'Birthday Gift' : event.event_type === 'graduation' ? 'Graduation Gift' : event.event_type === 'housewarming' ? 'Housewarming Gift' : 'Wedding Gift'}</p>
+             <h3 className="text-lg font-bold text-[#101010]">Give Moi {event.event_type === 'birthday' ? '🎂' : event.event_type === 'graduation' ? '🎓' : event.event_type === 'housewarming' ? '🏠' : '💍'}</h3>
+          </div>
+          <button
+            onClick={onGiveMoi}
+            className="bg-[#FFC107] border border-[#FFC107] flex-1 h-[50px] flex justify-center items-center rounded-lg font-semibold text-[#000000] hover:bg-[#E6AC00] transition-colors"
+          >
+            Give Moi Now
+          </button>
         </div>
-        <button
-          onClick={onGiveMoi}
-          className="bg-[#FFC107] border border-[#FFC107] flex-1 h-[50px] flex justify-center items-center rounded-lg font-semibold text-[#000000] hover:bg-[#E6AC00] transition-colors"
-        >
-          Give Moi Now
-        </button>
-      </div>
+      )}
 
     </div>
   );
@@ -402,6 +463,17 @@ function MoiForm({ event, onBack, onSuccess }: { event: Event; onBack: () => voi
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]     = useState('');
   const presets = [101, 201, 501, 1001, 2001, 5001];
+
+  // Extended relationship options for dropdown
+  const relationshipOptions = [
+    { v: 'family', l: 'Family', t: 'குடும்பம்' },
+    { v: 'friend', l: 'Friend', t: 'நண்பர்' },
+    { v: 'colleague', l: 'Colleague', t: 'சக ஊழியர்' },
+    { v: 'relative', l: 'Relative', t: 'உற்சவம்' },
+    { v: 'neighbor', l: 'Neighbor', t: 'அகிலக்' },
+    { v: 'business', l: 'Business', t: 'வணிகர்' },
+    { v: 'other', l: 'Other', t: 'மற்றவர்' },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -446,7 +518,15 @@ function MoiForm({ event, onBack, onSuccess }: { event: Event; onBack: () => voi
         <div>
           <h2 className="font-bold text-[#101010]">Give Moi</h2>
           <p className="text-xs text-[#666666]">
-            {event.event_type === 'birthday' ? event.birthday_person_name : `${event.bride_name || ''} & ${event.groom_name || ''}`}
+            {event.event_type === 'graduation' 
+              ? event.graduate_name 
+              : event.event_type === 'birthday'
+              ? event.birthday_person_name
+              : event.event_type === 'housewarming'
+              ? `${event.host_name || ''}${event.spouse_name ? ' & ' + event.spouse_name : ''}`
+              : event.event_type === 'custom'
+              ? event.custom_title
+              : `${event.bride_name || ''} & ${event.groom_name || ''}`}
           </p>
         </div>
       </div>
@@ -524,18 +604,20 @@ function MoiForm({ event, onBack, onSuccess }: { event: Event; onBack: () => voi
           </div>
         )}
 
-        {/* Relation */}
+        {/* Relation - Dropdown for better UX */}
         <div>
           <label className="block text-sm font-semibold text-[#101010] mb-2">Relation</label>
-          <div className="grid grid-cols-2 gap-2">
-            {[{ v: 'family', l: '👨‍👩‍👧 Family', t: 'குடும்பம்' }, { v: 'friend', l: '👫 Friend', t: 'நண்பர்' }, { v: 'colleague', l: '💼 Colleague', t: 'சக ஊழியர்' }, { v: 'other', l: '🤝 Other', t: 'மற்றவர்' }].map((r) => (
-              <button key={r.v} type="button" onClick={() => setForm({ ...form, relation: r.v })}
-                className={`py-3 px-3 rounded-xl text-left border-2 transition-colors ${form.relation === r.v ? 'border-[#FFC107] bg-[#FFFCF5]' : 'border-[#E8E8E8] hover:border-[#FFC107]'}`}>
-                <p className="text-sm font-semibold text-[#101010]">{r.l}</p>
-                <p className="text-xs text-[#666666]">{r.t}</p>
-              </button>
+          <select
+            value={form.relation}
+            onChange={(e) => setForm({ ...form, relation: e.target.value })}
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-[#101010] focus:outline-none focus:border-[#FFC107] transition-colors bg-white"
+          >
+            {relationshipOptions.map((r) => (
+              <option key={r.v} value={r.v}>
+                {r.l} ({r.t})
+              </option>
             ))}
-          </div>
+          </select>
         </div>
 
         {/* Note */}
@@ -582,9 +664,17 @@ function SuccessView({ event, onBack, amount }: { event: Event; onBack: () => vo
   const hasUpi  = !!event.upi_id;
   const hasBank = !!(event.account_number && event.ifsc_code);
   const isWedding = event.event_type === 'wedding';
-  const eventLabel = isWedding ? 'Wedding' : 'Birthday';
-  const eventNames = isWedding ? `${event.bride_name || ''} & ${event.groom_name || ''}` : event.birthday_person_name || event.bride_name || '';
-  const eventEmoji = isWedding ? '💒' : '🎂';
+  const eventLabel = isWedding ? 'Wedding' : event.event_type === 'birthday' ? 'Birthday' : event.event_type === 'graduation' ? 'Graduation' : event.event_type === 'housewarming' ? 'Housewarming' : 'Event';
+  const eventNames = isWedding 
+    ? `${event.bride_name || ''} & ${event.groom_name || ''}` 
+    : event.event_type === 'birthday' 
+    ? event.birthday_person_name 
+    : event.event_type === 'graduation'
+    ? event.graduate_name
+    : event.event_type === 'housewarming'
+    ? `${event.host_name || ''}${event.spouse_name ? ' & ' + event.spouse_name : ''}`
+    : event.custom_title || '';
+  const eventEmoji = isWedding ? '💒' : event.event_type === 'birthday' ? '🎂' : event.event_type === 'graduation' ? '🎓' : event.event_type === 'housewarming' ? '🏠' : '🎉';
   const upiAmount = typeof amount === 'number' && amount > 0 ? amount : undefined;
 
   const copyText = (text: string, label: string) => {

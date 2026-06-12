@@ -8,6 +8,18 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/cors.php';
 
+// Helper function to handle null values in bind_param
+function refValues($arr) {
+    if (strnatcmp(phpversion(), '5.3') >= 0) {
+        $refs = [];
+        foreach ($arr as $key => $value) {
+            $refs[$key] = &$arr[$key];
+        }
+        return $refs;
+    }
+    return $arr;
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
 $user = getAuthUser();
 if (!$user) {
@@ -126,9 +138,34 @@ if ($method === 'POST' && ($_GET['action'] ?? '') === 'csv') {
             $originalEntryDate = $originalDate;
         }
 
-        $stmt = $db->prepare('INSERT INTO moi_entries (event_id, guest_name, amount, gift_type, gold_weight, gift_description, relation, payment_mode, note, entered_by, is_digitized, original_entry_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)');
-        $stmt->bind_param('isdssdsssss', $eventId, $guestName, $amount, $giftType, $goldWeight, $giftDescription, $relation, $paymentMode, $note, $user['name'], $originalEntryDate);
+        // Build types and values dynamically to handle null values
+        $types = 'i';
+        $values = [$eventId];
+        $types .= 's';
+        $values[] = $guestName;
+        $types .= 'd';
+        $values[] = $amount;
+        $types .= 's';
+        $values[] = $giftType;
+        $types .= 'd';
+        $values[] = $goldWeight;
+        $types .= 's';
+        $values[] = $giftDescription;
+        $types .= 's';
+        $values[] = $relation;
+        $types .= 's';
+        $values[] = $paymentMode;
+        $types .= 's';
+        $values[] = $note;
+        $types .= 's';
+        $values[] = $user['name'];
+        $types .= 's';
+        $values[] = $originalEntryDate;
         
+        $stmt = $db->prepare('INSERT INTO moi_entries (event_id, guest_name, amount, gift_type, gold_weight, gift_description, relation, payment_mode, note, entered_by, is_digitized, original_entry_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)');
+        $params = array_merge([$types], $values);
+        call_user_func_array([$stmt, 'bind_param'], refValues($params));
+            
         if ($stmt->execute()) {
             $imported++;
         } else {
@@ -192,8 +229,33 @@ if ($method === 'POST' && ($_GET['action'] ?? '') === 'add') {
         $originalEntryDate = $originalDate;
     }
 
+    // Build types and values dynamically to handle null values
+    $types = 'i';
+    $values = [$eventId];
+    $types .= 's';
+    $values[] = $guestName;
+    $types .= 'd';
+    $values[] = $amount;
+    $types .= 's';
+    $values[] = $giftType;
+    $types .= 'd';
+    $values[] = $goldWeight;
+    $types .= 's';
+    $values[] = $giftDescription;
+    $types .= 's';
+    $values[] = $relation;
+    $types .= 's';
+    $values[] = $paymentMode;
+    $types .= 's';
+    $values[] = $note;
+    $types .= 's';
+    $values[] = $user['name'];
+    $types .= 's';
+    $values[] = $originalEntryDate;
+    
     $stmt = $db->prepare('INSERT INTO moi_entries (event_id, guest_name, amount, gift_type, gold_weight, gift_description, relation, payment_mode, note, entered_by, is_digitized, original_entry_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)');
-    $stmt->bind_param('isdssdsssss', $eventId, $guestName, $amount, $giftType, $goldWeight, $giftDescription, $relation, $paymentMode, $note, $user['name'], $originalEntryDate);
+    $params = array_merge([$types], $values);
+    call_user_func_array([$stmt, 'bind_param'], refValues($params));
     
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'id' => $db->insert_id]);

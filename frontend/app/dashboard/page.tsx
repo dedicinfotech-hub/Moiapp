@@ -4,29 +4,37 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { eventsApi, moiApi, Event, MoiEntry } from '@/lib/api';
+import NotificationBell from '@/components/NotificationBell';
 import { useAuth } from '@/lib/auth';
 import { FeaturesProvider, useFeatures } from '@/lib/features';
 import {
   ModuleDashboard,
   ModuleEvents,
-  ModulePayments,
+  ModuleMoiNotebook,
   ModuleOrganizers,
   ModuleUsers,
   ModuleAnalytics,
   ModuleSettings,
   ModuleFeatures,
+  ModuleAdminDashboard,
+  ModuleAdminUsers,
+  ModuleAdminAnalytics,
+  ModuleAdminRevenue,
+  ModuleAdminSupport,
+  ModuleAdminApprovals,
+  ModuleAdminPrivateEvents,
   NewEventModal,
   EditEventModal,
   BulkImportModal,
 } from './components';
 
-type Module = 'dashboard' | 'events' | 'payments' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features';
+type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support' | 'admin-approvals' | 'admin-private-events';
 
 const ALL_NAV: { id: Module; label: string; icon: string; feature?: string }[] = [
   { id: 'dashboard', label: 'Dashboard',  icon: '📊' },
   { id: 'events',    label: 'Events',     icon: '💍' },
   { id: 'organizers', label: 'Organizers', icon: '👥', feature: 'multi_organizer' },
-  { id: 'payments',  label: 'Payments',   icon: '💰' },
+  { id: 'moi-notebook',  label: 'Moi Notebook',   icon: '💰' },
   { id: 'users',     label: 'Users',      icon: '👤' },
   { id: 'analytics', label: 'Analytics',  icon: '📈' },
   { id: 'features',  label: 'Features',   icon: '🧩' },
@@ -37,11 +45,17 @@ const MODULE_SUBTITLE: Record<Module, string> = {
   dashboard:  'Overview of your Moi activity',
   events:     'Manage all wedding events',
   organizers: 'Manage event organizers',
-  payments:   'Track all moi payments',
+  'moi-notebook':   'Track all moi entries',
   users:      'Guest & user management',
   analytics:  'Performance & insights',
   features:   'Enable or disable app features',
   settings:   'Account & preferences',
+  'admin-dashboard': 'Admin overview and statistics',
+  'admin-users': 'Manage all users',
+  'admin-analytics': 'Platform analytics and insights',
+  'admin-revenue': 'Revenue management',
+  'admin-support': 'Support tickets and complaints',
+  'admin-approvals': 'Approve or reject new functions',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -78,7 +92,7 @@ function DashboardInner() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const mod = params.get('module') as Module;
-      if (mod && ['dashboard', 'events', 'payments', 'users', 'analytics', 'settings', 'organizers', 'features'].includes(mod)) {
+      if (mod && ['dashboard', 'events', 'moi-notebook', 'users', 'analytics', 'settings', 'organizers', 'features', 'admin-dashboard', 'admin-users', 'admin-analytics', 'admin-revenue', 'admin-support', 'admin-approvals', 'admin-private-events'].includes(mod)) {
         // Only allow features module for admin users
         if (mod === 'features' && !isAdmin) {
           setModule('dashboard');
@@ -146,9 +160,11 @@ function DashboardInner() {
             <Link href="/" className="font-extrabold text-lg text-[#101010] leading-none">
               Moi<span className="text-[#FFC107]">App</span>
             </Link>
-            <span className="text-[9px] font-bold bg-[#FFC107] text-black px-1.5 py-0.5 rounded uppercase tracking-wider">
-              Admin
-            </span>
+            {isAdmin && (
+              <span className="text-[9px] font-bold bg-[#FFC107] text-black px-1.5 py-0.5 rounded uppercase tracking-wider">
+                Admin
+              </span>
+            )}
           </div>
 
           {/* Nav items */}
@@ -174,6 +190,51 @@ function DashboardInner() {
                 </button>
               );
             })}
+            
+            {/* Admin Section - only for admin users */}
+            {isAdmin && (
+              <>
+                <p className="text-[10px] font-semibold text-[#BBBBBB] uppercase tracking-widest px-5 mb-1 mt-4">
+                  Admin
+                </p>
+                {['admin-dashboard', 'admin-approvals', 'admin-users', 'admin-analytics', 'admin-revenue', 'admin-support', 'admin-private-events'].map((adminMod) => {
+                  const labels: Record<string, string> = {
+                    'admin-dashboard': 'Admin Dashboard',
+                    'admin-approvals': 'Approvals',
+                    'admin-users': 'User Management',
+                    'admin-analytics': 'Analytics',
+                    'admin-revenue': 'Revenue',
+                    'admin-support': 'Support',
+                    'admin-private-events': 'Private Events',
+                  };
+                  const icons: Record<string, string> = {
+                    'admin-dashboard': '📊',
+                    'admin-approvals': '✅',
+                    'admin-users': '👥',
+                    'admin-analytics': '📈',
+                    'admin-revenue': '💰',
+                    'admin-support': '🎫',
+                    'admin-private-events': '🔒',
+                  };
+                  const active = module === adminMod;
+                  return (
+                    <button
+                      key={adminMod}
+                      onClick={() => { setModule(adminMod as Module); setSideOpen(false); }}
+                      className={[
+                        'w-full flex items-center gap-3 px-5 py-2.5 text-sm font-medium transition-colors text-left',
+                        active
+                          ? 'bg-[#FFFBEE] text-[#101010] border-r-[3px] border-[#FFC107]'
+                          : 'text-[#666] hover:bg-[#fafafa] hover:text-[#101010]',
+                      ].join(' ')}
+                    >
+                      <span className="text-base w-5 text-center">{icons[adminMod]}</span>
+                      {labels[adminMod]}
+                    </button>
+                  );
+                })}
+              </>
+            )}
           </nav>
 
           {/* User footer */}
@@ -225,6 +286,7 @@ function DashboardInner() {
             </div>
 
             <div className="flex items-center gap-2">
+              <NotificationBell />
               {isEnabled('bulk_import') && (
                 <button
                   onClick={() => setShowBulkImport(true)}
@@ -251,11 +313,18 @@ function DashboardInner() {
             )}
             {module === 'events'     && <ModuleEvents     events={events} onRefresh={loadAll} onNewEvent={() => setShowNew(true)} onEdit={setEditingEvent} />}
             {module === 'organizers' && <ModuleOrganizers events={events} onRefresh={loadAll} />}
-            {module === 'payments'   && <ModulePayments   entries={allEntries} events={events} />}
+            {module === 'moi-notebook'   && <ModuleMoiNotebook   entries={allEntries} events={events} />}
             {module === 'users'      && <ModuleUsers      entries={allEntries} />}
             {module === 'analytics'  && <ModuleAnalytics  events={events} entries={allEntries} totalMoi={totalMoi} />}
             {module === 'features'   && <ModuleFeatures   isAdmin={isAdmin} />}
             {module === 'settings'   && <ModuleSettings   user={user} onLogout={() => { logout(); router.push('/'); }} />}
+            {module === 'admin-dashboard' && <ModuleAdminDashboard onNavigate={setModule} />}
+            {module === 'admin-users' && <ModuleAdminUsers onNavigate={setModule} />}
+            {module === 'admin-analytics' && <ModuleAdminAnalytics onNavigate={setModule} />}
+            {module === 'admin-revenue' && <ModuleAdminRevenue onNavigate={setModule} />}
+            {module === 'admin-support' && <ModuleAdminSupport onNavigate={setModule} />}
+            {module === 'admin-approvals' && <ModuleAdminApprovals onNavigate={setModule} onRefresh={loadAll} />}
+            {module === 'admin-private-events' && <ModuleAdminPrivateEvents onNavigate={setModule} />}
           </main>
         </div>
       </div>

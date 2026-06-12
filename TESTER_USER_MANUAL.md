@@ -1,6 +1,6 @@
 # MoiApp — Tester User Manual
-**Version:** 1.0 (Launch-ready)  
-**Date:** 2026-06-05  
+**Version:** 2.0 (Complete)  
+**Date:** 2026-06-11  
 **Application:** MoiApp – Wedding & Event Gift Tracker  
 **Tech Stack:** Next.js (Frontend) + PHP/MySQL (Backend)
 
@@ -32,6 +32,7 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 | Engagement | 💍 | Partner 1, Partner 2, Parent 1, Parent 2, Mother, Father, Date |
 | Valakaappu | 🌺 | Mother Name, Father Name, Date |
 | Housewarming | 🏠 | Host Name, Spouse Name, Date |
+| Graduation | 🎓 | Graduate Name, Date |
 | Custom | 🎉 | Custom Title, Date |
 
 ### Gift Types Supported
@@ -50,6 +51,8 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 - Can add moi entries to their own events
 - Can export CSV / PDF for their own events
 - Can add photos to their own events
+- Can manage invitations for their events
+- Can track return gifts for their events
 
 ### Admin (role: `admin`)
 - All regular user permissions
@@ -57,12 +60,46 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 - Can manage feature toggles (enable/disable features)
 - Can manage multi-organizer assignments
 - Can delete any moi entry
+- Can view admin dashboard with platform statistics
+- Can manage users (block/delete)
+- Can view analytics (user growth, top cities, peak months)
+- Can view revenue management
+- Can manage support tickets
 
 ### Guest (no auth required)
 - Can browse public events at `/events`
 - Can view event details at `/e/[slug]`
 - Can submit moi entries via public form
 - Can share event links
+- Can view event photos (if public)
+
+---
+
+## 2.1 Menu Structure by User Role
+
+### Guest Menu (No Login)
+- **Home** (`/`) - Landing page
+- **Events** (`/events`) - Public event listing
+- **Login** (`/login`) - Phone/OTP or Email/Password login
+- **Register** (`/register`) - Create new account
+
+### Regular User Menu (After Login)
+- **Dashboard** (`/dashboard`) - Main dashboard with summary
+- **Events** (`/dashboard`) - My Events module
+- **Moi Notebook** (`/dashboard`) - Moi entries and tracking
+- **Invitations** (`/dashboard`) - Invitation upload and tracking
+- **Return Gifts** (`/dashboard`) - Return gift tracking
+- **Reports** (`/dashboard`) - Analytics and reports
+- **Settings** (`/dashboard`) - Profile, language, font size, notifications
+
+### Admin Menu (After Login)
+- **Dashboard** (`/dashboard`) - Admin dashboard with platform stats
+- **Users** (`/dashboard`) - User management (search, filter, block/delete)
+- **Analytics** (`/dashboard`) - Platform analytics and graphs
+- **Revenue** (`/dashboard`) - Revenue management
+- **Support** (`/dashboard`) - Support ticket management
+- **Features** (`/dashboard`) - Feature toggle management
+- **Settings** (`/dashboard`) - Profile and app settings
 
 ---
 
@@ -70,14 +107,25 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 
 ### 3.1 Authentication
 - **Register:** `/register` — Name, Email, Password, Phone (optional)
-- **Login:** `/login` — Email, Password
+- **Login:** `/login` — Email, Password OR Phone + OTP
+- **Phone/OTP Login:**
+  - Enter 10-digit phone number
+  - OTP sent within 30 seconds
+  - OTP expires after 5 minutes
+  - 3 wrong attempts = blocked for 10 minutes
 - **Session:** JWT token stored in `localStorage` as `moi_token`
 - **Profile Update:** Dashboard → Settings → Update profile fields
+- **New User Flow:** After first login, redirected to profile setup screen
+- **Language Toggle:** Tamil / English (affects entire app)
+- **Font Size:** Small / Medium / Large options
 
 ### 3.2 Event Management
-- **Create Event:** Dashboard → "New Event" button → Select type → Fill fields → Upload cover photo (optional)
+- **Create Event:** Dashboard → "New Event" button → Select type → Select date (Today/Tomorrow/Choose Date) → Submit
+- **Event Types:** Wedding, Birthday, Engagement, Valaikappu, Housewarming, Graduation, Custom
+- **Auto-generated Name:** Function Type - Date format
 - **Edit Event:** Dashboard → Events module → Click edit icon on event card
 - **Delete Event:** Dashboard → Events module → Click delete → Confirm
+- **Function Settings:** Can add/edit/delete Venue and City after creation
 - **Cover Photo:** Upload via event creation/edit or dedicated upload endpoint (max 10MB, JPG/PNG/WEBP)
 
 ### 3.3 Moi Entry (Gift Recording)
@@ -87,11 +135,53 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 3. Submit → See Thank You page with WhatsApp share + QR code (if UPI selected)
 
 **Admin Flow (Dashboard):**
-1. Dashboard → Events → Click event → View moi entries table
+1. Dashboard → Moi Notebook → View moi entries table
 2. Can add entries manually, edit, or delete
 3. Can export CSV or generate PDF report
+4. **Offline Support:** Entries save locally and sync when online
 
-### 3.4 PDF Export + Email
+### 3.4 Moi List
+- **Search:** By name and relationship
+- **Filter:** All / Cash / Online
+- **Sort:** High to Low / Low to High / Date
+- **Entry Details:** Name, amount, payment method, relation, date
+- **Edit/Delete:** Tap entry for options, delete requires confirmation
+- **Pagination:** 20 entries per page with scroll to load more
+
+### 3.5 Reports
+- **Total Amount:** Sum of all moi received
+- **Total Contributors:** Count of unique givers
+- **Average Amount:** Per contributor
+- **Top 3 Contributors:** With amounts
+- **Cash vs Online:** Percentage breakdown
+- **PDF Download:** Within 5 seconds
+- **WhatsApp Share:** Opens with PDF attached
+
+### 3.6 Invitation Upload
+- **File Formats:** .xlsx and .csv
+- **Required Columns:** Name, Phone, Relationship, City
+- **Auto-matching:** Invitation list matched with moi entries
+- **Status Tracking:** Invited / Came / Gave Moi / No Show
+- **Alerts:**
+  - People who came but not in invitation list
+  - Invited people who did not attend
+- **Attendance Summary:** Invited / Came / Gave Moi / No Show counts
+
+### 3.7 Return Gifts Tracker
+- **Return Status:** Pending / Returned
+- **Return Date:** Track when return gift was given
+- **Reminders:** Automatic notifications for pending returns
+- **Return Type:** Type of return gift
+
+### 3.8 Notifications
+- **3 Days Before:** Notification sent before function date
+- **Day of Function:** Notification on event day
+- **Weekly Reminders:** For overdue pending returns
+- **Entry Confirmation:** Notification after moi entry save
+- **Settings:** Can be turned on/off in Settings
+- **Default Time:** 9:00 AM
+
+### 3.9 PDF Export + Email
 - **Endpoint:** `GET /api/pdf.php?event_id=X`
 - Generates styled HTML report with:
   - Event header (type, names, date, venue)
@@ -101,47 +191,88 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 - **Email:** Sends report link to organizer's email via PHP `mail()`
 - **Frontend Button:** "Send PDF via Email" in dashboard event tables
 
-### 3.5 CSV Export
+### 3.10 CSV Export
 - **Endpoint:** `GET /api/export.php?event_id=X&format=csv`
 - Downloads UTF-8 BOM encoded CSV with columns: #, Guest Name, Amount, Relation, Payment Mode, Note, Date
 - Includes total row at bottom
 
-### 3.6 Photo Gallery
+### 3.11 Photo Gallery
 - **Upload:** Dashboard → Event detail → Upload photos (max 10MB, JPG/PNG/WEBP/GIF)
 - **Public View:** Photos displayed in grid on public event page
 - **Delete:** Organizer can delete photos
 
-### 3.7 Bulk Import (Digitized Moi Notes)
+### 3.12 Bulk Import (Digitized Moi Notes)
 - **Access:** Dashboard → "Import" button (if `bulk_import` feature enabled)
 - **CSV Upload:** Upload CSV file with columns: guest_name, amount, gift_type, relation, payment_mode, note, original_date
 - **Manual Entry:** Add single digitized entry with original date picker
 - All imported entries marked as `is_digitized = 1`
 
-### 3.8 Multi-Organizer Support
+### 3.13 Multi-Organizer Support
 - **Access:** Dashboard → Organizers module (if `multi_organizer` feature enabled)
 - **Add Organizer:** Enter email of existing user → Assign role (organizer/admin)
 - **Remove Organizer:** Click remove icon
 - Organizers can access and manage the same event
 
-### 3.9 Feature Toggles
+### 3.14 Feature Toggles
 - **Access:** Dashboard → Features module (admin only)
 - Toggle features on/off: `bulk_import`, `multi_organizer`, etc.
 - Changes take effect immediately in UI
 
-### 3.10 WhatsApp Sharing
+### 3.15 WhatsApp Sharing
 - Public event pages have WhatsApp share button
 - Pre-filled message: `[Bride/Groom] Wedding — Give Moi here: [URL]`
 - Also supports native share API and copy-to-clipboard
 
-### 3.11 UPI QR Code
+### 3.16 UPI QR Code
 - After moi entry submission (if payment_mode = UPI), QR code displayed
 - QR contains: `upi://pay?pa=[UPI_ID]&pn=[Name]&cu=INR`
 - Generated via `api.qrserver.com`
 - Shows UPI ID text + "Open UPI App" button
 
-### 3.12 Venue Map Integration
+### 3.17 Venue Map Integration
 - Google Maps link on event detail page
 - Inline map component below venue address
+
+### 3.18 Admin Dashboard
+- **Statistics:** Total users, new today, active today, total functions, monthly revenue
+- **Quick Navigation:** To Users, Analytics, Revenue, Settings, Support, Features
+- **All numbers load within 3 seconds**
+
+### 3.19 User Management (Admin)
+- **User List:** Name, city, join date, function count, status
+- **Privacy:** Moi amounts NOT displayed
+- **Search:** By name or phone number
+- **Filter:** All / Active / Inactive / Blocked
+- **Block User:** Prevents login, data preserved
+- **Delete User:** All data permanently removed (with confirmation)
+
+### 3.20 Admin Analytics
+- **User Growth Graph:** Daily / Weekly / Monthly view
+- **Top 5 Cities:** By user count
+- **Peak Function Months:** Clear visualization
+- **Most Used Features:** By usage count
+- **Free vs Premium Ratio:** User distribution
+- **Anonymous Data:** No personal information
+- **CSV Export:** For all reports
+
+### 3.21 Revenue Management (Admin)
+- **Monthly Comparison:** This month vs last month
+- **Total Revenue:** Since launch
+- **User Distribution:** Free vs premium count and percentage
+- **Recent Payments:** List with name, plan, amount, date
+- **Real-time Updates:** Data updates automatically
+
+### 3.22 Support & Complaints (Admin)
+- **Ticket List:** Open / In Progress / Resolved
+- **Ticket Details:** User name, issue, date submitted
+- **Mark Resolved:** Moves ticket to resolved list
+- **Archive:** Resolved tickets archived after 30 days
+- **Open Count:** Shown on Admin Dashboard
+
+### 3.23 Support/Helpline
+- **Helpline Number:** Displayed in app
+- **Support Contact:** Available in Settings
+- **Ticket Submission:** Users can submit support tickets
 
 ---
 
@@ -236,6 +367,35 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 | 48 | Add duplicate organizer | Add same user again | Error: "Already an organizer" |
 | 49 | Remove organizer | Click remove | Organizer removed |
 
+### 4.9 Invitation Tests
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| 50 | Upload invitation CSV | Upload valid CSV file | Invitations imported, status shown |
+| 51 | Upload invitation XLSX | Upload valid XLSX file | Invitations imported, status shown |
+| 52 | Invalid columns | Upload file with missing columns | Error: "Missing required columns" |
+| 53 | Auto-match moi entries | Upload invitations, view moi entries | Status shows "Gave Moi" for matched entries |
+| 54 | View attendance summary | View invitation tab | Shows Invited/Came/Gave Moi/No Show counts |
+
+### 4.10 Return Gifts Tests
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| 55 | Add return gift | Fill return gift form | Return gift saved |
+| 56 | Update return status | Change status to "Returned" | Status updated |
+| 57 | View return reminders | Check notifications | Weekly reminders for pending returns |
+
+### 4.11 Admin Tests
+
+| # | Scenario | Steps | Expected Result |
+|---|----------|-------|-----------------|
+| 58 | Admin dashboard load | Login as admin, view dashboard | Stats load within 3 seconds |
+| 59 | User management | View users list | Can search, filter, block/delete |
+| 60 | Analytics view | View analytics | Graphs display correctly |
+| 61 | Revenue view | View revenue | Monthly comparison shown |
+| 62 | Support tickets | View support module | Can view and resolve tickets |
+| 63 | Feature toggles | Toggle features | Changes take effect immediately |
+
 ---
 
 ## 5. API Endpoints Reference
@@ -303,6 +463,41 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 | GET | `/features.php` | Yes | List feature toggles |
 | PUT | `/features.php` | Admin | Update feature toggle |
 
+### Invitations
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/invitations.php?event_id={id}` | Yes | List invitations for event |
+| POST | `/invitations.php` | Yes | Upload invitation CSV/XLSX |
+| PUT | `/invitations.php?id={id}` | Yes | Update invitation status |
+| DELETE | `/invitations.php?id={id}` | Yes | Delete invitation |
+
+### Notifications
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/notifications.php?user_id={id}` | Yes | List user notifications |
+| POST | `/notifications.php` | Yes | Create notification |
+| PUT | `/notifications.php?id={id}` | Yes | Mark notification as read |
+| DELETE | `/notifications.php?id={id}` | Yes | Delete notification |
+
+### Return Gifts
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/return-gifts.php?event_id={id}` | Yes | List return gifts for event |
+| POST | `/return-gifts.php` | Yes | Add return gift entry |
+| PUT | `/return-gifts.php?id={id}` | Yes | Update return gift |
+| DELETE | `/return-gifts.php?id={id}` | Yes | Delete return gift |
+
+### Admin
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/admin.php?action=stats` | Admin | Get platform statistics |
+| GET | `/admin.php?action=users` | Admin | List all users |
+| GET | `/admin.php?action=analytics` | Admin | Get analytics data |
+| GET | `/admin.php?action=revenue` | Admin | Get revenue data |
+| GET | `/admin.php?action=support` | Admin | List support tickets |
+| PUT | `/admin.php?action=block-user` | Admin | Block/unblock user |
+| PUT | `/admin.php?action=resolve-ticket` | Admin | Resolve support ticket |
+
 ---
 
 ## 6. Database Schema Overview
@@ -323,9 +518,38 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 | ifsc_code | VARCHAR(20) | IFSC code |
 | account_holder | VARCHAR(100) | Account holder name |
 | role | ENUM('admin','user') | User role |
+| is_blocked | TINYINT(1) | 0=active, 1=blocked |
 | created_at | TIMESTAMP | Registration date |
 
 #### `events`
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT (PK) | Event ID |
+| user_id | INT (FK) | Creator user ID |
+| slug | VARCHAR(100) | URL slug (unique) |
+| event_type | ENUM | wedding/birthday/engagement/valakaappu/housewarming/graduation/custom |
+| custom_title | VARCHAR(100) | Title for custom events |
+| bride_name | VARCHAR(100) | Bride/Partner 1 name |
+| groom_name | VARCHAR(100) | Groom/Partner 2 name |
+| birthday_person_name | VARCHAR(100) | Birthday person |
+| birthday_person_age | INT | Age |
+| parent1_name | VARCHAR(100) | Parent 1 (engagement) |
+| parent2_name | VARCHAR(100) | Parent 2 (engagement) |
+| mother_name | VARCHAR(100) | Mother name |
+| father_name | VARCHAR(100) | Father name |
+| host_name | VARCHAR(100) | Host (housewarming) |
+| spouse_name | VARCHAR(100) | Spouse (housewarming) |
+| graduate_name | VARCHAR(100) | Graduate (graduation) |
+| wedding_date | DATE | Event date |
+| venue | VARCHAR(255) | Venue name |
+| venue_latitude | DECIMAL | Map coordinates |
+| venue_longitude | DECIMAL | Map coordinates |
+| cover_photo | VARCHAR(500) | Cover photo URL |
+| description | TEXT | Event description |
+| is_active | TINYINT(1) | Soft delete flag |
+| created_at | TIMESTAMP | Creation date |
+
+#### `moi_entries`
 | Column | Type | Description |
 |--------|------|-------------|
 | id | INT (PK) | Event ID |
@@ -368,6 +592,54 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 | note | TEXT | Optional note |
 | entered_by | VARCHAR(100) | Who entered this |
 | created_at | TIMESTAMP | Entry date |
+
+#### `invitations`
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT (PK) | Invitation ID |
+| event_id | INT (FK) | Event ID |
+| name | VARCHAR(100) | Invitee name |
+| phone | VARCHAR(20) | Phone number |
+| relationship | VARCHAR(100) | Relationship to host |
+| city | VARCHAR(150) | City/Address |
+| status | ENUM | invited/came/gave_moi/no_show |
+| created_at | TIMESTAMP | Upload date |
+
+#### `notifications`
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT (PK) | Notification ID |
+| user_id | INT (FK) | User ID |
+| event_id | INT (FK) | Event ID (optional) |
+| title | VARCHAR(255) | Notification title |
+| message | TEXT | Notification message |
+| type | VARCHAR(50) | reminder/entry_save/etc |
+| is_read | TINYINT(1) | 0=unread, 1=read |
+| scheduled_at | TIMESTAMP | When to send |
+| created_at | TIMESTAMP | Creation date |
+
+#### `return_gifts`
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT (PK) | Return gift ID |
+| event_id | INT (FK) | Event ID |
+| moi_entry_id | INT (FK) | Related moi entry |
+| return_type | VARCHAR(100) | Type of return gift |
+| return_status | ENUM | pending/returned |
+| return_date | DATE | When return was given |
+| notes | TEXT | Additional notes |
+| created_at | TIMESTAMP | Creation date |
+
+#### `support_tickets`
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT (PK) | Ticket ID |
+| user_id | INT (FK) | User who submitted |
+| subject | VARCHAR(255) | Ticket subject |
+| message | TEXT | Full issue description |
+| status | ENUM | open/in_progress/resolved |
+| resolved_at | TIMESTAMP | Resolution date |
+| created_at | TIMESTAMP | Submission date |
 
 #### `photos`
 | Column | Type | Description |
@@ -420,6 +692,21 @@ MoiApp is a gift-tracking application designed for Indian weddings and family ev
 6. **Event type switching** — Changing event type after creation may cause validation issues if required fields don't match new type.
 7. **CSV import column order** — Must match exact order: guest_name, amount, gift_type, relation, payment_mode, note, original_date
 8. **File uploads stored locally** — Photos and covers stored in `/uploads/` directory, not S3 (despite `s3_key` column naming).
+9. **Offline sync requires connectivity** — Offline entries only sync when the app is online and the user visits the event page.
+10. **Notification scheduling** — Notifications are scheduled via cron job; requires server cron setup for automatic delivery.
+
+### 7.2 Database Migration
+- **Migration Script:** `scripts/migration_new_features.sql`
+- Run this script on existing databases to add new columns:
+  - `users.is_blocked` - For user blocking functionality
+  - `events.graduate_name` - For Graduation event type
+  - `moi_entries.return_type`, `return_status`, `return_date` - For return gift tracking
+  - `invitations` table - For invitation management
+  - `notifications` table - For notification system
+  - `return_gifts` table - For return gift tracking
+  - `support_tickets` table - For support ticket management
+
+---
 
 ### 7.2 Edge Cases to Test
 1. **Very long names** — Test with 100+ character names in all name fields

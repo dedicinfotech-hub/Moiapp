@@ -46,15 +46,15 @@ export default function Navbar() {
 
             {user ? (
                <>
-                 <Link href="/dashboard" className="text-sm font-medium text-[#444444] hover:text-[#101010] px-3 py-1.5 transition-colors">
+                 {/* <Link href="/dashboard" className="text-sm font-medium text-[#444444] hover:text-[#101010] px-3 py-1.5 transition-colors">
                    Dashboard
-                 </Link>
-                 <Link href="/events/new" className="text-sm font-medium px-3 py-1.5 text-[#444444] hover:text-[#101010] transition-colors">
+                 </Link> */}
+                 {/* <Link href="/events/new" className="text-sm font-medium px-3 py-1.5 text-[#444444] hover:text-[#101010] transition-colors">
                    List Event
-                 </Link>
-                 <Link href="/dashboard?module=events" className="text-sm font-medium px-3 py-1.5 text-[#444444] hover:text-[#101010] transition-colors">
+                 </Link> */}
+                 {/* <Link href="/dashboard?module=events" className="text-sm font-medium px-3 py-1.5 text-[#444444] hover:text-[#101010] transition-colors">
                    Import
-                 </Link>
+                 </Link> */}
 
                  {/* User avatar with dropdown */}
                  <div className="relative ml-1" ref={dropRef}>
@@ -82,6 +82,9 @@ export default function Navbar() {
                       </div>
                       <Link href="/dashboard" onClick={() => setDropOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#444444] hover:bg-[#fafafa] hover:text-[#101010] transition-colors">
                         <span>📊</span> Dashboard
+                      </Link>
+                      <Link href="/dashboard?module=settings" onClick={() => setDropOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#444444] hover:bg-[#fafafa] hover:text-[#101010] transition-colors">
+                        <span>👤</span> My Profile
                       </Link>
                       <Link href="/events/new" onClick={() => setDropOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#444444] hover:bg-[#fafafa] hover:text-[#101010] transition-colors">
                         <span>➕</span> New Event

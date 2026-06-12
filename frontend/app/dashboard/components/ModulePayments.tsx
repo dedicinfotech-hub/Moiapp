@@ -95,8 +95,8 @@ export default function ModulePayments({ entries, events }: ModulePaymentsProps)
       {/* Table */}
       <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden shadow-sm">
         {filtered.length === 0 ? (
-          <div className="py-16 text-center text-[#bbb] text-sm">No payments found.</div>
-        ) : (
+           <div className="py-16 text-center text-[#bbb] text-sm">No moi entries found.</div>
+         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Event, eventsApi, exportCSV, emailPDF } from '@/lib/api';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
+import EventStatusBadges from '@/components/EventStatusBadges';
+import { canAddMoi, showEventQr } from '@/lib/eventHelpers';
 
 interface ModuleEventsProps {
   events: Event[];
@@ -28,23 +30,31 @@ export default function ModuleEvents({
       engagement: '💍',
       valakaappu: '🌺',
       housewarming: '🏠',
+      graduation: '🎓',
       custom: '🎉',
     };
     return icons[eventType] || '🎉';
   };
 
   const getEventDisplayName = (ev: Event) => {
-    if (ev.event_type === 'custom' && ev.custom_title) {
-      return ev.custom_title;
-    }
-    if (ev.event_type === 'birthday') {
-      return ev.birthday_person_name || 'Birthday Event';
-    }
-    return `${ev.bride_name} & ${ev.groom_name}`;
+    const typeLabels: Record<string, string> = {
+      wedding: 'Wedding',
+      birthday: 'Birthday',
+      engagement: 'Engagement',
+      valakaappu: 'Valakaappu',
+      housewarming: 'Housewarming',
+      graduation: 'Graduation',
+      custom: ev.custom_title || 'Custom Event',
+    };
+    const typeName = typeLabels[ev.event_type] || 'Event';
+    const dateStr = ev.wedding_date
+      ? new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+      : '';
+    return `${typeName} - ${dateStr}`.trim();
   };
 
   const filtered = events.filter((ev) =>
-    `${ev.bride_name} ${ev.groom_name} ${ev.venue} ${ev.custom_title || ''}`.toLowerCase().includes(search.toLowerCase())
+    `${ev.bride_name} ${ev.groom_name} ${ev.venue} ${ev.city || ''} ${ev.custom_title || ''}`.toLowerCase().includes(search.toLowerCase())
   );
 
   useEffect(() => {
@@ -125,6 +135,11 @@ export default function ModuleEvents({
                               {getEventDisplayName(ev)}
                             </p>
                             <p className="text-xs text-[#bbb]">/{ev.slug}</p>
+                            {showEventQr(ev) && (
+                              <p className="text-[10px] text-[#B8860B] font-semibold mt-0.5">
+                                📱 {Number(ev.qr_payment_count ?? 0)} QR payment{Number(ev.qr_payment_count ?? 0) !== 1 ? 's' : ''}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -133,17 +148,16 @@ export default function ModuleEvents({
                       </td>
                       <td className="px-4 py-3.5 text-[#666] hidden lg:table-cell max-w-[160px] truncate">{ev.venue || '—'}</td>
                       <td className="px-4 py-3.5 text-center">
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${ev.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                          {ev.is_active ? 'Active' : 'Draft'}
-                        </span>
+                        <EventStatusBadges event={ev} />
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1">
                           {/* 👤 Add Moi (manual entry) */}
                           <Link
-                            href={`/events/${ev.slug}`}
-                            title="Add manual moi entry"
-                            className="p-1.5 text-[#bbb] hover:text-[#FFC107] transition-colors rounded"
+                            href={canAddMoi(ev) ? `/events/${ev.slug}` : '#'}
+                            onClick={(e) => { if (!canAddMoi(ev)) e.preventDefault(); }}
+                            title={canAddMoi(ev) ? 'Add manual moi entry' : 'Awaiting admin approval'}
+                            className={`p-1.5 transition-colors rounded ${canAddMoi(ev) ? 'text-[#bbb] hover:text-[#FFC107]' : 'text-[#ddd] cursor-not-allowed'}`}
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -199,9 +213,7 @@ export default function ModuleEvents({
                           <p className="text-xs text-[#bbb]">/{ev.slug}</p>
                         </div>
                     </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ev.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {ev.is_active ? 'Active' : 'Draft'}
-                    </span>
+                    <EventStatusBadges event={ev} />
                   </div>
 
                   <div className="text-xs text-[#666] space-y-1 pl-11">
@@ -214,9 +226,10 @@ export default function ModuleEvents({
                     <div className="flex items-center gap-2">
                       {/* 👤 Add Moi (manual entry) */}
                       <Link
-                        href={`/events/${ev.slug}`}
-                        title="Add manual moi entry"
-                        className="p-1.5 text-[#bbb] hover:text-[#FFC107] transition-colors rounded"
+                        href={canAddMoi(ev) ? `/events/${ev.slug}` : '#'}
+                        onClick={(e) => { if (!canAddMoi(ev)) e.preventDefault(); }}
+                        title={canAddMoi(ev) ? 'Add manual moi entry' : 'Awaiting admin approval'}
+                        className={`p-1.5 transition-colors rounded ${canAddMoi(ev) ? 'text-[#bbb] hover:text-[#FFC107]' : 'text-[#ddd] cursor-not-allowed'}`}
                       >
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />

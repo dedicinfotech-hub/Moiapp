@@ -10,13 +10,20 @@ interface ModuleAnalyticsProps {
 
 export default function ModuleAnalytics({ events, entries, totalMoi }: ModuleAnalyticsProps) {
   const getEventDisplayName = (ev: Event) => {
-    if (ev.event_type === 'custom' && ev.custom_title) {
-      return ev.custom_title;
-    }
-    if (ev.event_type === 'birthday') {
-      return ev.birthday_person_name || 'Birthday Event';
-    }
-    return `${ev.bride_name} & ${ev.groom_name}`;
+    const typeLabels: Record<string, string> = {
+      wedding: 'Wedding',
+      birthday: 'Birthday',
+      engagement: 'Engagement',
+      valakaappu: 'Valakaappu',
+      housewarming: 'Housewarming',
+      graduation: 'Graduation',
+      custom: ev.custom_title || 'Custom Event',
+    };
+    const typeName = typeLabels[ev.event_type] || 'Event';
+    const dateStr = ev.wedding_date
+      ? new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+      : '';
+    return `${typeName} - ${dateStr}`.trim();
   };
 
   const eventStats = events.map((ev) => {

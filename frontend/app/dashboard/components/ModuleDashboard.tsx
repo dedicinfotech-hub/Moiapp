@@ -1,8 +1,9 @@
 'use client';
 
 import { Event, MoiEntry } from '@/lib/api';
+import EventStatusBadges from '@/components/EventStatusBadges';
 
-type Module = 'dashboard' | 'events' | 'payments' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features';
+type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features';
 
 interface ModuleDashboardProps {
   events: Event[];
@@ -27,13 +28,20 @@ export default function ModuleDashboard({
   };
 
   const getEventDisplayName = (ev: Event) => {
-    if (ev.event_type === 'custom' && ev.custom_title) {
-      return ev.custom_title;
-    }
-    if (ev.event_type === 'birthday') {
-      return ev.birthday_person_name || 'Birthday Event';
-    }
-    return `${ev.bride_name} & ${ev.groom_name}`;
+    const typeLabels: Record<string, string> = {
+      wedding: 'Wedding',
+      birthday: 'Birthday',
+      engagement: 'Engagement',
+      valakaappu: 'Valakaappu',
+      housewarming: 'Housewarming',
+      graduation: 'Graduation',
+      custom: ev.custom_title || 'Custom Event',
+    };
+    const typeName = typeLabels[ev.event_type] || 'Event';
+    const dateStr = ev.wedding_date
+      ? new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+      : '';
+    return `${typeName} - ${dateStr}`.trim();
   };
 
   const recentEntries = [...entries]
@@ -77,16 +85,16 @@ export default function ModuleDashboard({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Recent payments */}
+        {/* Recent Moi Entries */}
         <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F5F5F5]">
-            <h3 className="font-semibold text-[#101010] text-sm">Recent Payments</h3>
-            <button onClick={() => onNavigate('payments')} className="text-xs text-[#FFC107] font-semibold hover:underline">
+            <h3 className="font-semibold text-[#101010] text-sm">Recent Moi Entries</h3>
+            <button onClick={() => onNavigate('moi-notebook')} className="text-xs text-[#FFC107] font-semibold hover:underline">
               View all
             </button>
           </div>
           {recentEntries.length === 0 ? (
-            <div className="py-10 text-center text-[#bbb] text-sm">No payments yet</div>
+            <div className="py-10 text-center text-[#bbb] text-sm">No moi entries yet</div>
           ) : (
             <div className="divide-y divide-[#F8F8F8]">
               {recentEntries.map((e) => {
@@ -148,9 +156,9 @@ export default function ModuleDashboard({
                       {ev.venue && ` · ${ev.venue}`}
                     </p>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${ev.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {ev.is_active ? 'Active' : 'Draft'}
-                  </span>
+                  <div className="shrink-0">
+                    <EventStatusBadges event={ev} />
+                  </div>
                 </div>
               ))}
             </div>
@@ -169,10 +177,10 @@ export default function ModuleDashboard({
             💍 New Event
           </button>
           <button
-            onClick={() => onNavigate('payments')}
+            onClick={() => onNavigate('moi-notebook')}
             className="flex items-center gap-2 border border-[#E8E8E8] text-[#444] px-4 py-2 rounded-lg text-sm font-medium hover:border-[#FFC107] transition-colors"
           >
-            💰 Payments
+            📓 Moi Notebook
           </button>
           <button
             onClick={() => onNavigate('analytics')}

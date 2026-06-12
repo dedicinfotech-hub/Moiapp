@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { eventsApi } from '@/lib/api';
+import { eventsApi, showSuccess } from '@/lib/api';
 
 interface NewEventModalProps {
   onClose: () => void;
   onCreated: () => void;
 }
 
-type EventType = 'wedding' | 'birthday' | 'engagement' | 'valakaappu' | 'housewarming' | 'custom';
+type EventType = 'wedding' | 'birthday' | 'engagement' | 'valakaappu' | 'housewarming' | 'graduation' | 'custom';
 
 const EVENT_TYPES: { value: EventType; label: string; icon: string }[] = [
   { value: 'wedding', label: 'Wedding', icon: '💒' },
@@ -16,12 +16,14 @@ const EVENT_TYPES: { value: EventType; label: string; icon: string }[] = [
   { value: 'engagement', label: 'Engagement', icon: '💍' },
   { value: 'valakaappu', label: 'Valakaappu', icon: '🌺' },
   { value: 'housewarming', label: 'Housewarming', icon: '🏠' },
-  { value: 'custom', label: 'Custom', icon: '🎉' },
+  { value: 'graduation', label: 'Graduation', icon: '🎓' },
+  { value: 'custom', label: 'Others', icon: '🎉' },
 ];
 
 export default function NewEventModal({ onClose, onCreated }: NewEventModalProps) {
   const [form, setForm] = useState({
     event_type: 'wedding' as EventType,
+    event_mode: 'new' as 'past' | 'new',
     custom_title: '',
     bride_name: '',
     groom_name: '',
@@ -33,8 +35,10 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
     father_name: '',
     host_name: '',
     spouse_name: '',
+    graduate_name: '',
     wedding_date: '',
     venue: '',
+    city: '',
     venue_latitude: '',
     venue_longitude: '',
     description: '',
@@ -56,6 +60,17 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
   };
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
+  const todayStr = new Date().toISOString().split('T')[0];
+  const isPast = form.event_mode === 'past';
+
+  const handleModeChange = (mode: 'past' | 'new') => {
+    setForm((prev) => {
+      let wedding_date = prev.wedding_date;
+      if (mode === 'past' && wedding_date > todayStr) wedding_date = todayStr;
+      if (mode === 'new' && wedding_date < todayStr) wedding_date = todayStr;
+      return { ...prev, event_mode: mode, wedding_date };
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,8 +79,10 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
     try {
       const submitData: Record<string, unknown> = {
         event_type: form.event_type,
+        event_mode: form.event_mode,
         wedding_date: form.wedding_date,
         venue: form.venue,
+        city: form.city,
         venue_latitude: form.venue_latitude ? parseFloat(form.venue_latitude) : null,
         venue_longitude: form.venue_longitude ? parseFloat(form.venue_longitude) : null,
         description: form.description,
@@ -92,9 +109,16 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
       } else if (form.event_type === 'housewarming') {
         submitData.host_name = form.host_name;
         submitData.spouse_name = form.spouse_name;
+      } else if (form.event_type === 'graduation') {
+        submitData.graduate_name = form.graduate_name;
       }
 
       const res = await eventsApi.create(submitData);
+      if (res.approval_status === 'pending') {
+        showSuccess('Your function is submitted. Admin will approve shortly.');
+      } else {
+        showSuccess('Function created! You can start adding moi entries.');
+      }
       if (coverFile) {
         const token = localStorage.getItem('moi_token');
         const fd = new FormData();
@@ -133,6 +157,8 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
     ? 'புதிய வலக்காப்பு'
     : form.event_type === 'housewarming'
     ? 'புதிய வீட்டு பண்டிகை'
+    : form.event_type === 'graduation'
+    ? 'புதிய பட்டமெழுக்கு விழா'
     : 'புதிய நிகழ்வு';
 
   // Get appropriate name field labels based on event type
@@ -168,6 +194,40 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
 
         <div className="px-6 py-5 space-y-4">
           {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm">{error}</div>}
+
+          {/* Past vs New Event */}
+          <div>
+            <label className={lbl}>Event Category <span className="text-[#FFC107]">*</span></label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleModeChange('past')}
+                className={`flex flex-col items-start gap-0.5 p-3 rounded-xl border-2 text-left transition-all ${
+                  isPast
+                    ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
+                    : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
+                }`}
+              >
+                <span className="text-sm font-bold">Past Event</span>
+                <span className="text-[10px] text-[#888]">நடந்த நிகழ்வு · Record keeping only</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleModeChange('new')}
+                className={`flex flex-col items-start gap-0.5 p-3 rounded-xl border-2 text-left transition-all ${
+                  !isPast
+                    ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
+                    : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
+                }`}
+              >
+                <span className="text-sm font-bold">New Event</span>
+                <span className="text-[10px] text-[#888]">இனி நடக்கப்போகிறது · QR & guest payments</span>
+              </button>
+            </div>
+            {!isPast && (
+              <p className="text-[10px] text-[#999] mt-1.5">New events require admin approval before moi collection begins.</p>
+            )}
+          </div>
 
           {/* Event Type Selector */}
           <div>
@@ -298,14 +358,77 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                   <input required value={form.spouse_name} onChange={(e) => setForm({ ...form, spouse_name: e.target.value })} className={inp} placeholder="Priya" />
                 </div>
               </div>
-            ) : null}
+            ) : form.event_type === 'graduation' ? (
+               <div>
+                 <label className={lbl}>Graduate Name <span className="text-[#FFC107]">*</span></label>
+                 <input required value={form.graduate_name} onChange={(e) => setForm({ ...form, graduate_name: e.target.value })} className={inp} placeholder="Arun" />
+               </div>
+             ) : null}
             <div>
-              <label className={lbl}>Event Date <span className="text-[#FFC107]">*</span></label>
-              <input required type="date" value={form.wedding_date} onChange={(e) => setForm({ ...form, wedding_date: e.target.value })} className={inp} />
+              <label className={lbl}>
+                Event Date <span className="text-[#FFC107]">*</span>
+                <span className="font-normal text-[#999] ml-1">
+                  {isPast ? '(past dates only)' : '(today or upcoming)'}
+                </span>
+              </label>
+              <div className={`grid gap-2 mb-2 ${isPast ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, wedding_date: todayStr })}
+                  className="px-2 py-2 text-xs font-medium rounded-lg border border-[#E8E8E8] hover:border-[#FFC107] transition-colors"
+                >
+                  Today
+                </button>
+                {!isPast && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const tomorrow = new Date();
+                      tomorrow.setDate(tomorrow.getDate() + 1);
+                      setForm({ ...form, wedding_date: tomorrow.toISOString().split('T')[0] });
+                    }}
+                    className="px-2 py-2 text-xs font-medium rounded-lg border border-[#E8E8E8] hover:border-[#FFC107] transition-colors"
+                  >
+                    Tomorrow
+                  </button>
+                )}
+                {isPast && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const yesterday = new Date();
+                      yesterday.setDate(yesterday.getDate() - 1);
+                      setForm({ ...form, wedding_date: yesterday.toISOString().split('T')[0] });
+                    }}
+                    className="px-2 py-2 text-xs font-medium rounded-lg border border-[#E8E8E8] hover:border-[#FFC107] transition-colors"
+                  >
+                    Yesterday
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="px-2 py-2 text-xs font-medium rounded-lg border border-[#E8E8E8] hover:border-[#FFC107] transition-colors"
+                >
+                  Choose Date
+                </button>
+              </div>
+              <input
+                required
+                type="date"
+                value={form.wedding_date}
+                max={isPast ? todayStr : undefined}
+                min={!isPast ? todayStr : undefined}
+                onChange={(e) => setForm({ ...form, wedding_date: e.target.value })}
+                className={inp}
+              />
             </div>
             <div>
-              <label className={lbl}>Venue</label>
+              <label className={lbl}>Venue (Optional)</label>
               <input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} className={inp} placeholder="Sri Murugan Mahal, Chennai" />
+            </div>
+            <div>
+              <label className={lbl}>City (Optional)</label>
+              <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inp} placeholder="Chennai" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

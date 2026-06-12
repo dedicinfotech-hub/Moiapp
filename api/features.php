@@ -1,18 +1,8 @@
 <?php
 require_once __DIR__ . '/../config/bootstrap.php';
 $method = $_SERVER['REQUEST_METHOD'];
-$token = $_SERVER['HTTP_X_AUTH_TOKEN'] ?? '';
-$user = getAuthUser();
-if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
-// Fetch user role from database
-$db = getDB();
-$stmt = $db->prepare('SELECT role FROM users WHERE id = ?');
-$stmt->bind_param('i', $user['id']);
-$stmt->execute();
-$roleRow = $stmt->get_result()->fetch_assoc();
-$userRole = $roleRow['role'] ?? 'user';
-
+// GET endpoint is public (no auth required)
 if ($method === 'GET') {
   try {
     $pdo = getPDO();
@@ -25,6 +15,19 @@ if ($method === 'GET') {
   }
   exit;
 }
+
+// Other methods require authentication
+$token = $_SERVER['HTTP_X_AUTH_TOKEN'] ?? '';
+$user = getAuthUser();
+if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+
+// Fetch user role from database
+$db = getDB();
+$stmt = $db->prepare('SELECT role FROM users WHERE id = ?');
+$stmt->bind_param('i', $user['id']);
+$stmt->execute();
+$roleRow = $stmt->get_result()->fetch_assoc();
+$userRole = $roleRow['role'] ?? 'user';
 
 if ($method === 'PUT' || $method === 'POST') {
   // Only admin can update feature toggles

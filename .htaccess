@@ -25,6 +25,10 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# ── Exclude API directory from rewrites ─────────────────────────────────────────
+RewriteCond %{REQUEST_URI} !^/[^/]+/api/ [NC]
+RewriteRule ^api/ - [L]
+
 # ── Dynamic routes: rewrite any slug to the pre-built _ shell ─────────────────
 # Supports case-insensitive subdir matching (e.g., /MoiApp/ or /moiapp/)
 RewriteCond %{REQUEST_URI} ^/[^/]+/e/[^/]+/?$ [NC]
