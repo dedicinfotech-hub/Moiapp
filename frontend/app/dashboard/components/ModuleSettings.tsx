@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Icon from '@/components/ui/Icon';
 import { User, authApi } from '@/lib/api';
 
 interface ModuleSettingsProps {
@@ -122,7 +123,7 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
           {/* ── Payment Details ── */}
           <div className="border-t border-[#F5F5F5] pt-4">
             <div className="flex items-center gap-2 mb-3">
-              <h4 className="text-sm font-semibold text-[#101010]">💳 Payment Details</h4>
+              <h4 className="text-sm font-semibold text-[#101010] flex items-center gap-2"><Icon name="wallet" size={16} /> Payment Details</h4>
               {hasPaymentDetails && (
                 <span className="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">Saved</span>
               )}

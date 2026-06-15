@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { eventsApi, moiApi, Event } from '@/lib/api';
 import { getEventDisplayName } from '@/lib/eventHelpers';
+import Icon, { IconName } from '@/components/ui/Icon';
 
 function useToken(): string {
   const [token, setToken] = useState('');
@@ -66,13 +67,13 @@ export default function GuestPaymentClient() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  const inp = 'w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-[#101010] placeholder-[#999] focus:outline-none focus:border-[#FFC107] bg-white';
+  const inp = 'w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow bg-white';
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!event || !token) return;
 
-    let gift_type: 'cash' | 'gold' | 'gift' = 'cash';
+    let gift_type: 'cash' | 'gold' | 'silver' | 'gift' = 'cash';
     let amount = 0;
     let gold_weight: number | null = null;
     let gift_description: string | null = null;
@@ -130,26 +131,26 @@ export default function GuestPaymentClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fafafa]">
-        <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FFC107] rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-tn-light">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
       </div>
     );
   }
 
   if (notFound || !event) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fafafa] px-6 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-tn-light px-6 text-center">
         <div>
-          <p className="text-5xl mb-3">🔒</p>
+          <Icon name="lock" size={48} className="mb-3 text-tn-yellow" />
           {errorType === 'private' ? (
             <>
-              <h1 className="text-lg font-bold text-[#101010]">Private Event</h1>
-              <p className="text-sm text-[#666] mt-2">This is a private event. You need an invitation to access this page.</p>
+              <h1 className="text-lg font-bold text-tn-text">Private Event</h1>
+              <p className="text-sm text-tn-muted mt-2">This is a private event. You need an invitation to access this page.</p>
             </>
           ) : (
             <>
-              <h1 className="text-lg font-bold text-[#101010]">This event is no longer accepting moi</h1>
-              <p className="text-sm text-[#666] mt-2">Please contact the host.</p>
+              <h1 className="text-lg font-bold text-tn-text">This event is no longer accepting moi</h1>
+              <p className="text-sm text-tn-muted mt-2">Please contact the host.</p>
             </>
           )}
         </div>
@@ -159,24 +160,24 @@ export default function GuestPaymentClient() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fafafa] px-6 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-tn-light px-6 text-center">
         <div className="max-w-sm">
-          <p className="text-5xl mb-3">🙏</p>
-          <h1 className="text-xl font-bold text-[#101010]">Your moi has been recorded. Thank you!</h1>
-          <p className="text-sm text-[#666] mt-2">உங்கள் மொய் பதிவு செய்யப்பட்டது. நன்றி!</p>
-          <p className="text-xs text-[#999] mt-4">{getEventDisplayName(event)}</p>
+          <Icon name="check" size={48} className="mb-3 text-tn-yellow" />
+          <h1 className="text-xl font-bold text-tn-text">Your moi has been recorded. Thank you!</h1>
+          <p className="text-sm text-tn-muted mt-2">உங்கள் மொய் பதிவு செய்யப்பட்டது. நன்றி!</p>
+          <p className="text-xs text-tn-subtle mt-4">{getEventDisplayName(event)}</p>
         </div>
       </div>
     );
   }
 
-  const methods: { id: GiftMethod; label: string; icon: string }[] = [
-    { id: 'gpay', label: 'GPay', icon: '📱' },
-    { id: 'phonepe', label: 'PhonePe', icon: '📱' },
-    { id: 'cash', label: 'Cash', icon: '💵' },
-    { id: 'gold', label: 'Gold', icon: '✨' },
-    { id: 'silver', label: 'Silver', icon: '🥈' },
-    { id: 'gift', label: 'Gift', icon: '🎁' },
+  const methods: { id: GiftMethod; label: string; icon: IconName }[] = [
+    { id: 'gpay', label: 'GPay', icon: 'wallet' },
+    { id: 'phonepe', label: 'PhonePe', icon: 'wallet' },
+    { id: 'cash', label: 'Cash', icon: 'wallet' },
+    { id: 'gold', label: 'Gold', icon: 'sparkle' },
+    { id: 'silver', label: 'Silver', icon: 'sparkle' },
+    { id: 'gift', label: 'Gift', icon: 'gift' },
   ];
 
   const needsAmount = ['gpay', 'phonepe', 'cash'].includes(form.method);
@@ -187,30 +188,30 @@ export default function GuestPaymentClient() {
   const eventCity = event.city || '';
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
-      <div className="bg-[#FFC107] px-4 py-5 text-center">
-        <p className="text-xs font-semibold text-black/70 uppercase tracking-wide">MoiApp</p>
-        <h1 className="text-lg font-bold text-black mt-1">{getEventDisplayName(event)}</h1>
-        <p className="text-xs text-black/80 mt-0.5">Host: {hostFirstName}</p>
-        {eventCity && <p className="text-[10px] text-black/60 mt-0.5">{eventCity}</p>}
-        <p className="text-[10px] text-black/60 mt-1">No app download required</p>
+    <div className="min-h-screen bg-tn-light">
+      <div className="bg-tn-yellow px-4 py-5 text-center">
+        <p className="text-xs font-semibold text-white/80 uppercase tracking-wide">MoiApp</p>
+        <h1 className="text-lg font-bold text-white mt-1">{getEventDisplayName(event)}</h1>
+        <p className="text-xs text-white/90 mt-0.5">Host: {hostFirstName}</p>
+        {eventCity && <p className="text-[10px] text-white/70 mt-0.5">{eventCity}</p>}
+        <p className="text-[10px] text-white/70 mt-1">No app download required</p>
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-lg mx-auto px-4 py-6 space-y-4 pb-10">
         {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">{error}</div>}
 
         <div>
-          <label className="block text-xs font-semibold text-[#555] mb-1">Your Name</label>
+          <label className="block text-xs font-semibold text-tn-muted mb-1">Your Name</label>
           <input className={inp} value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} placeholder="Optional" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">City</label>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">City</label>
             <input className={inp} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Optional" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Relationship</label>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">Relationship</label>
             <select className={inp} value={form.relation} onChange={(e) => setForm({ ...form, relation: e.target.value })}>
               <option value="family">Family</option>
               <option value="friend">Friend</option>
@@ -225,17 +226,17 @@ export default function GuestPaymentClient() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Company</label>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">Company</label>
             <input className={inp} value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="Optional" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Occupation</label>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">Occupation</label>
             <input className={inp} value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} placeholder="Optional" />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-[#555] mb-2">Payment / Gift Type</label>
+          <label className="block text-xs font-semibold text-tn-muted mb-2">Payment / Gift Type</label>
           <div className="grid grid-cols-3 gap-2">
             {methods.map((m) => (
               <button
@@ -243,10 +244,10 @@ export default function GuestPaymentClient() {
                 type="button"
                 onClick={() => setForm({ ...form, method: m.id })}
                 className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
-                  form.method === m.id ? 'border-[#FFC107] bg-[#FFFCF5]' : 'border-[#E8E8E8] bg-white'
+                  form.method === m.id ? 'border-tn-yellow bg-tn-yellow-light' : 'border-tn-border bg-white'
                 }`}
               >
-                <span className="block text-lg">{m.icon}</span>
+                <Icon name={m.icon} size={18} className="mx-auto mb-0.5" />
                 {m.label}
               </button>
             ))}
@@ -255,34 +256,34 @@ export default function GuestPaymentClient() {
 
         {needsAmount && (
           <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Amount (₹) <span className="text-[#FFC107]">*</span></label>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">Amount (₹) <span className="text-tn-yellow">*</span></label>
             <input type="number" min="1" className={inp} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="e.g. 1001" />
           </div>
         )}
 
         {needsGold && (
           <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">Gold weight (grams)</label>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">Gold weight (grams)</label>
             <input type="number" step="0.01" min="0" className={inp} value={form.gold_weight} onChange={(e) => setForm({ ...form, gold_weight: e.target.value })} />
           </div>
         )}
 
         {needsGiftDesc && (
           <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1">{form.method === 'silver' ? 'Silver details' : 'Gift description'}</label>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">{form.method === 'silver' ? 'Silver details' : 'Gift description'}</label>
             <input className={inp} value={form.gift_description} onChange={(e) => setForm({ ...form, gift_description: e.target.value })} placeholder="Optional" />
           </div>
         )}
 
         <div>
-          <label className="block text-xs font-semibold text-[#555] mb-1">Note</label>
+          <label className="block text-xs font-semibold text-tn-muted mb-1">Note</label>
           <input className={inp} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Optional" />
         </div>
 
         <button
           type="submit"
           disabled={submitting || submitted}
-          className="w-full bg-[#FFC107] text-black font-bold py-3.5 rounded-xl hover:bg-[#E6AC00] disabled:opacity-50 transition-colors"
+          className="w-full bg-tn-yellow text-white font-bold py-3.5 rounded-xl hover:bg-tn-yellow-2 disabled:opacity-50 transition-colors"
         >
           {submitted ? 'Submitted ✓' : submitting ? 'Saving…' : 'Submit Moi'}
         </button>

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import Icon from '@/components/ui/Icon';
 
 export default function ProfileSetupPage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function ProfileSetupPage() {
     }
   }, [user, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -57,7 +58,7 @@ export default function ProfileSetupPage() {
       <div className="w-full max-w-md">
         <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-8">
           <div className="text-center mb-8">
-            <div className="text-4xl mb-3">👤</div>
+            <Icon name="users" size={44} className="mb-3 text-[#B8860B]" />
             <h1 className="text-2xl font-bold text-gray-900">Complete Your Profile</h1>
             <p className="text-gray-400 text-sm mt-1">Please provide your details to continue</p>
           </div>

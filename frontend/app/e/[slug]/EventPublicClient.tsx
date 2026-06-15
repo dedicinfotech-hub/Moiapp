@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import Icon, { type IconName } from '@/components/ui/Icon';
 import { eventsApi, moiApi, photosApi, Event, Photo } from '@/lib/api';
 import { useFeatures } from '@/lib/features';
 import { canAcceptGuestMoi } from '@/lib/eventHelpers';
@@ -22,16 +23,46 @@ function useSlug(): string {
   return slug;
 }
 
-type Step = 'event' | 'form' | 'success';
+type Step = 'event' | 'form' | 'payment' | 'success' | 'thankyou';
 interface GuestForm {
   guest_name: string;
-  gift_type: 'cash' | 'gold' | 'gift';
+  city: string;
+  relation: string;
+  company: string;
+  occupation: string;
+  gift_type: 'cash' | 'gold' | 'silver' | 'gift';
   amount: string;
   gold_weight: string;
   gift_description: string;
-  relation: string;
-  payment_mode: string;
+  item_name: string;
+  approx_value: string;
   note: string;
+}
+
+function getEventIcon(eventType: string): IconName {
+  const icons: Record<string, IconName> = {
+    wedding: 'wedding',
+    birthday: 'gift',
+    engagement: 'wedding',
+    valakaappu: 'sparkle',
+    housewarming: 'venue',
+    graduation: 'sparkle',
+    custom: 'sparkle',
+  };
+  return icons[eventType] || 'wedding';
+}
+
+function getEventLabel(eventType: string): string {
+  const labels: Record<string, string> = {
+    wedding: 'Wedding',
+    birthday: 'Birthday',
+    engagement: 'Engagement',
+    valakaappu: 'Valakaappu',
+    housewarming: 'Housewarming',
+    graduation: 'Graduation',
+    custom: 'Custom Event',
+  };
+  return labels[eventType] || 'Event';
 }
 
 export default function PublicEventPage() {
@@ -62,9 +93,11 @@ export default function PublicEventPage() {
 
   if (notFound || !event) return (
     <div className="min-h-screen bg-white flex items-center justify-center text-center px-6">
-      <div>
-        <div className="text-6xl mb-4">😔</div>
-        <h1 className="text-xl font-bold text-[#101010]">Event not found</h1>
+        <div>
+          <div className="mb-4 text-tn-gold">
+            <Icon name="sad" size={48} />
+          </div>
+          <h1 className="text-xl font-bold text-[#101010]">Event not found</h1>
         <p className="text-[#666666] text-sm mt-2">This link may be invalid or the event has been removed.</p>
         <Link href="/events" className="mt-4 inline-block text-[#FFC107] font-semibold underline text-sm">Browse all events</Link>
       </div>
@@ -75,9 +108,11 @@ export default function PublicEventPage() {
     if (!canAcceptGuestMoi(event)) {
       return <EventDetailView event={event} photos={photos} onGiveMoi={() => {}} guestMoiClosed />;
     }
-    return <MoiForm event={event} onBack={() => setStep('event')} onSuccess={(amount) => { (window as Window & { __paidAmount?: number }).__paidAmount = amount; setStep('success'); }} />;
+    return <MoiForm event={event} onBack={() => setStep('event')} onNext={(formData) => { (window as Window & { __guestForm?: GuestForm }).__guestForm = formData; setStep('payment'); }} />;
   }
-  if (step === 'success') return <SuccessView event={event} onBack={() => setStep('event')} amount={(window as Window & { __paidAmount?: number }).__paidAmount} />;
+  if (step === 'payment') return <PaymentMethod event={event} onBack={() => setStep('form')} onSuccess={(txn) => { (window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn = txn; setStep('success'); }} />;
+  if (step === 'success') return <SuccessView event={event} onBack={() => setStep('event')} onContinue={() => setStep('thankyou')} txn={(window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn} />;
+  if (step === 'thankyou') return <ThankYouScreen event={event} onBack={() => setStep('event')} txn={(window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn} />;
 
   return <EventDetailView event={event} photos={photos} onGiveMoi={() => setStep('form')} guestMoiClosed={!canAcceptGuestMoi(event)} />;
 }
@@ -164,8 +199,10 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
         ) : (
           <div className="w-full h-48 lg:h-full bg-gradient-to-br from-[#FFF8E1] to-[#FFFCF5] rounded-lg lg:rounded-none flex items-center justify-center">
             <div className="text-center">
-              <div className="text-6xl mb-2">💍</div>
-              <p className="text-[#B8860B] font-semibold text-sm">Wedding Event</p>
+              <div className="mb-2 text-[#B8860B]">
+                <Icon name={getEventIcon(event.event_type)} size={44} />
+              </div>
+              <p className="text-[#B8860B] font-semibold text-sm">{getEventLabel(event.event_type)} Event</p>
             </div>
           </div>
         )}
@@ -181,20 +218,20 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
             {/* Category pill + title + date/venue */}
             <div className="pb-6 pt-4 lg:pt-0">
               <div className="flex items-center gap-1 border border-[#FFC107] bg-[#FFFCF5] ps-2 pe-3 py-1.5 rounded-full w-fit text-sm font-semibold text-[#FFC107] mb-3">
-                 <span>{event.event_type === 'birthday' ? '🎂' : event.event_type === 'graduation' ? '🎓' : event.event_type === 'housewarming' ? '🏠' : '💍'}</span>
-                 <span>{event.event_type === 'birthday' ? 'Birthday' : event.event_type === 'graduation' ? 'Graduation' : event.event_type === 'housewarming' ? 'Housewarming' : 'Wedding'}</span>
+                 <Icon name={getEventIcon(event.event_type)} size={16} />
+                 <span>{getEventLabel(event.event_type)}</span>
                </div>
               <h1 className="font-bold text-xl lg:text-[32px] leading-tight">
                 {event.bride_name || ''} &amp; {event.groom_name || ''}
               </h1>
               <div className="pt-2 flex flex-col gap-2 text-[#444444] lg:flex-row lg:gap-6 lg:pt-3">
                 <p className="flex gap-2 items-center font-medium text-base">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 9.26H19V6.76C19 6.68 18.97 6.61 18.9 6.55C18.84 6.48 18.77 6.45 18.69 6.45H5.31C5.23 6.45 5.16 6.48 5.1 6.55C5.03 6.61 5 6.68 5 6.76V9.26ZM5.31 21.95C4.8 21.95 4.37 21.78 4.02 21.43C3.67 21.08 3.5 20.65 3.5 20.14V6.76C3.5 6.25 3.67 5.83 4.02 5.48C4.37 5.13 4.8 4.95 5.31 4.95H6.69V2.84H8.23V4.95H15.81V2.84H17.31V4.95H18.69C19.2 4.95 19.62 5.13 19.97 5.48C20.32 5.83 20.5 6.25 20.5 6.76V12.22C20.26 12.12 20.01 12.03 19.76 11.97C19.51 11.9 19.26 11.85 19 11.81V10.76H5V20.14C5 20.22 5.03 20.29 5.1 20.35C5.16 20.42 5.23 20.45 5.31 20.45H11.81C11.89 20.73 12 20.99 12.12 21.24C12.24 21.48 12.37 21.72 12.52 21.95H5.31ZM18.19 22.95C16.94 22.95 15.88 22.51 15 21.64C14.13 20.76 13.69 19.7 13.69 18.45C13.69 17.2 14.13 16.14 15 15.26C15.88 14.39 16.94 13.95 18.19 13.95C19.44 13.95 20.5 14.39 21.38 15.26C22.25 16.14 22.69 17.2 22.69 18.45C22.69 19.7 22.25 20.76 21.38 21.64C20.5 22.51 19.44 22.95 18.19 22.95ZM19.86 20.74L20.48 20.12L18.63 18.27V15.51H17.75V18.63L19.86 20.74Z" fill="#444444"/></svg>
+                  <Icon name="calendar" size={20} />
                   {weddingDate}
                 </p>
                 {event.venue && (
                   <p className="flex gap-2 items-center font-medium text-base text-[#444444]">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 11.87C12.5 11.87 12.92 11.69 13.27 11.33C13.62 10.98 13.8 10.55 13.8 10.06C13.8 9.56 13.62 9.13 13.27 8.78C12.91 8.43 12.49 8.25 11.99 8.25C11.49 8.25 11.07 8.43 10.71 8.78C10.36 9.14 10.18 9.56 10.18 10.06C10.18 10.56 10.36 10.98 10.72 11.34C11.07 11.69 11.5 11.87 12 11.87ZM12 19.51C13.95 17.76 15.45 16.08 16.48 14.47C17.52 12.87 18.04 11.46 18.04 10.25C18.04 8.43 17.46 6.93 16.3 5.75C15.14 4.58 13.71 3.99 12 3.99C10.28 3.99 8.84 4.58 7.68 5.75C6.52 6.93 5.94 8.43 5.94 10.25C5.94 11.46 6.46 12.87 7.5 14.47C8.54 16.08 10.04 17.76 12 19.51ZM12 21.51C9.48 19.33 7.59 17.3 6.33 15.42C5.07 13.54 4.44 11.82 4.44 10.25C4.44 7.94 5.19 6.07 6.68 4.64C8.18 3.21 9.95 2.5 12 2.5C14.04 2.5 15.81 3.21 17.3 4.64C18.79 6.07 19.54 7.94 19.54 10.25C19.54 11.82 18.91 13.54 17.65 15.42C16.4 17.3 14.51 19.33 12 21.51Z" fill="#444444"/></svg>
+                    <Icon name="map" size={20} />
                     {event.venue}
                     <a
                       href={`https://maps.google.com/?q=${encodeURIComponent(event.venue)}`}
@@ -257,7 +294,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
                 <h2 className="text-xl font-bold mb-4">Event Details</h2>
                 <div className="space-y-3">
                   <div className="flex gap-3 items-start">
-                    <span className="text-[#444444] mt-0.5">📅</span>
+                    <span className="text-[#444444] mt-0.5"><Icon name="calendar" size={16} /></span>
                     <div>
                       <p className="text-xs text-[#666666]">Date</p>
                       <p className="font-medium text-[#101010]">{weddingDate}</p>
@@ -266,7 +303,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
                   {event.venue && (
                     <>
                       <div className="flex gap-3 items-start">
-                        <span className="text-[#444444] mt-0.5">📍</span>
+                        <span className="text-[#444444] mt-0.5"><Icon name="map" size={16} /></span>
                         <div>
                           <p className="text-xs text-[#666666]">Venue</p>
                           <p className="font-medium text-[#101010]">{event.venue}</p>
@@ -287,14 +324,14 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
                   {event.event_type === 'wedding' && (
                    <>
                      <div className="flex gap-3 items-start">
-                       <span className="text-[#444444] mt-0.5">👰</span>
+                       <span className="text-[#444444] mt-0.5"><Icon name="wedding" size={16} /></span>
                        <div>
                          <p className="text-xs text-[#666666]">Bride</p>
                          <p className="font-medium text-[#101010]">{event.bride_name || ''}</p>
                        </div>
                      </div>
                      <div className="flex gap-3 items-start">
-                       <span className="text-[#444444] mt-0.5">🤵</span>
+                       <span className="text-[#444444] mt-0.5"><Icon name="users" size={16} /></span>
                        <div>
                          <p className="text-xs text-[#666666]">Groom</p>
                          <p className="font-medium text-[#101010]">{event.groom_name || ''}</p>
@@ -304,7 +341,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
                    )}
                    {event.event_type === 'graduation' && (
                    <div className="flex gap-3 items-start">
-                     <span className="text-[#444444] mt-0.5">🎓</span>
+                     <span className="text-[#444444] mt-0.5"><Icon name="sparkle" size={16} /></span>
                      <div>
                        <p className="text-xs text-[#666666]">Graduate</p>
                        <p className="font-medium text-[#101010]">{event.graduate_name || ''}</p>
@@ -314,16 +351,16 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
                    {event.event_type === 'housewarming' && (
                    <>
                      <div className="flex gap-3 items-start">
-                       <span className="text-[#444444] mt-0.5">👨</span>
+                       <span className="text-[#444444] mt-0.5"><Icon name="users" size={16} /></span>
                        <div>
                          <p className="text-xs text-[#666666]">Host</p>
                          <p className="font-medium text-[#101010]">{event.host_name || ''}</p>
                        </div>
                      </div>
                      {event.spouse_name && (
-                     <div className="flex gap-3 items-start">
-                       <span className="text-[#444444] mt-0.5">👩</span>
-                       <div>
+                      <div className="flex gap-3 items-start">
+                        <span className="text-[#444444] mt-0.5"><Icon name="users" size={16} /></span>
+                        <div>
                          <p className="text-xs text-[#666666]">Spouse</p>
                          <p className="font-medium text-[#101010]">{event.spouse_name || ''}</p>
                        </div>
@@ -406,8 +443,8 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
             {/* Desktop: Give Moi card */}
             <div className="hidden lg:flex flex-col border border-[#E8E8E8] rounded-xl p-6 gap-5">
               <div>
-                <p className="text-sm text-[#666666] mb-1">{event.event_type === 'birthday' ? 'Birthday Gift' : event.event_type === 'graduation' ? 'Graduation Gift' : event.event_type === 'housewarming' ? 'Housewarming Gift' : 'Wedding Gift'}</p>
-               <h3 className="text-2xl font-bold text-[#101010]">Give Moi {event.event_type === 'birthday' ? '🎂' : event.event_type === 'graduation' ? '🎓' : event.event_type === 'housewarming' ? '🏠' : '💍'}</h3>
+                <p className="text-sm text-[#666666] mb-1">{getEventLabel(event.event_type)} Gift</p>
+               <h3 className="text-2xl font-bold text-[#101010] flex items-center gap-2">Give Moi <Icon name={getEventIcon(event.event_type)} size={24} /></h3>
                 <p className="text-sm text-[#666666] mt-1">மொய் கொடுக்க இங்கே அழுத்துங்கள்</p>
               </div>
               {guestMoiClosed ? (
@@ -420,7 +457,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
                 <>
                   {guestCount > 0 && (
                     <div className="flex gap-4 text-sm text-[#666666]">
-                      <span>👥 {guestCount} guests registered</span>
+                      <span className="inline-flex items-center gap-1"><Icon name="users" size={14} /> {guestCount} guests registered</span>
                     </div>
                   )}
                   <button
@@ -441,8 +478,8 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
       {!guestMoiClosed && (
         <div className="sticky bottom-0 left-0 flex justify-between bg-white py-4 px-4 items-center border-t border-[#F5F5F5] shadow-lg lg:hidden">
           <div className="flex-1">
-            <p className="text-xs text-[#666666]">{event.event_type === 'birthday' ? 'Birthday Gift' : event.event_type === 'graduation' ? 'Graduation Gift' : event.event_type === 'housewarming' ? 'Housewarming Gift' : 'Wedding Gift'}</p>
-             <h3 className="text-lg font-bold text-[#101010]">Give Moi {event.event_type === 'birthday' ? '🎂' : event.event_type === 'graduation' ? '🎓' : event.event_type === 'housewarming' ? '🏠' : '💍'}</h3>
+            <p className="text-xs text-[#666666]">{getEventLabel(event.event_type)} Gift</p>
+             <h3 className="text-lg font-bold text-[#101010] flex items-center gap-1">Give Moi <Icon name={getEventIcon(event.event_type)} size={18} /></h3>
           </div>
           <button
             onClick={onGiveMoi}
@@ -458,68 +495,49 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: 
 }
 
 // ── Moi Form ──────────────────────────────────────────────────────────────────
-function MoiForm({ event, onBack, onSuccess }: { event: Event; onBack: () => void; onSuccess: (amount?: number) => void }) {
-  const [form, setForm]       = useState<GuestForm>({ guest_name: '', gift_type: 'cash', amount: '', gold_weight: '', gift_description: '', relation: 'friend', payment_mode: 'cash', note: '' });
-  const [submitting, setSubmitting] = useState(false);
+function MoiForm({ event, onBack, onNext }: { event: Event; onBack: () => void; onNext: (data: GuestForm) => void }) {
+  const [form, setForm]       = useState<GuestForm>({ guest_name: '', city: '', relation: 'friend', company: '', occupation: '', gift_type: 'cash', amount: '', gold_weight: '', gift_description: '', item_name: '', approx_value: '', note: '' });
   const [error, setError]     = useState('');
   const presets = [101, 201, 501, 1001, 2001, 5001];
 
-  // Extended relationship options for dropdown
   const relationshipOptions = [
-    { v: 'family', l: 'Family', t: 'குடும்பம்' },
-    { v: 'friend', l: 'Friend', t: 'நண்பர்' },
-    { v: 'colleague', l: 'Colleague', t: 'சக ஊழியர்' },
-    { v: 'relative', l: 'Relative', t: 'உற்சவம்' },
-    { v: 'neighbor', l: 'Neighbor', t: 'அகிலக்' },
-    { v: 'business', l: 'Business', t: 'வணிகர்' },
-    { v: 'other', l: 'Other', t: 'மற்றவர்' },
+    { v: 'family', l: 'Family' },
+    { v: 'friend', l: 'Friend' },
+    { v: 'colleague', l: 'Colleague' },
+    { v: 'relative', l: 'Relative' },
+    { v: 'neighbor', l: 'Neighbor' },
+    { v: 'business', l: 'Business' },
+    { v: 'other', l: 'Other' },
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.guest_name.trim()) { setError('Please enter your name'); return; }
+    if (!form.city.trim()) { setError('Please enter your city'); return; }
     if (form.gift_type === 'cash' && (!form.amount || parseFloat(form.amount) <= 0)) {
       setError('Please enter a valid amount'); return;
     }
     if (form.gift_type === 'gold' && (!form.gold_weight || parseFloat(form.gold_weight) <= 0)) {
       setError('Please enter gold weight in grams'); return;
     }
-    if (form.gift_type === 'gift' && !form.gift_description.trim()) {
-      setError('Please describe the gift'); return;
+    if ((form.gift_type === 'silver' || form.gift_type === 'gift') && !form.item_name.trim()) {
+      setError('Please enter the item name'); return;
     }
-    setError(''); setSubmitting(true);
-    try {
-      await moiApi.add({
-        slug: event.slug,
-        guest_name: form.guest_name.trim(),
-        gift_type: form.gift_type,
-        amount: form.gift_type === 'cash' ? parseFloat(form.amount) : 0,
-        gold_weight: form.gift_type === 'gold' ? parseFloat(form.gold_weight) : null,
-        gift_description: form.gift_type === 'gift' ? form.gift_description.trim() : null,
-        relation: form.relation as 'family' | 'friend' | 'colleague' | 'other',
-        payment_mode: form.payment_mode as 'cash' | 'upi' | 'card' | 'cheque',
-        note: form.note.trim(),
-      });
-      onSuccess(form.gift_type === 'cash' ? parseFloat(form.amount) : undefined);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.');
-    } finally {
-      setSubmitting(false);
-    }
+    setError('');
+    onNext(form);
   };
 
-  const inputCls = "w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-[#101010] placeholder-[#999] focus:outline-none focus:border-[#FFC107] transition-colors bg-white";
+  const inputCls = "w-full border-2 border-tn-border rounded-xl px-4 py-3 text-base text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow transition-colors bg-white";
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-[#E8E8E8] sticky top-0 bg-white z-10">
-        <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full bg-[#F5F5F5] text-[#444444] hover:bg-gray-200 transition-colors">←</button>
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-tn-border sticky top-0 bg-white z-10">
+        <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full bg-tn-light text-tn-muted hover:bg-gray-200 transition-colors">←</button>
         <div>
-          <h2 className="font-bold text-[#101010]">Give Moi</h2>
-          <p className="text-xs text-[#666666]">
-            {event.event_type === 'graduation' 
-              ? event.graduate_name 
+          <h2 className="font-bold text-tn-text">Guest Moi Form</h2>
+          <p className="text-xs text-tn-subtle">
+            {event.event_type === 'graduation'
+              ? event.graduate_name
               : event.event_type === 'birthday'
               ? event.birthday_person_name
               : event.event_type === 'housewarming'
@@ -531,323 +549,124 @@ function MoiForm({ event, onBack, onSuccess }: { event: Event; onBack: () => voi
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-5 pb-36">
-        {/* Name */}
+      <form onSubmit={handleSubmit} className="max-w-lg mx-auto px-4 py-6 space-y-5 pb-36">
+        <p className="text-xs font-bold text-tn-text">Personal Details</p>
         <div>
-          <label className="block text-sm font-semibold text-[#101010] mb-2">Your Name <span className="text-[#FFC107]">*</span></label>
+          <label className="block text-sm font-semibold text-tn-text mb-2">Your Name <span className="text-tn-yellow">*</span></label>
           <input type="text" required autoFocus value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} className={inputCls} placeholder="உங்கள் பெயர் / Your name" />
         </div>
 
-        {/* Gift Type */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-semibold text-tn-text mb-2">City <span className="text-tn-yellow">*</span></label>
+            <input type="text" required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inputCls} placeholder="Your city" />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-tn-text mb-2">Relationship <span className="text-tn-yellow">*</span></label>
+            <select required value={form.relation} onChange={(e) => setForm({ ...form, relation: e.target.value })} className={inputCls}>
+              {relationshipOptions.map((r) => (
+                <option key={r.v} value={r.v}>{r.l}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-semibold text-tn-text mb-2">Company <span className="text-tn-subtle font-normal">(optional)</span></label>
+            <input type="text" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} className={inputCls} placeholder="Company name" />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-tn-text mb-2">Occupation <span className="text-tn-subtle font-normal">(optional)</span></label>
+            <input type="text" value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} className={inputCls} placeholder="Your occupation" />
+          </div>
+        </div>
+
+        <p className="text-xs font-bold text-tn-text pt-2">Contribution Details</p>
         <div>
-          <label className="block text-sm font-semibold text-[#101010] mb-2">Gift Type</label>
-          <div className="grid grid-cols-3 gap-2">
-            {([
-              { v: 'cash', i: '💵', l: 'Cash' },
-              { v: 'gold', i: '✨', l: 'Gold' },
-              { v: 'gift', i: '🎁', l: 'Gift' },
-            ] as { v: GuestForm['gift_type']; i: string; l: string }[]).map((t) => (
+          <label className="block text-sm font-semibold text-tn-text mb-2">Select Gift Type <span className="text-tn-yellow">*</span></label>
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { v: 'cash', i: 'wallet' as IconName, l: 'Cash' },
+              { v: 'gold', i: 'sparkle' as IconName, l: 'Gold' },
+              { v: 'silver', i: 'sparkle' as IconName, l: 'Silver' },
+              { v: 'gift', i: 'gift' as IconName, l: 'Gift' },
+            ].map((t) => (
               <button key={t.v} type="button"
-                onClick={() => setForm({ ...form, gift_type: t.v })}
-                className={`py-3 rounded-xl text-center border-2 transition-colors ${form.gift_type === t.v ? 'border-[#FFC107] bg-[#FFFCF5] text-[#B8860B]' : 'border-[#E8E8E8] text-[#444444] hover:border-[#FFC107]'}`}>
-                <p className="text-xl">{t.i}</p>
-                <p className="text-xs font-semibold mt-1">{t.l}</p>
+                onClick={() => setForm({ ...form, gift_type: t.v as GuestForm['gift_type'] })}
+                className={`py-3 rounded-xl text-center border-2 transition-colors ${form.gift_type === t.v ? 'border-tn-yellow bg-tn-yellow-bg text-tn-gold' : 'border-tn-border text-tn-muted hover:border-tn-yellow'}`}>
+                <p className="text-xl text-tn-gold"><Icon name={t.i} size={24} /></p>
+                <p className="text-[10px] font-semibold mt-1">{t.l}</p>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Cash: amount + payment mode */}
         {form.gift_type === 'cash' && (
-          <>
-            <div>
-              <label className="block text-sm font-semibold text-[#101010] mb-2">Amount (₹) <span className="text-[#FFC107]">*</span></label>
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                {presets.map((p) => (
-                  <button key={p} type="button" onClick={() => setForm({ ...form, amount: String(p) })}
-                    className={`py-2.5 rounded-xl text-sm font-semibold border-2 transition-colors ${form.amount === String(p) ? 'border-[#FFC107] bg-[#FFFCF5] text-[#B8860B]' : 'border-[#E8E8E8] text-[#444444] hover:border-[#FFC107]'}`}>
-                    ₹{p.toLocaleString('en-IN')}
-                  </button>
-                ))}
-              </div>
-              <input type="number" min="1" step="1" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} placeholder="Or enter custom amount" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-[#101010] mb-2">Payment Mode</label>
-              <div className="grid grid-cols-4 gap-2">
-                {[{ v: 'cash', i: '💵', l: 'Cash' }, { v: 'upi', i: '📱', l: 'UPI' }, { v: 'card', i: '💳', l: 'Card' }, { v: 'cheque', i: '📄', l: 'Cheque' }].map((m) => (
-                  <button key={m.v} type="button" onClick={() => setForm({ ...form, payment_mode: m.v })}
-                    className={`py-3 rounded-xl text-center border-2 transition-colors ${form.payment_mode === m.v ? 'border-[#FFC107] bg-[#FFFCF5]' : 'border-[#E8E8E8] hover:border-[#FFC107]'}`}>
-                    <p className="text-xl">{m.i}</p>
-                    <p className="text-xs text-[#444444] mt-1 font-medium">{m.l}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Gold: weight input */}
-        {form.gift_type === 'gold' && (
           <div>
-            <label className="block text-sm font-semibold text-[#101010] mb-2">Gold Weight (grams) <span className="text-[#FFC107]">*</span></label>
-            <input type="number" min="0.01" step="0.01" value={form.gold_weight} onChange={(e) => setForm({ ...form, gold_weight: e.target.value })} className={inputCls} placeholder="e.g. 8" />
+            <label className="block text-sm font-semibold text-tn-text mb-2">Amount (₹) <span className="text-tn-yellow">*</span></label>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {presets.map((p) => (
+                <button key={p} type="button" onClick={() => setForm({ ...form, amount: String(p) })}
+                  className={`py-2.5 rounded-xl text-sm font-semibold border-2 transition-colors ${form.amount === String(p) ? 'border-tn-yellow bg-tn-yellow-bg text-tn-gold' : 'border-tn-border text-tn-muted hover:border-tn-yellow'}`}>
+                  ₹{p.toLocaleString('en-IN')}
+                </button>
+              ))}
+            </div>
+            <input type="number" min="1" step="1" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className={inputCls} placeholder="Or enter custom amount" />
           </div>
         )}
 
-        {/* Gift: description input */}
+        {(form.gift_type === 'gold' || form.gift_type === 'silver') && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-semibold text-tn-text mb-2">Item Name <span className="text-tn-yellow">*</span></label>
+              <input type="text" required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} className={inputCls} placeholder={form.gift_type === 'gold' ? 'e.g. Gold chain' : 'e.g. Silver plate'} />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-tn-text mb-2">{form.gift_type === 'gold' ? 'Weight (grams)' : 'Approx Value (₹)'} <span className="text-tn-yellow">*</span></label>
+              <input type={form.gift_type === 'gold' ? 'number' : 'number'} min="0.01" step="0.01" value={form.gift_type === 'gold' ? form.gold_weight : form.approx_value} onChange={(e) => setForm({ ...form, [form.gift_type === 'gold' ? 'gold_weight' : 'approx_value']: e.target.value })} className={inputCls} placeholder={form.gift_type === 'gold' ? 'e.g. 8' : 'e.g. 2500'} />
+            </div>
+          </div>
+        )}
+
         {form.gift_type === 'gift' && (
           <div>
-            <label className="block text-sm font-semibold text-[#101010] mb-2">Gift Description <span className="text-[#FFC107]">*</span></label>
-            <input type="text" value={form.gift_description} onChange={(e) => setForm({ ...form, gift_description: e.target.value })} className={inputCls} placeholder="e.g. Silver plate, wall clock" />
+            <label className="block text-sm font-semibold text-tn-text mb-2">Gift Name <span className="text-tn-yellow">*</span></label>
+            <input type="text" required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} className={inputCls} placeholder="e.g. Wall clock, photo frame" />
+            <div className="mt-3">
+              <label className="block text-sm font-semibold text-tn-text mb-2">Approx Value (₹) <span className="text-tn-subtle font-normal">(optional)</span></label>
+              <input type="number" min="0" step="1" value={form.approx_value} onChange={(e) => setForm({ ...form, approx_value: e.target.value })} className={inputCls} placeholder="e.g. 1500" />
+            </div>
           </div>
         )}
 
-        {/* Relation - Dropdown for better UX */}
         <div>
-          <label className="block text-sm font-semibold text-[#101010] mb-2">Relation</label>
-          <select
-            value={form.relation}
-            onChange={(e) => setForm({ ...form, relation: e.target.value })}
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-[#101010] focus:outline-none focus:border-[#FFC107] transition-colors bg-white"
-          >
-            {relationshipOptions.map((r) => (
-              <option key={r.v} value={r.v}>
-                {r.l} ({r.t})
-              </option>
-            ))}
-          </select>
+          <label className="block text-sm font-semibold text-tn-text mb-2">Message <span className="text-tn-subtle font-normal">(optional)</span></label>
+          <textarea rows={3} maxLength={200} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} className={`${inputCls} resize-none`} placeholder="Your wishes..." />
+          <p className="text-[10px] text-tn-subtle text-right">{form.note.length}/200</p>
         </div>
 
-        {/* Note */}
-        <div>
-          <label className="block text-sm font-semibold text-[#101010] mb-2">Note <span className="text-[#999] font-normal">(optional)</span></label>
-          <input type="text" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} className={inputCls} placeholder="Any message for the couple…" />
+        <div className="bg-tn-yellow-bg rounded-xl p-3 flex gap-2 text-[11px] text-tn-gold border border-tn-gold-border">
+          <Icon name="lock" size={16} />
+          <p>Your information is secure. We respect your privacy. Your details will only be used for this event.</p>
         </div>
 
         {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">{error}</div>}
-      </div>
+      </form>
 
-      {/* Sticky submit */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E8E8] px-4 py-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-tn-border px-4 py-4">
         <div className="max-w-lg mx-auto">
-          {form.guest_name && (form.gift_type === 'cash' ? form.amount : form.gift_type === 'gold' ? form.gold_weight : form.gift_description) && (
-            <div className="flex items-center justify-between bg-[#FFFCF5] border border-[#FFE082] rounded-xl px-4 py-2.5 mb-3">
-              <span className="text-sm text-[#444444]">{form.guest_name}</span>
-              <span className="font-bold text-[#B8860B]">
-                {form.gift_type === 'cash' && `₹${parseFloat(form.amount || '0').toLocaleString('en-IN')}`}
-                {form.gift_type === 'gold' && `${form.gold_weight}g Gold ✨`}
-                {form.gift_type === 'gift' && `🎁 ${form.gift_description}`}
-              </span>
-            </div>
-          )}
-          <button onClick={handleSubmit} disabled={submitting}
-            className="w-full bg-[#FFC107] border border-[#FFC107] h-[50px] flex justify-center items-center rounded-lg font-semibold text-[#000000] hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
-            {submitting ? (
-              <span className="flex items-center gap-2">
-                <span className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                Submitting…
-              </span>
-            ) : '✓ Submit Moi'}
+          <button type="submit" onClick={handleSubmit}
+            className="w-full bg-tn-yellow border border-tn-yellow h-[50px] flex justify-center items-center rounded-lg font-semibold text-white hover:bg-tn-yellow-2 transition-colors">
+            Continue to Payment
           </button>
         </div>
       </div>
     </div>
   );
+
 }
-
-// ── Success View ──────────────────────────────────────────────────────────────
-function SuccessView({ event, onBack, amount }: { event: Event; onBack: () => void; amount?: number }) {
-  const [copied, setCopied] = useState('');
-  const { isEnabled } = useFeatures();
-  const hasUpi  = !!event.upi_id;
-  const hasBank = !!(event.account_number && event.ifsc_code);
-  const isWedding = event.event_type === 'wedding';
-  const eventLabel = isWedding ? 'Wedding' : event.event_type === 'birthday' ? 'Birthday' : event.event_type === 'graduation' ? 'Graduation' : event.event_type === 'housewarming' ? 'Housewarming' : 'Event';
-  const eventNames = isWedding 
-    ? `${event.bride_name || ''} & ${event.groom_name || ''}` 
-    : event.event_type === 'birthday' 
-    ? event.birthday_person_name 
-    : event.event_type === 'graduation'
-    ? event.graduate_name
-    : event.event_type === 'housewarming'
-    ? `${event.host_name || ''}${event.spouse_name ? ' & ' + event.spouse_name : ''}`
-    : event.custom_title || '';
-  const eventEmoji = isWedding ? '💒' : event.event_type === 'birthday' ? '🎂' : event.event_type === 'graduation' ? '🎓' : event.event_type === 'housewarming' ? '🏠' : '🎉';
-  const upiAmount = typeof amount === 'number' && amount > 0 ? amount : undefined;
-
-  const copyText = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(label);
-    setTimeout(() => setCopied(''), 2000);
-  };
-
-  const whatsappMessage = encodeURIComponent(
-    `🙏 I just gave moi to ${eventNames}'s ${eventLabel}! ${eventEmoji}\n\n` +
-    `Event: ${eventNames} ${eventLabel}\n` +
-    `Date: ${new Date(event.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}\n` +
-    (event.venue ? `Venue: ${event.venue}\n` : '') +
-    `\nGive moi here: ${typeof window !== 'undefined' ? window.location.origin + '/e/' + event.slug : ''}`
-  );
-  const whatsappUrl = `https://wa.me/?text=${whatsappMessage}`;
-
-  return (
-    <div className="min-h-screen bg-white px-4 py-10 max-w-lg mx-auto">
-      {/* Confirmation */}
-      <div className="text-center mb-8">
-        <div className="w-20 h-20 bg-[#FFFCF5] border-2 border-[#FFE082] rounded-full flex items-center justify-center mx-auto mb-5">
-          <span className="text-4xl">✅</span>
-        </div>
-        <h1 className="text-2xl font-bold text-[#101010] mb-1">Thank You! 🙏</h1>
-        <p className="text-[#666666] text-sm">Your moi has been recorded successfully</p>
-        <p className="text-[#999] text-sm mt-2">
-          For <span className="font-semibold text-[#444444]">{eventNames}</span>
-        </p>
-      </div>
-
-      {/* WhatsApp Thank You Share */}
-      {isEnabled('whatsapp_share') && (
-        <div className="bg-[#F0FFF4] border-2 border-[#25D366] rounded-xl p-5 mb-6">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-2xl">📱</span>
-            <div>
-              <p className="font-bold text-[#101010]">Share on WhatsApp</p>
-              <p className="text-xs text-[#666]">Send a thank you note to the family</p>
-            </div>
-          </div>
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-[#25D366] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#1da851] transition-colors w-full"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-              <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.978-1.401A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.952 7.952 0 01-4.054-1.107l-.29-.173-3.006.845.838-3.065-.19-.314A7.953 7.953 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/>
-            </svg>
-            Share Thank You on WhatsApp
-          </a>
-        </div>
-      )}
-
-      {/* Payment instructions */}
-      {(hasUpi || hasBank) && isEnabled('upi_payment') && (
-        <div className="space-y-4 mb-8">
-          <div className="bg-[#FFFBEE] border border-[#FFE082] rounded-xl p-4">
-            <p className="text-sm font-bold text-[#B8860B] mb-1">💸 Now send the money</p>
-            <p className="text-xs text-[#666] leading-relaxed">
-              Your entry has been recorded. Please transfer the amount using one of the methods below.
-            </p>
-          </div>
-
-          {/* UPI */}
-          {hasUpi && isEnabled('qr_payment') && (
-            <div className="border border-[#E8E8E8] rounded-xl overflow-hidden">
-              <div className="bg-[#F0FFF4] px-4 py-3 border-b border-[#E8E8E8] flex items-center gap-2">
-                <span className="text-lg">📱</span>
-                <p className="font-semibold text-sm text-[#101010]">Pay via UPI</p>
-                <span className="ml-auto text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">Recommended</span>
-              </div>
-              <div className="p-4">
-                {/* UPI QR code via free API */}
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=upi://pay?pa=${encodeURIComponent(event.upi_id!)}&pn=${encodeURIComponent((event.bride_name || '') + ' & ' + (event.groom_name || ''))}&cu=INR${upiAmount ? `&am=${upiAmount}` : ''}`}
-                    alt="UPI QR Code"
-                    width={112}
-                    height={112}
-                    className="w-28 h-28 rounded-lg border border-[#E8E8E8]"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-[#999] mb-1">UPI ID</p>
-                    <p className="font-bold text-[#101010] text-sm break-all">{event.upi_id}</p>
-                    <button
-                      onClick={() => copyText(event.upi_id!, 'upi')}
-                      className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[#FFC107] hover:text-[#E6AC00] transition-colors"
-                    >
-                      {copied === 'upi' ? '✓ Copied!' : '📋 Copy UPI ID'}
-                    </button>
-                    <a
-                      href={`upi://pay?pa=${encodeURIComponent(event.upi_id!)}&pn=${encodeURIComponent((event.bride_name || '') + ' & ' + (event.groom_name || ''))}&cu=INR${upiAmount ? `&am=${upiAmount}` : ''}`}
-                      className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-white bg-[#FFC107] px-3 py-1.5 rounded-lg hover:bg-[#E6AC00] transition-colors w-fit"
-                    >
-                      Open UPI App →
-                    </a>
-                    {upiAmount && (
-                      <a
-                        href={`upi://pay?pa=${encodeURIComponent(event.upi_id!)}&pn=${encodeURIComponent((event.bride_name || '') + ' & ' + (event.groom_name || ''))}&cu=INR&am=${upiAmount}`}
-                        className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-white bg-[#25D366] px-3 py-1.5 rounded-lg hover:bg-[#1da851] transition-colors w-fit"
-                      >
-                        Pay ₹{upiAmount.toLocaleString('en-IN')} →
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Bank transfer */}
-          {hasBank && (
-            <div className="border border-[#E8E8E8] rounded-xl overflow-hidden">
-              <div className="bg-[#EFF6FF] px-4 py-3 border-b border-[#E8E8E8] flex items-center gap-2">
-                <span className="text-lg">🏦</span>
-                <p className="font-semibold text-sm text-[#101010]">Bank Transfer / NEFT / IMPS</p>
-              </div>
-              <div className="p-4 space-y-2.5">
-                {[
-                  { label: 'Account Holder', value: event.account_holder || (event.bride_name || '') + ' / ' + (event.groom_name || '') },
-                  { label: 'Bank',           value: event.bank_name },
-                  { label: 'Account No.',    value: event.account_number, copy: true },
-                  { label: 'IFSC Code',      value: event.ifsc_code,      copy: true },
-                ].filter((r) => r.value).map((row) => (
-                  <div key={row.label} className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-[#999]">{row.label}</p>
-                      <p className="text-sm font-semibold text-[#101010] break-all">{row.value}</p>
-                    </div>
-                    {row.copy && (
-                      <button
-                        onClick={() => copyText(row.value!, row.label)}
-                        className="shrink-0 text-xs text-[#FFC107] font-semibold hover:text-[#E6AC00]"
-                      >
-                        {copied === row.label ? '✓' : '📋'}
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Cash note */}
-          {!hasUpi && !hasBank && (
-            <div className="border border-[#E8E8E8] rounded-xl p-4 text-center text-sm text-[#666]">
-              💵 Please hand over the cash to the couple or their representative in person.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* No payment details set */}
-      {!hasUpi && !hasBank && (
-        <div className="bg-[#fafafa] border border-[#E8E8E8] rounded-xl p-4 mb-6 text-center">
-          <p className="text-sm text-[#666]">💵 Please hand over the cash to the couple in person.</p>
-        </div>
-      )}
-
-      <div className="text-3xl text-center mb-6 space-x-2"><span>🎊</span><span>💍</span><span>🎉</span></div>
-
-      <button onClick={onBack}
-        className="w-full border-2 border-[#FFC107] text-[#B8860B] py-3.5 rounded-xl font-semibold hover:bg-[#FFFCF5] transition-colors">
-        ← Back to Event
-      </button>
-      <p className="text-xs text-[#cccccc] mt-6 text-center">Powered by <span className="text-[#FFC107]">MoiApp</span></p>
-    </div>
-  );
-}
-
 // ── Venue Map ─────────────────────────────────────────────────────────────────
 // Shows a Google Maps embed immediately (no API key needed for the embed URL),
 // with an OpenStreetMap iframe as fallback if the embed fails.
@@ -885,6 +704,269 @@ function VenueMap({ venue }: { venue: string }) {
             <line x1="10" y1="14" x2="21" y2="3"/>
           </svg>
         </a>
+      </div>
+    </div>
+  );
+}
+
+// ── Payment Method ─────────────────────────────────────────────────────────────
+type PaymentMethod = 'upi' | 'card' | 'netbanking' | 'wallet' | 'scan';
+
+function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () => void; onSuccess: (txn: { transactionId: string; amount: number; method: string; date: string }) => void }) {
+  const form = (window as Window & { __guestForm?: GuestForm }).__guestForm;
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('upi');
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState('');
+
+  if (!form) { onBack(); return null; }
+
+  const amount = parseFloat(form.amount || '0');
+  const fee = Math.round(amount * 0.0018) || 9;
+  const total = amount + fee;
+
+  const handlePay = async () => {
+    setProcessing(true);
+    setError('');
+    try {
+      const paymentModeMap: Record<PaymentMethod, 'cash' | 'upi' | 'card' | 'other'> = {
+        upi: 'upi', card: 'card', netbanking: 'other', wallet: 'upi', scan: 'upi',
+      };
+      const giftType = (form.gift_type || 'cash') as 'cash' | 'gold' | 'gift' | 'silver';
+      await moiApi.add({
+        slug: event.slug,
+        guest_name: form.guest_name.trim(),
+        city: form.city.trim() || undefined,
+        company: form.company.trim() || undefined,
+        occupation: form.occupation.trim() || undefined,
+        gift_type: giftType === 'silver' ? 'gift' : giftType,
+        amount: giftType === 'cash' ? amount : 0,
+        gold_weight: giftType === 'gold' ? parseFloat(form.gold_weight || '0') : null,
+        gift_description: giftType === 'gift' ? (form.item_name || form.gift_description || 'Gift') : null,
+        relation: form.relation as 'family' | 'friend' | 'colleague' | 'relative' | 'neighbor' | 'business' | 'other',
+        payment_mode: paymentModeMap[selectedMethod],
+        note: [form.note, `Paid via ${selectedMethod}`].filter(Boolean).join(' · '),
+      });
+      const txnId = `TXN${Date.now()}`;
+      const dateStr = new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      onSuccess({ transactionId: txnId, amount: total, method: selectedMethod, date: dateStr });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Payment failed. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const methods = [
+    { id: 'upi' as PaymentMethod, label: 'UPI', sub: 'Google Pay, PhonePe, Paytm', badge: 'Instant' },
+    { id: 'card' as PaymentMethod, label: 'Debit / Credit Card', sub: 'Visa, Mastercard, RuPay', badge: 'Instant' },
+    { id: 'netbanking' as PaymentMethod, label: 'Net Banking', sub: 'All major banks', badge: 'Instant' },
+    { id: 'wallet' as PaymentMethod, label: 'Wallets', sub: 'Paytm, Amazon Pay', badge: 'Instant' },
+    { id: 'scan' as PaymentMethod, label: 'Scan & Pay', sub: 'QR based payment', badge: 'Instant' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-tn-border sticky top-0 bg-white z-10">
+        <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full bg-tn-light text-tn-muted hover:bg-gray-200 transition-colors">←</button>
+        <div>
+          <h2 className="font-bold text-tn-text">Payment Method</h2>
+          <p className="text-xs text-tn-subtle">{event.bride_name || ''} &amp; {event.groom_name || ''}</p>
+        </div>
+      </div>
+
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-5 pb-36">
+        {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">{error}</div>}
+
+        <div className="bg-tn-yellow-bg border border-tn-gold-border rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-semibold text-tn-muted">Gift Amount</p>
+            <p className="text-sm font-bold text-tn-text">₹ {amount.toLocaleString('en-IN')}</p>
+          </div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-semibold text-tn-muted">Convenience Fee</p>
+            <p className="text-sm font-bold text-tn-text">₹ {fee.toLocaleString('en-IN')}</p>
+          </div>
+          <div className="border-t border-dashed border-tn-gold-border pt-2 flex items-center justify-between">
+            <p className="text-sm font-bold text-tn-text">Total Amount</p>
+            <p className="text-base font-bold text-tn-gold">₹ {total.toLocaleString('en-IN')}</p>
+          </div>
+        </div>
+
+        <p className="text-xs font-bold text-tn-text">Select Payment Method</p>
+        <div className="space-y-2">
+          {methods.map((m) => (
+            <button key={m.id} type="button" onClick={() => setSelectedMethod(m.id)} className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-colors ${selectedMethod === m.id ? 'border-tn-yellow bg-tn-yellow-bg' : 'border-tn-border bg-white'}`}>
+              <div className={`w-4 h-4 rounded-full border-2 ${selectedMethod === m.id ? 'border-tn-yellow bg-tn-yellow' : 'border-tn-subtle'}`} />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-tn-text">{m.label}</p>
+                <p className="text-[10px] text-tn-subtle">{m.sub}</p>
+              </div>
+              <span className="text-[9px] font-bold text-tn-green-soft bg-tn-yellow-bg px-2 py-0.5 rounded-full border border-tn-gold-border">{m.badge}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="bg-tn-yellow-bg rounded-xl p-3 flex gap-2 text-[11px] text-tn-gold border border-tn-gold-border">
+          <Icon name="shield" size={16} />
+          <p>100% Secure Payments. Your payment details are encrypted and safe with us.</p>
+        </div>
+      </main>
+
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-tn-border px-4 py-4">
+        <div className="max-w-lg mx-auto">
+          <button type="button" onClick={handlePay} disabled={processing || total <= 0} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-tn-yellow-2 transition-colors">
+            <Icon name="lock" size={16} /> {processing ? 'Processing…' : `Pay ₹ ${total.toLocaleString('en-IN')}`}
+          </button>
+                    <p className="text-center text-[10px] text-tn-subtle mt-2">Secured by MoiApp Payments</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Success View ──────────────────────────────────────────────────────────────
+function SuccessView({ event, onBack, onContinue, txn }: { event: Event; onBack: () => void; onContinue: () => void; txn?: { transactionId: string; amount: number; method: string; date: string } }) {
+  const [copied, setCopied] = useState('');
+  const { isEnabled } = useFeatures();
+  const isWedding = event.event_type === 'wedding';
+  const eventNames = isWedding
+    ? `${event.bride_name || ''} & ${event.groom_name || ''}`
+    : event.event_type === 'birthday'
+    ? event.birthday_person_name || ''
+    : event.event_type === 'graduation'
+    ? event.graduate_name || ''
+    : event.event_type === 'housewarming'
+    ? `${event.host_name || ''}${event.spouse_name ? ' & ' + event.spouse_name : ''}`
+    : event.custom_title || '';
+
+  const whatsappMessage = encodeURIComponent(
+    `Thank you — I just gave moi to ${eventNames}'s ${event.event_type}!\n\n` +
+    `Event: ${eventNames}\n` +
+    `Date: ${new Date(event.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}\n` +
+    (event.venue ? `Venue: ${event.venue}\n` : '') +
+    `\nGive moi here: ${typeof window !== 'undefined' ? window.location.origin + '/e/' + event.slug : ''}`
+  );
+  const whatsappUrl = `https://wa.me/?text=${whatsappMessage}`;
+
+  const copyText = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(text);
+    setTimeout(() => setCopied(''), 2000);
+  };
+
+  return (
+    <div className="min-h-screen bg-white px-4 py-10 max-w-lg mx-auto">
+      <div className="text-center mb-8">
+        <div className="w-20 h-20 bg-tn-yellow-bg border-2 border-tn-gold-border rounded-full flex items-center justify-center mx-auto mb-5 text-tn-gold">
+          <Icon name="check" size={40} />
+        </div>
+        <h1 className="text-2xl font-bold text-tn-text mb-1">Payment Successful!</h1>
+        <p className="text-sm text-tn-subtle">Your moi has been recorded successfully</p>
+        <p className="text-xs text-tn-muted mt-2">
+          For <span className="font-semibold text-tn-text">{eventNames}</span>
+        </p>
+      </div>
+
+      {txn && (
+        <div className="inline-flex items-center gap-2 bg-tn-yellow-bg border border-tn-gold-border rounded-full px-4 py-2 mb-6 text-xs font-semibold text-tn-gold">
+          <span>✓</span> Transaction ID: {txn.transactionId}
+          <button type="button" onClick={() => copyText(txn.transactionId)} className="text-tn-yellow ml-1">{copied === txn.transactionId ? '✓' : 'Copy'}</button>
+        </div>
+      )}
+
+      <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4 text-left">
+        <h3 className="text-sm font-bold text-tn-text mb-3">Payment Summary</h3>
+        <div className="space-y-2 text-sm text-tn-muted">
+          <div className="flex justify-between"><span>Amount</span><span className="font-semibold text-tn-text">₹ {txn ? txn.amount.toLocaleString('en-IN') : '0'}</span></div>
+          <div className="flex justify-between"><span>Payment Method</span><span className="font-semibold text-tn-text capitalize">{txn ? txn.method : ''}</span></div>
+          <div className="flex justify-between"><span>Date</span><span className="font-semibold text-tn-text">{txn ? txn.date : ''}</span></div>
+        </div>
+      </div>
+
+      {isEnabled('whatsapp_share') && (
+        <div className="bg-tn-yellow-bg border border-tn-gold-border rounded-xl p-5 mb-6">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl text-tn-gold"><Icon name="arrow-right" size={24} /></span>
+            <div>
+              <p className="font-bold text-tn-text">Share on WhatsApp</p>
+              <p className="text-xs text-tn-subtle">Send a thank you note to the family</p>
+            </div>
+          </div>
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-tn-yellow text-white py-3 rounded-xl font-bold text-sm hover:bg-tn-yellow-2 transition-colors w-full">
+            Share Thank You on WhatsApp
+          </a>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <button type="button" onClick={onContinue} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm hover:bg-tn-yellow-2 transition-colors">Continue to Thank You</button>
+        <button type="button" onClick={onBack} className="w-full h-12 border-2 border-tn-yellow text-tn-gold rounded-xl font-semibold text-sm hover:bg-tn-yellow-bg transition-colors">Back to Event</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Thank You Screen ───────────────────────────────────────────────────────────
+function ThankYouScreen({ event, onBack, txn }: { event: Event; onBack: () => void; txn?: { transactionId: string; amount: number; method: string; date: string } }) {
+  const isWedding = event.event_type === 'wedding';
+  const eventNames = isWedding
+    ? `${event.bride_name || ''} & ${event.groom_name || ''}`
+    : event.event_type === 'birthday'
+    ? event.birthday_person_name || ''
+    : event.event_type === 'graduation'
+    ? event.graduate_name || ''
+    : event.event_type === 'housewarming'
+    ? `${event.host_name || ''}${event.spouse_name ? ' & ' + event.spouse_name : ''}`
+    : event.custom_title || '';
+
+  const handleShare = async () => {
+    const text = `I contributed ₹${txn ? txn.amount.toLocaleString('en-IN') : '0'} to ${eventNames}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Moi Contribution', text }); } catch { /* ignore */ }
+    } else {
+      try { await navigator.clipboard.writeText(text); } catch { /* ignore */ }
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white px-4 py-10 max-w-lg mx-auto">
+      <div className="text-center mb-8">
+        <div className="w-20 h-20 bg-tn-yellow-bg border-2 border-tn-gold-border rounded-full flex items-center justify-center mx-auto mb-5 text-tn-gold">
+          <Icon name="gift" size={40} />
+        </div>
+        <h1 className="text-2xl font-bold text-tn-text mb-1">Thank You!</h1>
+        <p className="text-sm text-tn-subtle">Your moi has been received successfully.</p>
+      </div>
+
+      <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4 shadow-sm">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-full bg-tn-yellow-bg border border-tn-gold-border flex items-center justify-center text-xl font-bold text-tn-gold shrink-0">
+            {event.creator_name ? event.creator_name.charAt(0).toUpperCase() : '?'}
+          </div>
+          <div>
+            <p className="text-sm font-bold text-tn-text">Host</p>
+            <p className="text-xs text-tn-subtle">{event.creator_name || eventNames}</p>
+          </div>
+        </div>
+        <div className="space-y-2 text-sm text-tn-muted">
+          <div className="flex justify-between"><span>Guest Name</span><span className="font-semibold text-tn-text">{(window as Window & { __guestForm?: GuestForm }).__guestForm?.guest_name || 'Guest'}</span></div>
+          <div className="flex justify-between"><span>Amount</span><span className="font-semibold text-tn-text">₹ {txn ? txn.amount.toLocaleString('en-IN') : '0'}</span></div>
+          <div className="flex justify-between"><span>Gift Type</span><span className="font-semibold text-tn-text capitalize">{(window as Window & { __guestForm?: GuestForm }).__guestForm?.gift_type || 'cash'}</span></div>
+          <div className="flex justify-between"><span>Transaction ID</span><span className="font-semibold text-tn-text">{txn ? txn.transactionId : ''}</span></div>
+          <div className="flex justify-between"><span>Date</span><span className="font-semibold text-tn-text">{txn ? txn.date : ''}</span></div>
+        </div>
+      </div>
+
+      <div className="bg-tn-yellow-bg border border-tn-gold-border rounded-2xl p-5 mb-6">
+        <p className="text-sm font-bold text-tn-gold mb-2">A Message from the Host</p>
+        <p className="text-sm text-tn-muted italic">Your blessings and support mean a lot to us. Thank you for being part of our celebration.</p>
+        <p className="text-xs text-tn-subtle text-right mt-3 font-semibold">— {eventNames}</p>
+      </div>
+
+      <div className="space-y-3">
+        <button type="button" onClick={() => window.print()} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm hover:bg-tn-yellow-2 transition-colors">Download Receipt</button>
+        <button type="button" onClick={handleShare} className="w-full h-12 border-2 border-tn-yellow text-tn-gold rounded-xl font-semibold text-sm hover:bg-tn-yellow-bg transition-colors">Share Confirmation</button>
+        <button type="button" onClick={onBack} className="w-full h-12 border-2 border-tn-yellow text-tn-gold rounded-xl font-semibold text-sm hover:bg-tn-yellow-bg transition-colors">Back to Home</button>
       </div>
     </div>
   );

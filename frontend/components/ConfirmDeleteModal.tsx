@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Icon from '@/components/ui/Icon';
 
 interface ConfirmDeleteModalProps {
   isOpen: boolean;
@@ -40,7 +41,7 @@ export default function ConfirmDeleteModal({
         <div className="p-6 text-center space-y-4">
           {/* Danger Warning Icon */}
           <div className="mx-auto w-12 h-12 bg-red-50 border border-red-100 text-red-500 rounded-full flex items-center justify-center text-xl">
-            ⚠️
+            <Icon name="alert" size={22} />
           </div>
 
           <div className="space-y-1.5">

@@ -1,7 +1,8 @@
-'use client';
+  'use client';
 
 import { useState, useRef } from 'react';
-import { eventsApi, showSuccess } from '@/lib/api';
+import Icon, { type IconName } from '@/components/ui/Icon';
+import { eventsApi } from '@/lib/api';
 
 interface NewEventModalProps {
   onClose: () => void;
@@ -9,21 +10,24 @@ interface NewEventModalProps {
 }
 
 type EventType = 'wedding' | 'birthday' | 'engagement' | 'valakaappu' | 'housewarming' | 'graduation' | 'custom';
+type Step = 1 | 2 | 3;
 
-const EVENT_TYPES: { value: EventType; label: string; icon: string }[] = [
-  { value: 'wedding', label: 'Wedding', icon: '💒' },
-  { value: 'birthday', label: 'Birthday', icon: '🎂' },
-  { value: 'engagement', label: 'Engagement', icon: '💍' },
-  { value: 'valakaappu', label: 'Valakaappu', icon: '🌺' },
-  { value: 'housewarming', label: 'Housewarming', icon: '🏠' },
-  { value: 'graduation', label: 'Graduation', icon: '🎓' },
-  { value: 'custom', label: 'Others', icon: '🎉' },
+const EVENT_TYPES: { value: EventType; label: string; icon: IconName }[] = [
+  { value: 'wedding', label: 'Wedding', icon: 'venue' },
+  { value: 'birthday', label: 'Birthday', icon: 'gift' },
+  { value: 'engagement', label: 'Engagement', icon: 'wedding' },
+  { value: 'valakaappu', label: 'Valakaappu', icon: 'sparkle' },
+  { value: 'housewarming', label: 'Housewarming', icon: 'venue' },
+  { value: 'graduation', label: 'Graduation', icon: 'sparkle' },
+  { value: 'custom', label: 'Others', icon: 'sparkle' },
 ];
 
 export default function NewEventModal({ onClose, onCreated }: NewEventModalProps) {
+  const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState({
     event_type: 'wedding' as EventType,
     event_mode: 'new' as 'past' | 'new',
+    function_name: '',
     custom_title: '',
     bride_name: '',
     groom_name: '',
@@ -72,7 +76,33 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleStep1Continue = () => {
+    // Pre-populate function name based on event type and existing name fields
+    setForm((prev) => {
+      let fn = prev.function_name;
+      if (!fn) {
+        if (prev.event_type === 'wedding' && prev.bride_name && prev.groom_name) {
+          fn = `${prev.bride_name} & ${prev.groom_name} Wedding`;
+        } else if (prev.event_type === 'birthday' && prev.birthday_person_name) {
+          fn = `${prev.birthday_person_name}'s Birthday Celebration`;
+        } else if (prev.event_type === 'engagement' && prev.bride_name && prev.groom_name) {
+          fn = `${prev.bride_name} & ${prev.groom_name} Engagement`;
+        } else if (prev.event_type === 'valakaappu' && prev.mother_name && prev.father_name) {
+          fn = `${prev.mother_name} & ${prev.father_name} Valakaappu`;
+        } else if (prev.event_type === 'housewarming' && prev.host_name) {
+          fn = `${prev.host_name}${prev.spouse_name ? ' & ' + prev.spouse_name : ''} Housewarming`;
+        } else if (prev.event_type === 'graduation' && prev.graduate_name) {
+          fn = `${prev.graduate_name}'s Graduation`;
+        } else if (prev.event_type === 'custom' && prev.custom_title) {
+          fn = prev.custom_title;
+        }
+      }
+      return { ...prev, function_name: fn };
+    });
+    setStep(2);
+  };
+
+  const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -80,6 +110,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
       const submitData: Record<string, unknown> = {
         event_type: form.event_type,
         event_mode: form.event_mode,
+        custom_title: form.function_name || form.custom_title,
         wedding_date: form.wedding_date,
         venue: form.venue,
         city: form.city,
@@ -95,7 +126,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
         submitData.birthday_person_name = form.birthday_person_name;
         submitData.birthday_person_age = form.birthday_person_age ? parseInt(form.birthday_person_age) : null;
       } else if (form.event_type === 'custom') {
-        submitData.custom_title = form.custom_title;
+        submitData.custom_title = form.function_name || form.custom_title;
       } else if (form.event_type === 'engagement') {
         submitData.bride_name = form.bride_name;
         submitData.groom_name = form.groom_name;
@@ -114,11 +145,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
       }
 
       const res = await eventsApi.create(submitData);
-      if (res.approval_status === 'pending') {
-        showSuccess('Your function is submitted. Admin will approve shortly.');
-      } else {
-        showSuccess('Function created! You can start adding moi entries.');
-      }
+      setStep(3);
       if (coverFile) {
         const token = localStorage.getItem('moi_token');
         const fd = new FormData();
@@ -130,7 +157,6 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
           body: fd,
         });
       }
-      onCreated();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create event');
     } finally {
@@ -138,28 +164,19 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
     }
   };
 
+  const handleStep3Done = () => {
+    onCreated();
+  };
+
   const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   };
 
   const selectedType = EVENT_TYPES.find(t => t.value === form.event_type);
-  const eventTitle = form.event_type === 'custom' 
+  const eventTitle = form.event_type === 'custom'
     ? (form.custom_title ? `New ${form.custom_title} Event` : 'New Custom Event')
     : `New ${selectedType?.label || 'Event'}`;
-  const eventIcon = selectedType?.icon || '🎉';
-  const eventSubtitle = form.event_type === 'wedding' 
-    ? 'புதிய திருமண நிகழ்வு' 
-    : form.event_type === 'birthday' 
-    ? 'புதிய பிறந்தநாள் நிகழ்வு'
-    : form.event_type === 'engagement'
-    ? 'புதிய நிஶ்சலயத்தார்ந்து'
-    : form.event_type === 'valakaappu'
-    ? 'புதிய வலக்காப்பு'
-    : form.event_type === 'housewarming'
-    ? 'புதிய வீட்டு பண்டிகை'
-    : form.event_type === 'graduation'
-    ? 'புதிய பட்டமெழுக்கு விழா'
-    : 'புதிய நிகழ்வு';
+  const eventIcon = selectedType?.icon || 'sparkle';
 
   // Get appropriate name field labels based on event type
   const getNameFieldLabels = () => {
@@ -177,280 +194,407 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
 
   const nameLabels = getNameFieldLabels();
 
+  const steps = [
+    { num: 1, label: 'Event Type' },
+    { num: 2, label: 'Function Details' },
+    { num: 3, label: 'Review' },
+  ] as const;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={handleBackdrop}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#F0F0F0]">
           <div className="flex items-center gap-2.5">
-            <span className="text-xl">{eventIcon}</span>
+            <span className="text-xl text-tn-gold"><Icon name={eventIcon} size={24} /></span>
             <div>
               <h2 className="font-bold text-[#101010] text-base leading-tight">{eventTitle}</h2>
-              <p className="text-[11px] text-[#999]">{eventSubtitle}</p>
+              <p className="text-[11px] text-[#999]">
+                {step === 1 && 'Choose event category'}
+                {step === 2 && 'Enter function details'}
+                {step === 3 && 'Review & submit'}
+              </p>
             </div>
           </div>
           <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full text-[#999] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors text-lg">×</button>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
-          {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm">{error}</div>}
-
-          {/* Past vs New Event */}
-          <div>
-            <label className={lbl}>Event Category <span className="text-[#FFC107]">*</span></label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleModeChange('past')}
-                className={`flex flex-col items-start gap-0.5 p-3 rounded-xl border-2 text-left transition-all ${
-                  isPast
-                    ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
-                    : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
-                }`}
-              >
-                <span className="text-sm font-bold">Past Event</span>
-                <span className="text-[10px] text-[#888]">நடந்த நிகழ்வு · Record keeping only</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleModeChange('new')}
-                className={`flex flex-col items-start gap-0.5 p-3 rounded-xl border-2 text-left transition-all ${
-                  !isPast
-                    ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
-                    : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
-                }`}
-              >
-                <span className="text-sm font-bold">New Event</span>
-                <span className="text-[10px] text-[#888]">இனி நடக்கப்போகிறது · QR & guest payments</span>
-              </button>
+        {/* Progress Stepper */}
+        {step < 3 && (
+          <div className="px-6 py-4 border-b border-[#F5F5F5]">
+            <div className="flex items-start justify-between max-w-xs mx-auto">
+              {steps.map((s, idx) => {
+                const isActive = step === s.num;
+                const isDone = step > s.num;
+                return (
+                  <div key={s.num} className="flex flex-col items-center flex-1 relative">
+                    {idx > 0 && (
+                      <div
+                        className={`absolute top-4 right-1/2 w-full h-0.5 -z-0 ${isDone || isActive ? 'bg-[#FFC107]' : 'bg-[#E5E7EB]'}`}
+                        style={{ width: '100%', transform: 'translateX(-50%)' }}
+                      />
+                    )}
+                    <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                      isActive || isDone ? 'bg-[#FFC107] text-black' : 'bg-[#E5E7EB] text-[#9CA3AF]'
+                    }`}>
+                      {isDone ? '✓' : s.num}
+                    </div>
+                    <p className={`text-[9px] mt-1.5 font-medium text-center leading-tight max-w-[64px] ${
+                      isActive ? 'text-[#101010] font-semibold' : isDone ? 'text-[#101010]' : 'text-[#9CA3AF]'
+                    }`}>
+                      {s.label}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
-            {!isPast && (
-              <p className="text-[10px] text-[#999] mt-1.5">New events require admin approval before moi collection begins.</p>
-            )}
           </div>
+        )}
 
-          {/* Event Type Selector */}
-          <div>
-            <label className={lbl}>Event Type <span className="text-[#FFC107]">*</span></label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {EVENT_TYPES.map((type) => (
-                <button
-                  key={type.value}
-                  type="button"
-                  onClick={() => setForm({ ...form, event_type: type.value })}
-                  className={`flex flex-col items-center justify-center gap-1 py-2 rounded-xl border-2 font-semibold text-xs transition-all ${
-                    form.event_type === type.value
-                      ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
-                      : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
-                  }`}
-                >
-                  <span className="text-lg">{type.icon}</span>
-                  {type.label}
+        <div className="px-6 py-5">
+          {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm mb-4">{error}</div>}
+
+          {/* ── Step 1: Choose Event Type ── */}
+          {step === 1 && (
+            <div className="space-y-4">
+              <div>
+                <label className={lbl}>Event Category <span className="text-[#FFC107]">*</span></label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleModeChange('past')}
+                    className={`flex flex-col items-start gap-1 p-4 rounded-xl border-2 text-left transition-all ${
+                      isPast
+                        ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
+                        : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
+                    }`}
+                  >
+                    <span className="text-lg text-tn-gold"><Icon name="calendar" size={20} /></span>
+                    <span className="text-sm font-bold">Past Event</span>
+                    <span className="text-[10px] text-[#888] leading-relaxed">நடந்த நிகழ்வு · Record keeping only</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleModeChange('new')}
+                    className={`flex flex-col items-start gap-1 p-4 rounded-xl border-2 text-left transition-all ${
+                      !isPast
+                        ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
+                        : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
+                    }`}
+                  >
+                    <span className="text-lg text-tn-gold"><Icon name="plus" size={20} /></span>
+                    <span className="text-sm font-bold">New Event</span>
+                    <span className="text-[10px] text-[#888] leading-relaxed">இனி நடக்கப்போகிறது · QR & guest payments</span>
+                  </button>
+                </div>
+                <p className="text-[10px] text-[#FFC107] mt-2 font-medium">You can&apos;t change this later.</p>
+                {!isPast && (
+                  <p className="text-[10px] text-[#999] mt-1.5">New events require admin approval before moi collection begins.</p>
+                )}
+              </div>
+
+              {/* Event Type Selector */}
+              <div>
+                <label className={lbl}>Event Type <span className="text-[#FFC107]">*</span></label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {EVENT_TYPES.map((type) => (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, event_type: type.value })}
+                      className={`flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border-2 font-semibold text-xs transition-all ${
+                        form.event_type === type.value
+                          ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
+                          : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
+                      }`}
+                    >
+                      <span className="text-lg text-tn-gold"><Icon name={type.icon} size={20} /></span>
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Title - only for custom events */}
+              {form.event_type === 'custom' && (
+                <div>
+                  <label className={lbl}>Event Title <span className="text-[#FFC107]">*</span></label>
+                  <input
+                    required
+                    value={form.custom_title}
+                    onChange={(e) => setForm({ ...form, custom_title: e.target.value })}
+                    className={inp}
+                    placeholder="e.g., Anniversary, Naming Ceremony"
+                  />
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={onClose} className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold hover:border-[#ccc] transition-colors">Cancel</button>
+                <button type="button" onClick={handleStep1Continue} className="flex-1 bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors">
+                  Continue →
                 </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Custom Title - only for custom events */}
-          {form.event_type === 'custom' && (
-            <div>
-              <label className={lbl}>Event Title <span className="text-[#FFC107]">*</span></label>
-              <input 
-                required 
-                value={form.custom_title} 
-                onChange={(e) => setForm({ ...form, custom_title: e.target.value })} 
-                className={inp} 
-                placeholder="e.g., Anniversary, Naming Ceremony" 
-              />
+              </div>
             </div>
           )}
 
-          {/* Cover photo */}
-          <div>
-            <label className={lbl}>Cover Photo</label>
-            <div
-              onClick={() => fileRef.current?.click()}
-              className={`cursor-pointer rounded-xl overflow-hidden border-2 border-dashed transition-colors ${coverPreview ? 'border-[#FFC107]' : 'border-[#E8E8E8] hover:border-[#FFC107]'}`}
-            >
-              {coverPreview ? (
-                <div className="relative h-32">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={coverPreview} alt="preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <p className="text-white text-xs font-semibold">Click to change</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="h-24 flex flex-col items-center justify-center gap-1.5 text-[#bbb]">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                  <p className="text-xs font-medium">Click to upload cover photo</p>
-                </div>
-              )}
-            </div>
-            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleCoverChange} />
-          </div>
+          {/* ── Step 2: Function Details ── */}
+          {step === 2 && (
+            <form onSubmit={handleStep2Submit} className="space-y-4">
+              {/* Function Name */}
+              <div>
+                <label className={lbl}>Function Name <span className="text-[#FFC107]">*</span></label>
+                <input
+                  required
+                  value={form.function_name}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setForm((prev) => {
+                      const updates: Record<string, string> = { function_name: val };
+                      if (form.event_type === 'wedding' || form.event_type === 'engagement' || form.event_type === 'valakaappu') {
+                        const parts = val.split(' & ');
+                        updates.bride_name = parts[0] || '';
+                        updates.groom_name = parts[1] || '';
+                      } else if (form.event_type === 'birthday') {
+                        updates.birthday_person_name = val;
+                      } else if (form.event_type === 'housewarming') {
+                        const parts = val.split(' & ');
+                        updates.host_name = parts[0] || '';
+                        updates.spouse_name = parts[1] || '';
+                      } else if (form.event_type === 'graduation') {
+                        updates.graduate_name = val;
+                      } else if (form.event_type === 'custom') {
+                        updates.custom_title = val;
+                      }
+                      return { ...prev, ...updates };
+                    });
+                  }}
+                  className={inp}
+                  placeholder={
+                    form.event_type === 'wedding' ? 'Arun & Priya Wedding' :
+                    form.event_type === 'birthday' ? 'Birthday Celebration' :
+                    form.event_type === 'custom' ? 'e.g., Anniversary' :
+                    form.event_type === 'engagement' ? 'Partner 1 & Partner 2' :
+                    form.event_type === 'valakaappu' ? 'Mother & Father Name' :
+                    form.event_type === 'housewarming' ? 'Host & Spouse Name' :
+                    form.event_type === 'graduation' ? 'Graduate Name' :
+                    ''
+                  }
+                />
+                <p className="text-[10px] text-[#999] mt-1">This name will be shown to guests. It syncs with the details you enter below.</p>
+              </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {form.event_type === 'wedding' ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={lbl}>Bride Name <span className="text-[#FFC107]">*</span></label>
-                  <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={inp} placeholder="Priya" />
-                </div>
-                <div>
-                  <label className={lbl}>Groom Name <span className="text-[#FFC107]">*</span></label>
-                  <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={inp} placeholder="Ravi" />
-                </div>
-              </div>
-            ) : form.event_type === 'birthday' ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={lbl}>Person Name <span className="text-[#FFC107]">*</span></label>
-                  <input required value={form.birthday_person_name} onChange={(e) => setForm({ ...form, birthday_person_name: e.target.value })} className={inp} placeholder="Arun" />
-                </div>
-                <div>
-                  <label className={lbl}>Age</label>
-                  <input type="number" min="1" max="120" value={form.birthday_person_age} onChange={(e) => setForm({ ...form, birthday_person_age: e.target.value })} className={inp} placeholder="25" />
-                </div>
-              </div>
-            ) : form.event_type === 'engagement' ? (
-              <div className="space-y-3">
+              {/* Name fields for specific event types */}
+              {(form.event_type === 'wedding' || form.event_type === 'engagement' || form.event_type === 'valakaappu') && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={lbl}>Partner 1 Name <span className="text-[#FFC107]">*</span></label>
-                    <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={inp} placeholder="Priya" />
+                    <label className={lbl}>{nameLabels.name1} <span className="text-[#FFC107]">*</span></label>
+                    <input required value={form.bride_name} onChange={(e) => {
+                      const val = e.target.value;
+                      setForm((prev) => {
+                        const fn = `${val} & ${prev.groom_name} ${prev.event_type === 'wedding' ? 'Wedding' : prev.event_type === 'engagement' ? 'Engagement' : 'Valakaappu'}`;
+                        return { ...prev, bride_name: val, function_name: fn };
+                      });
+                    }} className={inp} placeholder={nameLabels.placeholder1} />
                   </div>
                   <div>
-                    <label className={lbl}>Partner 2 Name <span className="text-[#FFC107]">*</span></label>
-                    <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={inp} placeholder="Ravi" />
+                    <label className={lbl}>{nameLabels.name2} <span className="text-[#FFC107]">*</span></label>
+                    <input required value={form.groom_name} onChange={(e) => {
+                      const val = e.target.value;
+                      setForm((prev) => {
+                        const fn = `${prev.bride_name} & ${val} ${prev.event_type === 'wedding' ? 'Wedding' : prev.event_type === 'engagement' ? 'Engagement' : 'Valakaappu'}`;
+                        return { ...prev, groom_name: val, function_name: fn };
+                      });
+                    }} className={inp} placeholder={nameLabels.placeholder2} />
                   </div>
                 </div>
+              )}
+
+              {form.event_type === 'birthday' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={lbl}>Person Name <span className="text-[#FFC107]">*</span></label>
+                    <input required value={form.birthday_person_name} onChange={(e) => {
+                      const val = e.target.value;
+                      setForm((prev) => ({ ...prev, birthday_person_name: val, function_name: `${val}'s Birthday Celebration` }));
+                    }} className={inp} placeholder="Arun" />
+                  </div>
+                  <div>
+                    <label className={lbl}>Age</label>
+                    <input type="number" min="1" max="120" value={form.birthday_person_age} onChange={(e) => setForm({ ...form, birthday_person_age: e.target.value })} className={inp} placeholder="25" />
+                  </div>
+                </div>
+              )}
+
+              {form.event_type === 'engagement' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={lbl}>Mother Name <span className="text-[#FFC107]">*</span></label>
-                    <input required value={form.mother_name} onChange={(e) => setForm({ ...form, mother_name: e.target.value })} className={inp} placeholder="Lakshmi" />
+                    <input required value={form.mother_name} onChange={(e) => {
+                      const val = e.target.value;
+                      setForm((prev) => {
+                        const fn = `${val} & ${prev.father_name} Engagement`;
+                        return { ...prev, mother_name: val, function_name: fn };
+                      });
+                    }} className={inp} placeholder="Lakshmi" />
                   </div>
                   <div>
                     <label className={lbl}>Father Name <span className="text-[#FFC107]">*</span></label>
-                    <input required value={form.father_name} onChange={(e) => setForm({ ...form, father_name: e.target.value })} className={inp} placeholder="Ravi" />
+                    <input required value={form.father_name} onChange={(e) => {
+                      const val = e.target.value;
+                      setForm((prev) => {
+                        const fn = `${prev.mother_name} & ${val} Engagement`;
+                        return { ...prev, father_name: val, function_name: fn };
+                      });
+                    }} className={inp} placeholder="Ravi" />
                   </div>
                 </div>
-              </div>
-            ) : form.event_type === 'valakaappu' ? (
+              )}
+
+              {form.event_type === 'housewarming' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={lbl}>Host Name <span className="text-[#FFC107]">*</span></label>
+                    <input required value={form.host_name} onChange={(e) => {
+                      const val = e.target.value;
+                      setForm((prev) => {
+                        const fn = `${val}${prev.spouse_name ? ' & ' + prev.spouse_name : ''} Housewarming`;
+                        return { ...prev, host_name: val, function_name: fn };
+                      });
+                    }} className={inp} placeholder="Arun" />
+                  </div>
+                  <div>
+                    <label className={lbl}>Spouse Name <span className="text-[#FFC107]">*</span></label>
+                    <input required value={form.spouse_name} onChange={(e) => {
+                      const val = e.target.value;
+                      setForm((prev) => {
+                        const fn = `${prev.host_name}${val ? ' & ' + val : ''} Housewarming`;
+                        return { ...prev, spouse_name: val, function_name: fn };
+                      });
+                    }} className={inp} placeholder="Priya" />
+                  </div>
+                </div>
+              )}
+
+              {form.event_type === 'graduation' && (
+                <div>
+                  <label className={lbl}>Graduate Name <span className="text-[#FFC107]">*</span></label>
+                  <input required value={form.graduate_name} onChange={(e) => {
+                    const val = e.target.value;
+                    setForm((prev) => ({ ...prev, graduate_name: val, function_name: `${val}'s Graduation` }));
+                  }} className={inp} placeholder="Arun" />
+                </div>
+              )}
+
+              {/* Date & Time */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={lbl}>{nameLabels.name1} <span className="text-[#FFC107]">*</span></label>
-                  <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={inp} placeholder={nameLabels.placeholder1} />
+                  <label className={lbl}>
+                    Date <span className="text-[#FFC107]">*</span>
+                    <span className="font-normal text-[#999] ml-1">
+                      {isPast ? '(past dates only)' : '(today or upcoming)'}
+                    </span>
+                  </label>
+                  <input
+                    required
+                    type="date"
+                    value={form.wedding_date}
+                    max={isPast ? todayStr : undefined}
+                    min={!isPast ? todayStr : undefined}
+                    onChange={(e) => setForm({ ...form, wedding_date: e.target.value })}
+                    className={inp}
+                  />
                 </div>
                 <div>
-                  <label className={lbl}>{nameLabels.name2} <span className="text-[#FFC107]">*</span></label>
-                  <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={inp} placeholder={nameLabels.placeholder2} />
+                  <label className={lbl}>Time</label>
+                  <input
+                    type="time"
+                    value={form.wedding_date ? '10:00' : ''}
+                    onChange={() => {}}
+                    className={inp}
+                    placeholder="Select time"
+                  />
                 </div>
               </div>
-            ) : form.event_type === 'housewarming' ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={lbl}>Host Name <span className="text-[#FFC107]">*</span></label>
-                  <input required value={form.host_name} onChange={(e) => setForm({ ...form, host_name: e.target.value })} className={inp} placeholder="Arun" />
-                </div>
-                <div>
-                  <label className={lbl}>Spouse Name <span className="text-[#FFC107]">*</span></label>
-                  <input required value={form.spouse_name} onChange={(e) => setForm({ ...form, spouse_name: e.target.value })} className={inp} placeholder="Priya" />
-                </div>
-              </div>
-            ) : form.event_type === 'graduation' ? (
-               <div>
-                 <label className={lbl}>Graduate Name <span className="text-[#FFC107]">*</span></label>
-                 <input required value={form.graduate_name} onChange={(e) => setForm({ ...form, graduate_name: e.target.value })} className={inp} placeholder="Arun" />
-               </div>
-             ) : null}
-            <div>
-              <label className={lbl}>
-                Event Date <span className="text-[#FFC107]">*</span>
-                <span className="font-normal text-[#999] ml-1">
-                  {isPast ? '(past dates only)' : '(today or upcoming)'}
-                </span>
-              </label>
-              <div className={`grid gap-2 mb-2 ${isPast ? 'grid-cols-2' : 'grid-cols-3'}`}>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, wedding_date: todayStr })}
-                  className="px-2 py-2 text-xs font-medium rounded-lg border border-[#E8E8E8] hover:border-[#FFC107] transition-colors"
-                >
-                  Today
-                </button>
-                {!isPast && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const tomorrow = new Date();
-                      tomorrow.setDate(tomorrow.getDate() + 1);
-                      setForm({ ...form, wedding_date: tomorrow.toISOString().split('T')[0] });
-                    }}
-                    className="px-2 py-2 text-xs font-medium rounded-lg border border-[#E8E8E8] hover:border-[#FFC107] transition-colors"
-                  >
-                    Tomorrow
-                  </button>
-                )}
-                {isPast && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const yesterday = new Date();
-                      yesterday.setDate(yesterday.getDate() - 1);
-                      setForm({ ...form, wedding_date: yesterday.toISOString().split('T')[0] });
-                    }}
-                    className="px-2 py-2 text-xs font-medium rounded-lg border border-[#E8E8E8] hover:border-[#FFC107] transition-colors"
-                  >
-                    Yesterday
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="px-2 py-2 text-xs font-medium rounded-lg border border-[#E8E8E8] hover:border-[#FFC107] transition-colors"
-                >
-                  Choose Date
-                </button>
-              </div>
-              <input
-                required
-                type="date"
-                value={form.wedding_date}
-                max={isPast ? todayStr : undefined}
-                min={!isPast ? todayStr : undefined}
-                onChange={(e) => setForm({ ...form, wedding_date: e.target.value })}
-                className={inp}
-              />
-            </div>
-            <div>
-              <label className={lbl}>Venue (Optional)</label>
-              <input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} className={inp} placeholder="Sri Murugan Mahal, Chennai" />
-            </div>
-            <div>
-              <label className={lbl}>City (Optional)</label>
-              <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inp} placeholder="Chennai" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+
+              {/* Venue & City */}
               <div>
-                <label className={lbl}>Latitude</label>
-                <input type="number" step="any" value={form.venue_latitude} onChange={(e) => setForm({ ...form, venue_latitude: e.target.value })} className={inp} placeholder="13.0827" />
+                <label className={lbl}>Venue</label>
+                <input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} className={inp} placeholder="Sri Murugan Mahal, Chennai" />
               </div>
               <div>
-                <label className={lbl}>Longitude</label>
-                <input type="number" step="any" value={form.venue_longitude} onChange={(e) => setForm({ ...form, venue_longitude: e.target.value })} className={inp} placeholder="80.2707" />
+                <label className={lbl}>City</label>
+                <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inp} placeholder="Chennai" />
               </div>
-            </div>
-            <div>
-              <label className={lbl}>Description</label>
-              <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={`${inp} resize-none`} placeholder="A brief note about the event…" />
-            </div>
-            <div className="flex gap-3 pt-1">
-              <button type="button" onClick={onClose} className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold hover:border-[#ccc] transition-colors">Cancel</button>
-              <button type="submit" disabled={loading} className="flex-1 bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
-                {loading ? 'Creating…' : 'Create Event →'}
+
+              {/* Description */}
+              <div>
+                <label className={lbl}>Description (Optional)</label>
+                <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={`${inp} resize-none`} placeholder="A brief note about the event…" />
+                <p className="text-[10px] text-[#999] mt-1">ℹ️ These details will be shown to guests on the invitation page.</p>
+              </div>
+
+              {/* Cover Photo */}
+              <div>
+                <label className={lbl}>Cover Photo</label>
+                <div
+                  onClick={() => fileRef.current?.click()}
+                  className={`cursor-pointer rounded-xl overflow-hidden border-2 border-dashed transition-colors ${coverPreview ? 'border-[#FFC107]' : 'border-[#E8E8E8] hover:border-[#FFC107]'}`}
+                >
+                  {coverPreview ? (
+                    <div className="relative h-32">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={coverPreview} alt="preview" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                        <p className="text-white text-xs font-semibold">Click to change</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-24 flex flex-col items-center justify-center gap-1.5 text-[#bbb]">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      <p className="text-xs font-medium">Click to upload cover photo</p>
+                    </div>
+                  )}
+                </div>
+                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleCoverChange} />
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setStep(1)} className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold hover:border-[#ccc] transition-colors">← Back</button>
+                <button type="submit" disabled={loading} className="flex-1 bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
+                  {loading ? 'Submitting…' : 'Submit for Approval →'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ── Step 3: Pending Approval ── */}
+          {step === 3 && (
+            <div className="space-y-5 text-center">
+              <div className="mx-auto w-16 h-16 bg-[#FFFCF5] border-2 border-[#FFC107] rounded-full flex items-center justify-center text-3xl">
+                ⏳
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#101010] mb-1">Your Function is Submitted!</h3>
+                <p className="text-xs text-[#999] leading-relaxed">
+                  Your function has been submitted for admin approval.<br />
+                  You will be notified once it is approved.
+                </p>
+              </div>
+              <div className="bg-[#FFFCF5] border border-[#FFE082] rounded-xl p-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="text-xs font-bold text-[#B8860B] uppercase tracking-wider">Status</span>
+                  <span className="text-[10px] font-bold bg-[#FFC107] text-black px-2 py-0.5 rounded-full">Pending Approval</span>
+                </div>
+                <p className="text-[10px] text-[#999]">
+                  Review in progress · Event not yet active · Waiting for administrator verification
+                </p>
+              </div>
+              <button type="button" onClick={handleStep3Done} className="w-full bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors">
+                Done
               </button>
             </div>
-          </form>
+          )}
         </div>
       </div>
     </div>

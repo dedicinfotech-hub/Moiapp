@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import Icon from '@/components/ui/Icon';
 import { adminApi } from '@/lib/api';
 
 type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support';
@@ -21,7 +22,7 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState('daily');
 
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     try {
       setLoading(true);
       const response = await adminApi.getAnalytics(period);
@@ -31,7 +32,7 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
     } finally {
       setLoading(false);
     }
-  };
+  }, [period]);
 
   const exportCSV = () => {
     if (!analytics) return;
@@ -54,7 +55,7 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
 
   useEffect(() => {
     loadAnalytics();
-  }, [period]);
+  }, [period, loadAnalytics]);
 
   if (loading) {
     return (
@@ -91,7 +92,7 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
             onClick={exportCSV}
             className="text-xs bg-white border border-[#E8E8E8] text-[#666] px-3 py-1.5 rounded-lg hover:border-[#FFC107] transition-colors"
           >
-            📥 Export CSV
+            <Icon name="download" size={14} className="inline mr-1" /> Export CSV
           </button>
           <button
             onClick={() => onNavigate('admin-dashboard')}
@@ -144,7 +145,7 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
 
         {/* Top Cities */}
         <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Top 5 Cities</h3>
+          <h3 className="font-semibold text-[#101010] text-sm mb-4">Guest Cities</h3>
           {analytics?.topCities && analytics.topCities.length > 0 ? (
             <div className="space-y-3">
               {analytics.topCities.map((item, i) => (
@@ -161,7 +162,7 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
 
         {/* Peak Function Months */}
         <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Peak Function Months</h3>
+          <h3 className="font-semibold text-[#101010] text-sm mb-4">Peak Event Months</h3>
           {analytics?.peakMonths && analytics.peakMonths.length > 0 ? (
             <div className="space-y-3">
               {analytics.peakMonths.map((item, i) => (
@@ -178,7 +179,7 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
 
         {/* Feature Usage */}
         <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Most Used Features</h3>
+          <h3 className="font-semibold text-[#101010] text-sm mb-4">Event Type Distribution</h3>
           {analytics?.featureUsage && analytics.featureUsage.length > 0 ? (
             <div className="space-y-3">
               {analytics.featureUsage.map((item, i) => (
@@ -195,7 +196,7 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
 
         {/* Free vs Premium Ratio */}
         <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Free vs Premium Users</h3>
+          <h3 className="font-semibold text-[#101010] text-sm mb-4">Organizer Plan Mix</h3>
           {analytics?.premiumRatio ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between">

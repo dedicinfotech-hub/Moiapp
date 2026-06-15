@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Icon, { type IconName } from '@/components/ui/Icon';
 import { eventsApi, Event } from '@/lib/api';
 
 export default function HomePage() {
@@ -33,26 +34,26 @@ export default function HomePage() {
           {/* Left copy */}
           <div className="flex-1 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 bg-[#FFC107]/15 border border-[#FFC107]/40 text-[#B8860B] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-6">
-              <span>💍</span> Tamil Wedding Gift Tracker
+              <Icon name="wedding" size={16} /> Tamil Wedding Gift Tracker
             </div>
 
             <h1 className="text-4xl lg:text-6xl font-extrabold text-[#101010] leading-[1.1] mb-5">
-              Celebrate with<br />
-              <span className="text-[#FFC107]">Moi</span> — the Tamil<br />
-              way of gifting
+              Create your wedding page.<br />
+              Track every <span className="text-[#FFC107]">moi</span> gift.<br />
+              Share with family.
             </h1>
 
             <p className="text-[#555] text-lg leading-relaxed mb-3 max-w-lg mx-auto lg:mx-0">
-              Browse weddings, give moi online, and let the couple track every gift — all in one place.
+              Create a wedding page, collect moi online or offline, and keep a clear gift record for the couple and family.
             </p>
             <p className="text-[#888] text-sm mb-8 max-w-md mx-auto lg:mx-0">
-              திருமண மொய் — எளிதாக கொடுங்கள், எளிதாக track பண்ணுங்கள்
+              மணமக்கள், குடும்பத்தினர், நண்பர்கள் — எல்லோருக்கும் எளிமையான மொய் பதிவு.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
               <Link href="/events"
-                className="bg-[#FFC107] text-black px-8 py-3.5 rounded-xl font-bold text-base hover:bg-[#E6AC00] transition-colors shadow-lg shadow-[#FFC107]/30 text-center">
-                Browse Weddings →
+                className="bg-[#FFC107] text-black px-8 py-3.5 rounded-xl font-bold text-base hover:bg-[#E6AC00] transition-colors shadow-lg shadow-[#FFC107]/30 text-center inline-flex items-center justify-center gap-2">
+                Browse Weddings <Icon name="arrow-right" size={18} />
               </Link>
               <Link href="/register"
                 className="border-2 border-[#E8E8E8] text-[#333] px-8 py-3.5 rounded-xl font-semibold text-base hover:border-[#FFC107] transition-colors text-center">
@@ -82,15 +83,17 @@ export default function HomePage() {
               <div className="bg-white rounded-2xl shadow-2xl shadow-black/10 overflow-hidden border border-[#F0E8C8]">
                 {/* Cover image */}
                 <div className="relative h-44 bg-gradient-to-br from-[#FFF8E1] to-[#FFFCF5] flex items-center justify-center overflow-hidden">
-                  {featuredEvent.cover_photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={featuredEvent.cover_photo} alt="cover" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="text-center">
-                      <div className="text-6xl mb-1">💍</div>
-                      <p className="text-[#B8860B] text-xs font-semibold">Wedding Event</p>
-                    </div>
-                  )}
+                    {featuredEvent.cover_photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={featuredEvent.cover_photo} alt="cover" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-center">
+                        <div className="mb-1 text-[#B8860B]">
+                          <Icon name="wedding" size={44} />
+                        </div>
+                        <p className="text-[#B8860B] text-xs font-semibold">Wedding Event</p>
+                      </div>
+                    )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   <div className="absolute bottom-3 left-4 text-white">
                     <p className="font-bold text-lg leading-tight">{featuredEvent.bride_name} &amp; {featuredEvent.groom_name}</p>
@@ -104,13 +107,13 @@ export default function HomePage() {
                 <div className="p-4">
                   {featuredEvent.venue && (
                     <p className="text-xs text-[#666] mb-3 flex items-center gap-1">
-                      <span>📍</span> {featuredEvent.venue}
+                      <Icon name="map" size={14} /> {featuredEvent.venue}
                     </p>
                   )}
                   <div className="flex gap-4 mb-4">
                     <div>
                       <p className="text-lg font-extrabold text-[#101010]">{featuredEvent.guest_count || 0}</p>
-                      <p className="text-[10px] text-[#888]">Guests registered</p>
+                      <p className="text-[10px] text-[#888] flex items-center gap-1"><Icon name="users" size={12} /> Guests registered</p>
                     </div>
                   </div>
                   <Link href={`/e/${featuredEvent.slug}`}
@@ -151,7 +154,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {/* Guest flow */}
             <div className="bg-[#FFFCF5] border border-[#FFE082] rounded-2xl p-7">
-              <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-5">For Guests 👥</p>
+              <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-5 flex items-center gap-2"><Icon name="users" size={16} /> For Guests</p>
               <div className="space-y-5">
                 {[
                   { n: '1', t: 'Browse Events',  d: 'Find the wedding from the events listing page.' },
@@ -168,13 +171,13 @@ export default function HomePage() {
                 ))}
               </div>
               <Link href="/events" className="mt-6 inline-flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#E6AC00] transition-colors">
-                Browse Events →
+                Browse Events <Icon name="arrow-right" size={16} />
               </Link>
             </div>
 
             {/* Organizer flow */}
             <div className="bg-[#fafafa] border border-[#E8E8E8] rounded-2xl p-7">
-              <p className="text-xs font-bold text-[#666] uppercase tracking-widest mb-5">For Couples / Organizers 💒</p>
+              <p className="text-xs font-bold text-[#666] uppercase tracking-widest mb-5 flex items-center gap-2"><Icon name="venue" size={16} /> For Couples / Organizers</p>
               <div className="space-y-5">
                 {[
                   { n: '1', t: 'Create Account',  d: 'Register and create your wedding event in minutes.' },
@@ -191,7 +194,7 @@ export default function HomePage() {
                 ))}
               </div>
               <Link href="/register" className="mt-6 inline-flex items-center gap-2 border-2 border-[#E8E8E8] text-[#333] px-5 py-2.5 rounded-xl font-bold text-sm hover:border-[#FFC107] transition-colors">
-                List Your Wedding →
+                List Your Wedding <Icon name="arrow-right" size={16} />
               </Link>
             </div>
           </div>
@@ -207,15 +210,17 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { icon: '📋', title: 'Moi Register',    desc: 'Record every guest gift with name, amount and payment mode instantly.' },
-              { icon: '📱', title: 'UPI Payments',    desc: 'Guests pay directly to your UPI — QR code shown after submission.' },
-              { icon: '🗺️', title: 'Venue Map',       desc: 'Interactive map shown on every event page so guests find the venue.' },
-              { icon: '📸', title: 'Cover Photo',     desc: 'Upload a beautiful cover photo for your event listing.' },
-              { icon: '📊', title: 'Live Dashboard',  desc: 'Real-time totals, guest count and breakdown by relation.' },
-              { icon: '📥', title: 'Export CSV',      desc: 'Download all entries as a spreadsheet anytime.' },
+              { icon: 'list' as IconName, title: 'Moi Register',    desc: 'Record every guest gift with name, amount and payment mode instantly.' },
+              { icon: 'wallet' as IconName, title: 'UPI Payments',    desc: 'Guests pay directly to your UPI — QR code shown after submission.' },
+              { icon: 'map' as IconName, title: 'Venue Map',       desc: 'Interactive map shown on every event page so guests find the venue.' },
+              { icon: 'photo' as IconName, title: 'Cover Photo',     desc: 'Upload a beautiful cover photo for your event listing.' },
+              { icon: 'dashboard' as IconName, title: 'Live Dashboard',  desc: 'Real-time totals, guest count and breakdown by relation.' },
+              { icon: 'download' as IconName, title: 'Export CSV',      desc: 'Download all entries as a spreadsheet anytime.' },
             ].map((f) => (
               <div key={f.title} className="bg-white border border-[#E8E8E8] rounded-2xl p-5 hover:border-[#FFC107] hover:shadow-md transition-all">
-                <div className="text-3xl mb-3">{f.icon}</div>
+                <div className="text-3xl mb-3 text-tn-gold">
+                  <Icon name={f.icon} size={28} />
+                </div>
                 <h3 className="font-bold text-[#101010] text-sm mb-1">{f.title}</h3>
                 <p className="text-[#666] text-xs leading-relaxed">{f.desc}</p>
               </div>
@@ -243,8 +248,8 @@ export default function HomePage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={ev.cover_photo} alt="cover" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-5xl">💍</span>
+                      <div className="w-full h-full flex items-center justify-center text-[#B8860B]">
+                        <Icon name="wedding" size={40} />
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -253,11 +258,11 @@ export default function HomePage() {
                       <p className="text-xs text-white/75">{new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     </div>
                   </div>
-                  <div className="px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs text-[#666]">
-                      <span>👥</span>
-                      <span>{ev.guest_count || 0} guests registered</span>
-                    </div>
+                    <div className="px-4 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs text-[#666]">
+                        <Icon name="users" size={14} />
+                        <span>{ev.guest_count || 0} guests registered</span>
+                      </div>
                     <span className="text-xs font-bold text-[#FFC107] group-hover:underline">Give Moi →</span>
                   </div>
                 </Link>
@@ -270,7 +275,9 @@ export default function HomePage() {
       {/* ── CTA ── */}
       <section className="py-16 px-4 bg-gradient-to-br from-[#FFF8E1] to-[#FFFCF5]">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="text-5xl mb-5">💒</div>
+          <div className="mb-5 text-[#B8860B]">
+            <Icon name="venue" size={44} />
+          </div>
           <h2 className="text-2xl lg:text-3xl font-extrabold text-[#101010] mb-3">
             உங்கள் திருமணத்தை இப்போதே பதிவு செய்யுங்கள்
           </h2>

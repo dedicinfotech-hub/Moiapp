@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Icon from '@/components/ui/Icon';
 import { eventsApi, Event } from '@/lib/api';
 
 export default function EventsListingPage() {
@@ -101,7 +102,9 @@ export default function EventsListingPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-24">
-            <div className="text-6xl mb-4">💍</div>
+            <div className="mb-4 text-[#B8860B]">
+              <Icon name="wedding" size={44} />
+            </div>
             <h2 className="text-lg font-bold text-[#444] mb-2">No events found</h2>
             <p className="text-[#666] text-sm mb-6">Be the first to list your wedding!</p>
             <Link href="/register" className="bg-[#FFC107] text-black px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#E6AC00] transition-colors">
@@ -186,7 +189,9 @@ function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-              <span className="text-5xl">{event.event_type === 'birthday' ? '🎂' : '💍'}</span>
+              <span className="text-5xl text-[#B8860B]">
+                <Icon name={event.event_type === 'birthday' ? 'gift' : 'wedding'} size={40} />
+              </span>
               <p className="text-[#B8860B] text-xs font-semibold">
                 {event.event_type === 'birthday' ? 'Birthday Event' : 'Wedding Event'}
               </p>
@@ -206,7 +211,7 @@ function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
           {/* Status badge */}
           {!isPast && daysLeft >= 0 && daysLeft <= 7 && (
             <div className="absolute top-3 right-3 bg-[#FFC107] text-black text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow">
-              {daysLeft === 0 ? '🎉 Today!' : `${daysLeft}d left`}
+              {daysLeft === 0 ? 'Today!' : `${daysLeft}d left`}
             </div>
           )}
           {isPast && (
@@ -228,14 +233,14 @@ function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
         <div className="p-4">
           {event.venue && (
             <p className="text-[#555] text-xs flex items-center gap-1.5 mb-3 truncate">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#888"/></svg>
+              <Icon name="map" size={11} />
               {event.venue}
             </p>
           )}
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs text-[#666]">
-              <span>👥</span>
+              <Icon name="users" size={14} />
               <span className="font-medium"><strong className="font-bold text-[#101010]">{event.guest_count || 0}</strong> guests registered</span>
             </div>
             <span className={`text-xs font-bold px-3 py-1.5 rounded-full transition-colors ${

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { notificationsApi, type Notification } from '@/lib/api';
+import Icon, { type IconName } from '@/components/ui/Icon';
 
 function notificationsEnabled(): boolean {
   if (typeof window === 'undefined') return true;
@@ -131,14 +132,14 @@ export default function NotificationBell() {
     }
   };
 
-  const getNotificationIcon = (type: string) => {
+  const getNotificationIcon = (type: string): IconName => {
     switch (type) {
-      case 'entry_saved': return '✅';
-      case 'approval': return '✅';
-      case 'reminder': return '🔔';
-      case 'return_gift': return '🎁';
-      case 'function_date': return '📅';
-      default: return '📢';
+      case 'entry_saved': return 'check';
+      case 'approval': return 'approval';
+      case 'reminder': return 'calendar';
+      case 'return_gift': return 'gift';
+      case 'function_date': return 'calendar';
+      default: return 'alert';
     }
   };
 
@@ -192,7 +193,7 @@ export default function NotificationBell() {
                   onClick={() => !n.is_read && markAsRead(n.id)}
                 >
                   <div className="flex items-start gap-2">
-                    <span className="text-lg">{getNotificationIcon(n.type)}</span>
+                    <span className="text-lg text-[#7C3AED]"><Icon name={getNotificationIcon(n.type)} size={18} /></span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900">{n.title}</p>
                       {n.message && (

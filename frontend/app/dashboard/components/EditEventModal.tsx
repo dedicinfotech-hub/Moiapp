@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Icon, { type IconName } from '@/components/ui/Icon';
 import { Event, eventsApi, showSuccess } from '@/lib/api';
 import ApprovalBanner from '@/components/ApprovalBanner';
 
@@ -10,15 +11,16 @@ interface EditEventModalProps {
   onUpdated: () => void;
 }
 
-type EventType = 'wedding' | 'birthday' | 'engagement' | 'valakaappu' | 'housewarming' | 'custom';
+type EventType = 'wedding' | 'birthday' | 'engagement' | 'valakaappu' | 'housewarming' | 'graduation' | 'custom';
 
-const EVENT_TYPES: { value: EventType; label: string; icon: string }[] = [
-  { value: 'wedding', label: 'Wedding', icon: '💒' },
-  { value: 'birthday', label: 'Birthday', icon: '🎂' },
-  { value: 'engagement', label: 'Engagement', icon: '💍' },
-  { value: 'valakaappu', label: 'Valakaappu', icon: '🌺' },
-  { value: 'housewarming', label: 'Housewarming', icon: '🏠' },
-  { value: 'custom', label: 'Custom', icon: '🎉' },
+const EVENT_TYPES: { value: EventType; label: string; icon: IconName }[] = [
+  { value: 'wedding', label: 'Wedding', icon: 'wedding' },
+  { value: 'birthday', label: 'Birthday', icon: 'sparkle' },
+  { value: 'engagement', label: 'Engagement', icon: 'wedding' },
+  { value: 'valakaappu', label: 'Valakaappu', icon: 'sparkle' },
+  { value: 'housewarming', label: 'Housewarming', icon: 'venue' },
+  { value: 'graduation', label: 'Graduation', icon: 'sparkle' },
+  { value: 'custom', label: 'Custom', icon: 'sparkle' },
 ];
 
 export default function EditEventModal({
@@ -39,7 +41,9 @@ export default function EditEventModal({
     father_name: event.father_name || '',
     host_name: event.host_name || '',
     spouse_name: event.spouse_name || '',
+    graduate_name: event.graduate_name || '',
     wedding_date: event.wedding_date,
+    city: event.city || '',
     venue: event.venue || '',
     venue_latitude: event.venue_latitude?.toString() || '',
     venue_longitude: event.venue_longitude?.toString() || '',
@@ -71,6 +75,7 @@ export default function EditEventModal({
       const submitData: Record<string, unknown> = {
         event_type: form.event_type,
         wedding_date: form.wedding_date,
+        city: form.city,
         venue: form.venue,
         venue_latitude: form.venue_latitude ? parseFloat(form.venue_latitude) : null,
         venue_longitude: form.venue_longitude ? parseFloat(form.venue_longitude) : null,
@@ -98,6 +103,8 @@ export default function EditEventModal({
       } else if (form.event_type === 'housewarming') {
         submitData.host_name = form.host_name;
         submitData.spouse_name = form.spouse_name;
+      } else if (form.event_type === 'graduation') {
+        submitData.graduate_name = form.graduate_name;
       }
 
       const res = await eventsApi.update(event.id, submitData);
@@ -133,7 +140,7 @@ export default function EditEventModal({
   const eventTitle = form.event_type === 'custom' 
     ? (form.custom_title ? `Edit ${form.custom_title} Event` : 'Edit Custom Event')
     : `Edit ${selectedType?.label || 'Event'}`;
-  const eventIcon = selectedType?.icon || '🎉';
+  const eventIcon = selectedType?.icon || 'sparkle';
   const eventSubtitle = form.event_type === 'wedding' 
     ? 'திருமண நிகழ்வு திருத்தம்' 
     : form.event_type === 'birthday' 
@@ -144,6 +151,8 @@ export default function EditEventModal({
     ? 'வலக்காப்பு திருத்தம்'
     : form.event_type === 'housewarming'
     ? 'வீட்டு பண்டிகை திருத்தம்'
+    : form.event_type === 'graduation'
+    ? 'பட்டமளிப்பு நிகழ்வு திருத்தம்'
     : 'நிகழ்வு திருத்தம்';
 
   // Get appropriate name field labels based on event type
@@ -168,7 +177,7 @@ export default function EditEventModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#F0F0F0]">
           <div className="flex items-center gap-2.5">
-            <span className="text-xl">{eventIcon}</span>
+            <Icon name={eventIcon} />
             <div>
               <h2 className="font-bold text-[#101010] text-base leading-tight">{eventTitle}</h2>
               <p className="text-[11px] text-[#999]">{eventSubtitle}</p>
@@ -196,7 +205,7 @@ export default function EditEventModal({
                       : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
                   }`}
                 >
-                  <span className="text-lg">{type.icon}</span>
+                  <Icon name={type.icon} />
                   {type.label}
                 </button>
               ))}
@@ -310,10 +319,19 @@ export default function EditEventModal({
                   <input required value={form.spouse_name} onChange={(e) => setForm({ ...form, spouse_name: e.target.value })} className={inp} placeholder="Priya" />
                 </div>
               </div>
+            ) : form.event_type === 'graduation' ? (
+              <div>
+                <label className={lbl}>Graduate Name <span className="text-[#FFC107]">*</span></label>
+                <input required value={form.graduate_name} onChange={(e) => setForm({ ...form, graduate_name: e.target.value })} className={inp} placeholder="Arun" />
+              </div>
             ) : null}
             <div>
               <label className={lbl}>Event Date <span className="text-[#FFC107]">*</span></label>
               <input required type="date" value={form.wedding_date} onChange={(e) => setForm({ ...form, wedding_date: e.target.value })} className={inp} />
+            </div>
+            <div>
+              <label className={lbl}>City</label>
+              <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inp} placeholder="Chennai" />
             </div>
             <div>
               <label className={lbl}>Venue</label>

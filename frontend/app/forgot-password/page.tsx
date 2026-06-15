@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
+import Icon from '@/components/ui/Icon';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function ForgotPasswordPage() {
 
   const inputCls = "w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#FFC107] transition-colors";
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setMessage('');
@@ -38,7 +39,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-8">
           <div className="text-center mb-8">
-            <div className="text-4xl mb-3">💍</div>
+            <Icon name="lock" size={44} className="mb-3 text-[#B8860B]" />
             <h1 className="text-2xl font-bold text-gray-900">Forgot Password</h1>
             <p className="text-gray-400 text-sm mt-1">Enter your email to reset your password</p>
           </div>

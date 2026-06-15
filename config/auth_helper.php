@@ -36,5 +36,17 @@ function getAuthUser(): ?array {
     $payload = json_decode(base64_decode($token), true);
     if (!$payload || !isset($payload['exp']) || $payload['exp'] < time()) return null;
 
+    // Check if account is deleted (soft delete)
+    if (isset($payload['id'])) {
+        $db = getDB();
+        $stmt = $db->prepare('SELECT deleted_at FROM users WHERE id = ?');
+        $stmt->bind_param('i', $payload['id']);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if ($row && $row['deleted_at']) {
+            return null; // Account is deleted, reject token
+        }
+    }
+
     return $payload;
 }

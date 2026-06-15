@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Icon from '@/components/ui/Icon';
 import { adminApi } from '@/lib/api';
 
 type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support' | 'admin-approvals' | 'admin-private-events';
@@ -129,11 +130,11 @@ export default function ModuleAdminPrivateEvents({ onNavigate }: ModuleAdminPriv
                     {ev.host_email && ` · ${ev.host_email}`}
                     {ev.host_phone && ` · ${ev.host_phone}`}
                   </p>
-                  <div className="flex gap-3 mt-2 text-xs text-[#666]">
-                    <span>👥 {ev.guest_count} guests</span>
-                    <span>💰 ₹{Number(ev.total_moi).toLocaleString('en-IN')}</span>
-                    <span>ID: #{ev.id}</span>
-                  </div>
+                    <div className="flex flex-wrap gap-3 mt-2 text-xs text-[#666]">
+                      <span className="inline-flex items-center gap-1"><Icon name="users" size={12} /> {ev.guest_count} guests</span>
+                      <span className="inline-flex items-center gap-1"><Icon name="wallet" size={12} /> ₹{Number(ev.total_moi).toLocaleString('en-IN')}</span>
+                      <span>ID: #{ev.id}</span>
+                    </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   {ev.qr_enabled ? (

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import Icon from '@/components/ui/Icon';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     if (form.password !== form.confirm) { setError('Passwords do not match'); return; }
@@ -37,7 +38,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-8">
           <div className="text-center mb-8">
-            <div className="text-4xl mb-3">💒</div>
+            <Icon name="venue" size={44} className="mb-3 text-[#B8860B]" />
             <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
             <p className="text-gray-400 text-sm mt-1">Start tracking your wedding moi</p>
           </div>

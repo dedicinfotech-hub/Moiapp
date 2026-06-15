@@ -113,6 +113,77 @@ export const featuresApi = {
     }),
 };
 
+// ── Dashboard ──────────────────────────────────────────────────────────────────
+export const dashboardApi = {
+  summary: () => request<DashboardSummaryResponse>('/dashboard.php?action=summary'),
+};
+
+export interface DashboardSummaryResponse {
+  success: boolean;
+  summary: {
+    total_events: number;
+    total_guests: number;
+    total_cash: number;
+    total_gold: number;
+    total_gifts: number;
+    avg_cash_gift: number;
+  };
+  recentEntries: DashboardEntry[];
+  recentEvents: DashboardEvent[];
+}
+
+export interface DashboardEntry {
+  id: number;
+  event_id: number;
+  guest_name: string;
+  city?: string | null;
+  amount: number;
+  gift_type: 'cash' | 'gold' | 'silver' | 'gift';
+  gold_weight?: number | null;
+  gift_description?: string | null;
+  payment_mode: 'cash' | 'upi' | 'card' | 'cheque' | 'other';
+  created_at: string;
+  event_type?: string;
+  custom_title?: string;
+  wedding_date?: string;
+}
+
+export interface DashboardEvent {
+  id: number;
+  user_id: number;
+  slug: string;
+  event_type: Event['event_type'];
+  custom_title?: string;
+  bride_name?: string;
+  groom_name?: string;
+  birthday_person_name?: string;
+  birthday_person_age?: number;
+  parent1_name?: string;
+  parent2_name?: string;
+  mother_name?: string;
+  father_name?: string;
+  host_name?: string;
+  spouse_name?: string;
+  graduate_name?: string;
+  wedding_date: string;
+  city?: string | null;
+  venue?: string | null;
+  venue_latitude?: number;
+  venue_longitude?: number;
+  cover_photo: string | null;
+  description?: string;
+  is_active: number;
+  event_mode?: 'past' | 'new';
+  approval_status?: 'pending' | 'approved' | 'rejected';
+  approval_reason?: string | null;
+  guest_token?: string | null;
+  qr_enabled?: number;
+  qr_payment_count?: number;
+  created_at: string;
+  guest_count?: number;
+  total_moi?: number;
+}
+
 export const eventsApi = {
   listPublic: () => request<Event[]>('/events.php?public=1'),
 
@@ -360,6 +431,7 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
+  city?: string;
   upi_id?: string;
   bank_name?: string;
   account_number?: string;
@@ -386,8 +458,8 @@ export interface Event {
   spouse_name?: string;
   graduate_name?: string;
   wedding_date: string;
-  city?: string;
-  venue?: string;
+  city?: string | null;
+  venue?: string | null;
   venue_latitude?: number;
   venue_longitude?: number;
   cover_photo: string | null;
@@ -418,11 +490,13 @@ export interface MoiEntry {
   id: number;
   event_id: number;
   guest_name: string;
+  phone?: string | null;
   city?: string | null;
   company?: string | null;
   occupation?: string | null;
   amount: number;
   gift_type: 'cash' | 'gold' | 'silver' | 'gift';
+  guest_token?: string | null;
   gold_weight?: number | null;
   gift_description?: string | null;
   approximate_value?: number | null;

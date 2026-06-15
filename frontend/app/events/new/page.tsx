@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Icon from '@/components/ui/Icon';
 import { eventsApi, API_BASE } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
@@ -76,7 +77,9 @@ export default function NewEventPage() {
         <div className="bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-[#FFF8E1] to-[#FFFCF5] border-b border-[#FFE082] px-8 py-6 text-center">
-            <div className="text-4xl mb-2">💒</div>
+            <div className="mb-2 text-[#B8860B]">
+              <Icon name="venue" size={40} />
+            </div>
             <h1 className="text-xl font-extrabold text-[#101010]">Create Wedding Event</h1>
             <p className="text-[#888] text-sm mt-1">புதிய திருமண நிகழ்வு உருவாக்கவும்</p>
           </div>

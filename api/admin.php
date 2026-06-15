@@ -170,7 +170,7 @@ if ($method === 'GET' && $action === 'users') {
     }
     
     $sql = "
-        SELECT u.id, u.name, u.city, u.phone, u.created_at,
+        SELECT u.id, u.name, u.phone, u.created_at,
                (SELECT COUNT(*) FROM events WHERE user_id = u.id) as function_count
         FROM users u
         $where
@@ -271,13 +271,13 @@ if ($method === 'GET' && $action === 'analytics') {
         ")->fetch_all(MYSQLI_ASSOC);
     }
     
-    // Top 5 cities
+    // Top 5 cities (from moi entries)
     $topCities = $db->query("
-        SELECT city, COUNT(*) as count 
-        FROM users 
-        WHERE role = 'user' AND city IS NOT NULL AND city != ''
-        GROUP BY city 
-        ORDER BY count DESC 
+        SELECT city, COUNT(*) as count
+        FROM moi_entries
+        WHERE city IS NOT NULL AND city != ''
+        GROUP BY city
+        ORDER BY count DESC
         LIMIT 5
     ")->fetch_all(MYSQLI_ASSOC);
     

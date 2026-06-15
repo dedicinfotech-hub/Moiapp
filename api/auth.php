@@ -6,6 +6,39 @@ require_once __DIR__ . '/../config/mail.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
+// Helper: check if a column exists in a table
+function columnExists(mysqli $db, string $table, string $column): bool {
+    $result = $db->query("SHOW COLUMNS FROM `$table` LIKE '$column'");
+    return $result && $result->num_rows > 0;
+}
+
+// Helper: safe login log insert (ignores if table/column missing)
+function safeLoginLog(mysqli $db, ?int $userId, ?string $email, ?string $ipAddress, ?string $userAgent, string $status, ?string $role = null): void {
+    try {
+        $tableExists = $db->query("SHOW TABLES LIKE 'login_logs'")->num_rows > 0;
+        if (!$tableExists) {
+            return; // Table doesn't exist, skip logging
+        }
+
+        $hasRole = columnExists($db, 'login_logs', 'role');
+        if ($hasRole && $role !== null) {
+            $stmt = $db->prepare('INSERT INTO login_logs (user_id, email, role, ip_address, user_agent, status) VALUES (?, ?, ?, ?, ?, ?)');
+            if ($stmt) {
+                $stmt->bind_param('isssss', $userId, $email, $role, $ipAddress, $userAgent, $status);
+                $stmt->execute();
+            }
+        } else {
+            $stmt = $db->prepare('INSERT INTO login_logs (user_id, email, ip_address, user_agent, status) VALUES (?, ?, ?, ?, ?)');
+            if ($stmt) {
+                $stmt->bind_param('issss', $userId, $email, $ipAddress, $userAgent, $status);
+                $stmt->execute();
+            }
+        }
+    } catch (Exception $e) {
+        // Logging is non-critical; ignore errors
+    }
+}
+
 // ── OTP Helper Functions ─────────────────────────────────────────────────────
 function generateOTP(): string {
     return str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
@@ -216,11 +249,9 @@ if ($method === 'POST' && $action === 'login') {
             $stmt->execute();
         }
         // Log failed login
-        $logStmt = $db->prepare('INSERT INTO login_logs (user_id, email, role, ip_address, user_agent, status) VALUES (?, ?, ?, ?, ?, ?)');
         $logRole = $user['role'] ?? 'unknown';
         $logUserId = $user['id'] ?? null;
-        $logStmt->bind_param('isssss', $logUserId, $email, $logRole, $ipAddress, $userAgent, $status = 'failed');
-        $logStmt->execute();
+        safeLoginLog($db, $logUserId, $email, $ipAddress, $userAgent, 'failed', $logRole);
         http_response_code(401);
         echo json_encode(['error' => 'Invalid email or password']);
         exit;
@@ -229,9 +260,7 @@ if ($method === 'POST' && $action === 'login') {
     // Check if blocked
     if ($user['login_blocked_until'] && strtotime($user['login_blocked_until']) > time()) {
         // Log blocked attempt
-        $logStmt = $db->prepare('INSERT INTO login_logs (user_id, email, role, ip_address, user_agent, status) VALUES (?, ?, ?, ?, ?, ?)');
-        $logStmt->bind_param('isssss', $user['id'], $email, $user['role'], $ipAddress, $userAgent, $status = 'blocked');
-        $logStmt->execute();
+        safeLoginLog($db, $user['id'], $email, $ipAddress, $userAgent, 'blocked', $user['role'] ?? 'user');
         http_response_code(429);
         echo json_encode(['error' => 'Account locked. Try again later.']);
         exit;
@@ -265,9 +294,7 @@ if ($method === 'POST' && $action === 'login') {
         
         if (!$otpRow || $otpRow['admin_otp'] !== $otp || strtotime($otpRow['admin_otp_expires']) < time()) {
             // Log failed OTP attempt
-            $logStmt = $db->prepare('INSERT INTO login_logs (user_id, email, role, ip_address, user_agent, status) VALUES (?, ?, ?, ?, ?, ?)');
-            $logStmt->bind_param('isssss', $user['id'], $email, $user['role'], $ipAddress, $userAgent, $status = 'failed');
-            $logStmt->execute();
+            safeLoginLog($db, $user['id'], $email, $ipAddress, $userAgent, 'failed', $user['role'] ?? 'user');
             http_response_code(401);
             echo json_encode(['error' => 'Invalid or expired OTP']);
             exit;
@@ -285,9 +312,7 @@ if ($method === 'POST' && $action === 'login') {
     }
 
     // Log successful login
-    $logStmt = $db->prepare('INSERT INTO login_logs (user_id, email, role, ip_address, user_agent, status) VALUES (?, ?, ?, ?, ?, ?)');
-    $logStmt->bind_param('isssss', $user['id'], $email, $user['role'], $ipAddress, $userAgent, $status = 'success');
-    $logStmt->execute();
+    safeLoginLog($db, $user['id'], $email, $ipAddress, $userAgent, 'success', $user['role'] ?? 'user');
 
     $token = makeToken($user['id'], $user['email']);
     echo json_encode(['success' => true, 'token' => $token, 'user' => ['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email'], 'role' => $user['role'] ?? 'user']]);
@@ -316,6 +341,8 @@ if ($method === 'PUT' && $action === 'profile') {
     $data           = json_decode(file_get_contents('php://input'), true);
     $name           = trim($data['name']           ?? '');
     $phone          = trim($data['phone']          ?? '');
+    $city           = trim($data['city']           ?? '');
+    $language       = trim($data['language']       ?? '');
     $upi_id         = trim($data['upi_id']         ?? '');
     $bank_name      = trim($data['bank_name']      ?? '');
     $account_number = trim($data['account_number'] ?? '');
@@ -326,9 +353,9 @@ if ($method === 'PUT' && $action === 'profile') {
 
     $db   = getDB();
     $stmt = $db->prepare(
-        'UPDATE users SET name=?, phone=?, upi_id=?, bank_name=?, account_number=?, ifsc_code=?, account_holder=? WHERE id=?'
+        'UPDATE users SET name=?, phone=?, city=?, language=?, upi_id=?, bank_name=?, account_number=?, ifsc_code=?, account_holder=? WHERE id=?'
     );
-    $stmt->bind_param('sssssssi', $name, $phone, $upi_id, $bank_name, $account_number, $ifsc_code, $account_holder, $user['id']);
+    $stmt->bind_param('sssssssssi', $name, $phone, $city, $language, $upi_id, $bank_name, $account_number, $ifsc_code, $account_holder, $user['id']);
     $stmt->execute();
 
     // Fetch the role from database
@@ -343,6 +370,8 @@ if ($method === 'PUT' && $action === 'profile') {
         'name'           => $name,
         'email'          => $user['email'],
         'phone'          => $phone,
+        'city'           => $city,
+        'language'       => $language,
         'upi_id'         => $upi_id,
         'bank_name'      => $bank_name,
         'account_number' => $account_number,
@@ -445,6 +474,93 @@ if ($method === 'POST' && $action === 'reset-password') {
     $stmt->execute();
 
     echo json_encode(['success' => true, 'message' => 'Password reset successfully']);
+    exit;
+}
+
+// ── Delete Account (with 30-day grace period) ──────────────────────────────────
+if ($method === 'DELETE' && $action === 'account') {
+    $user = getAuthUser();
+    if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+
+    $db = getDB();
+
+    // Check if already deleted
+    $stmt = $db->prepare('SELECT deleted_at FROM users WHERE id = ?');
+    $stmt->bind_param('i', $user['id']);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+
+    if ($row && $row['deleted_at']) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Account is already scheduled for deletion']);
+        exit;
+    }
+
+    // Set deleted_at to now (30-day grace period)
+    $stmt = $db->prepare('UPDATE users SET deleted_at = NOW() WHERE id = ?');
+    $stmt->bind_param('i', $user['id']);
+    $stmt->execute();
+
+    // Invalidate token by clearing it from localStorage on frontend
+    echo json_encode([
+        'success' => true,
+        'message' => 'Account scheduled for deletion. You have 30 days to restore it by logging in again.',
+        'grace_period_days' => 30
+    ]);
+    exit;
+}
+
+// ── Restore Account (within grace period) ──────────────────────────────────────
+if ($method === 'POST' && $action === 'restore-account') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $email = trim($data['email'] ?? '');
+    $password = $data['password'] ?? '';
+
+    if (!$email || !$password) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Email and password required']);
+        exit;
+    }
+
+    $db = getDB();
+    $stmt = $db->prepare('SELECT id, password, deleted_at FROM users WHERE email = ?');
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $user = $stmt->get_result()->fetch_assoc();
+
+    if (!$user || !password_verify($password, $user['password'])) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid credentials']);
+        exit;
+    }
+
+    if (!$user['deleted_at']) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Account is not scheduled for deletion']);
+        exit;
+    }
+
+    // Check if within 30-day grace period
+    $deletedAt = strtotime($user['deleted_at']);
+    $gracePeriod = 30 * 24 * 60 * 60; // 30 days in seconds
+    if (time() - $deletedAt > $gracePeriod) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Grace period has expired. Account cannot be restored.']);
+        exit;
+    }
+
+    // Restore account
+    $stmt = $db->prepare('UPDATE users SET deleted_at = NULL WHERE id = ?');
+    $stmt->bind_param('i', $user['id']);
+    $stmt->execute();
+
+    $token = makeToken($user['id'], $email);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Account restored successfully',
+        'token' => $token,
+        'user' => ['id' => $user['id'], 'email' => $email]
+    ]);
     exit;
 }
 

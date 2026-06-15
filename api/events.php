@@ -213,6 +213,161 @@ if ($method === 'GET' && $action === 'pending') {
     exit;
 }
 
+// ── Organizers for a specific event ───────────────────────────────────────────
+if ($method === 'GET' && $action === 'organizers' && isset($_GET['event_id'])) {
+    $user = getAuthUser();
+    if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+
+    $eventId = intval($_GET['event_id']);
+    $db = getDB();
+
+    $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+    $stmtRole->bind_param('i', $user['id']);
+    $stmtRole->execute();
+    $roleRow = $stmtRole->get_result()->fetch_assoc();
+    $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+
+    if (!$isAdmin) {
+        $stmtAccess = $db->prepare('SELECT id FROM events WHERE id = ? AND user_id = ?');
+        $stmtAccess->bind_param('ii', $eventId, $user['id']);
+        $stmtAccess->execute();
+        if ($stmtAccess->get_result()->num_rows === 0) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Forbidden']);
+            exit;
+        }
+    }
+
+    $stmt = $db->prepare('
+        SELECT o.id, o.user_id, u.name, u.email, o.role, o.added_at
+        FROM event_organizers o
+        JOIN users u ON o.user_id = u.id
+        WHERE o.event_id = ?
+        ORDER BY o.added_at ASC
+    ');
+    $stmt->bind_param('i', $eventId);
+    $stmt->execute();
+    $organizers = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    echo json_encode(['organizers' => $organizers]);
+    exit;
+}
+
+// ── Add organizer to event ─────────────────────────────────────────────────────
+if ($method === 'POST' && $action === 'add-organizer') {
+    $user = getAuthUser();
+    if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $eventId = intval($data['event_id'] ?? 0);
+    $email = trim($data['email'] ?? '');
+
+    if (!$eventId || !$email) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Event ID and registered email are required']);
+        exit;
+    }
+
+    $db = getDB();
+
+    $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+    $stmtRole->bind_param('i', $user['id']);
+    $stmtRole->execute();
+    $roleRow = $stmtRole->get_result()->fetch_assoc();
+    $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+
+    if (!$isAdmin) {
+        $stmtAccess = $db->prepare('SELECT id FROM events WHERE id = ? AND user_id = ?');
+        $stmtAccess->bind_param('ii', $eventId, $user['id']);
+        $stmtAccess->execute();
+        if ($stmtAccess->get_result()->num_rows === 0) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Forbidden']);
+            exit;
+        }
+    }
+
+    $stmt = $db->prepare('SELECT id, name FROM users WHERE email = ?');
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $targetUser = $stmt->get_result()->fetch_assoc();
+
+    if (!$targetUser) {
+        http_response_code(404);
+        echo json_encode(['error' => 'User not found with this email. They need to register first.']);
+        exit;
+    }
+
+    $stmt = $db->prepare('SELECT id FROM event_organizers WHERE event_id = ? AND user_id = ?');
+    $stmt->bind_param('ii', $eventId, $targetUser['id']);
+    $stmt->execute();
+    if ($stmt->get_result()->num_rows > 0) {
+        http_response_code(409);
+        echo json_encode(['error' => 'User is already an organizer for this event']);
+        exit;
+    }
+
+    $stmt = $db->prepare('INSERT INTO event_organizers (event_id, user_id, role) VALUES (?, ?, ?)');
+    $stmt->bind_param('iis', $eventId, $targetUser['id'], 'organizer');
+    $stmt->execute();
+
+    echo json_encode([
+        'success' => true,
+        'organizer' => [
+            'id' => $db->insert_id,
+            'user_id' => $targetUser['id'],
+            'name' => $targetUser['name'],
+            'email' => $email,
+            'role' => 'organizer',
+        ],
+    ]);
+    exit;
+}
+
+// ── Remove organizer from event ────────────────────────────────────────────────
+if ($method === 'DELETE' && $action === 'remove-organizer' && isset($_GET['id'])) {
+    $user = getAuthUser();
+    if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+
+    $organizerId = intval($_GET['id']);
+    $db = getDB();
+
+    $stmt = $db->prepare('SELECT event_id FROM event_organizers WHERE id = ?');
+    $stmt->bind_param('i', $organizerId);
+    $stmt->execute();
+    $org = $stmt->get_result()->fetch_assoc();
+
+    if (!$org) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Organizer not found']);
+        exit;
+    }
+
+    $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+    $stmtRole->bind_param('i', $user['id']);
+    $stmtRole->execute();
+    $roleRow = $stmtRole->get_result()->fetch_assoc();
+    $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+
+    if (!$isAdmin) {
+        $stmtAccess = $db->prepare('SELECT id FROM events WHERE id = ? AND user_id = ?');
+        $stmtAccess->bind_param('ii', $org['event_id'], $user['id']);
+        $stmtAccess->execute();
+        if ($stmtAccess->get_result()->num_rows === 0) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Forbidden']);
+            exit;
+        }
+    }
+
+    $stmt = $db->prepare('DELETE FROM event_organizers WHERE id = ?');
+    $stmt->bind_param('i', $organizerId);
+    $stmt->execute();
+
+    echo json_encode(['success' => true]);
+    exit;
+}
+
 // ── GET all events for logged-in user (admin sees all) ────────────────────────
 if ($method === 'GET') {
     $user = getAuthUser();

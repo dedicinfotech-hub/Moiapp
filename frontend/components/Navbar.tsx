@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
+import Icon from '@/components/ui/Icon';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -81,20 +82,20 @@ export default function Navbar() {
                         <p className="text-xs text-[#999] truncate">{user.email}</p>
                       </div>
                       <Link href="/dashboard" onClick={() => setDropOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#444444] hover:bg-[#fafafa] hover:text-[#101010] transition-colors">
-                        <span>📊</span> Dashboard
+                        <Icon name="dashboard" size={16} /> Dashboard
                       </Link>
                       <Link href="/dashboard?module=settings" onClick={() => setDropOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#444444] hover:bg-[#fafafa] hover:text-[#101010] transition-colors">
-                        <span>👤</span> My Profile
+                        <Icon name="users" size={16} /> My Profile
                       </Link>
                       <Link href="/events/new" onClick={() => setDropOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#444444] hover:bg-[#fafafa] hover:text-[#101010] transition-colors">
-                        <span>➕</span> New Event
+                        <Icon name="plus" size={16} /> New Event
                       </Link>
                       <div className="border-t border-[#F5F5F5] mt-1">
                         <button
                           onClick={() => { setDropOpen(false); logout(); router.push('/'); }}
                           className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
                         >
-                          <span>🚪</span> Sign Out
+                          <Icon name="lock" size={16} /> Sign Out
                         </button>
                       </div>
                     </div>
@@ -156,19 +157,19 @@ export default function Navbar() {
         <div className="md:hidden fixed inset-0 top-[56px] z-40 bg-white border-t border-[#E8E8E8] flex flex-col">
           <nav className="flex flex-col px-4 py-4 gap-1">
             <Link href="/events" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
-              <span>🎉</span> Browse Events
+              <Icon name="events" size={18} /> Browse Events
             </Link>
 
             {user ? (
                <>
                  <Link href="/dashboard" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
-                   <span>📊</span> Dashboard
+                   <Icon name="dashboard" size={18} /> Dashboard
                  </Link>
                  <Link href="/events/new" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
-                   <span>➕</span> List Event
+                   <Icon name="plus" size={18} /> List Event
                  </Link>
                  <Link href="/dashboard?module=events" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
-                   <span>📥</span> Import
+                   <Icon name="upload" size={18} /> Import
                  </Link>
                  <div className="border-t border-[#F5F5F5] mt-2 pt-2">
                   <div className="px-3 py-2 mb-1">
@@ -179,14 +180,14 @@ export default function Navbar() {
                     onClick={() => { closeMobile(); logout(); router.push('/'); }}
                     className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
                   >
-                    <span>🚪</span> Sign Out
+                    <Icon name="lock" size={18} /> Sign Out
                   </button>
                 </div>
               </>
             ) : (
               <>
                 <Link href="/register" onClick={closeMobile} className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors">
-                  <span>💍</span> List Your Wedding
+                  <Icon name="wedding" size={18} /> List Your Wedding
                 </Link>
                 <div className="mt-3 px-3">
                   <button

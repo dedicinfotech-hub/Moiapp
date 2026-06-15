@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     login_blocked_until TIMESTAMP NULL,
     admin_otp VARCHAR(6),
     admin_otp_expires TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL
 );
 
 -- Events

@@ -76,7 +76,7 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
   };
 
   return (
-    <div className="bg-white border border-[#EBEBEB] rounded-xl p-5 space-y-4">
+    <div className="bg-white border border-[#EBEBEB] rounded-xl p-4 sm:p-5 space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div>
           <h3 className="font-bold text-[#101010] text-sm">Guest QR Code</h3>
@@ -105,31 +105,31 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
         </div>
       ) : (
         <div className="flex flex-col md:flex-row gap-5 items-center md:items-start">
-          <div className="shrink-0 bg-white p-3 border-2 border-[#101010] rounded-xl">
+          <div className="w-full shrink-0 flex justify-center bg-white p-3 border-2 border-[#101010] rounded-xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrImg} alt="Event payment QR code" width={200} height={200} className="w-[200px] h-[200px]" />
+            <img src={qrImg} alt="Event payment QR code" width={180} height={180} className="w-[180px] h-[180px] sm:w-[200px] sm:h-[200px]" />
           </div>
           <div className="flex-1 space-y-2 w-full">
             <p className="text-[10px] text-[#999] break-all font-mono">{paymentUrl}</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => downloadQrPng(paymentUrl, `moi-qr-${event.slug}.png`)}
-                className="px-3 py-2 rounded-lg text-xs font-semibold bg-[#FFC107] text-black hover:bg-[#E6AC00]"
+                className="px-3 py-2 rounded-lg text-xs font-semibold bg-[#FFC107] text-black hover:bg-[#E6AC00] text-center"
               >
                 ⬇ Download PNG
               </button>
               <button
                 type="button"
                 onClick={shareWhatsApp}
-                className="px-3 py-2 rounded-lg text-xs font-semibold border border-[#25D366] text-[#128C7E] hover:bg-green-50"
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-[#25D366] text-[#128C7E] hover:bg-green-50 text-center"
               >
                 WhatsApp Share
               </button>
               <button
                 type="button"
                 onClick={() => { navigator.clipboard.writeText(paymentUrl); showSuccess('Link copied'); }}
-                className="px-3 py-2 rounded-lg text-xs font-semibold border border-[#E8E8E8] text-[#666] hover:border-[#FFC107]"
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-[#E8E8E8] text-[#666] hover:border-[#FFC107] text-center"
               >
                 Copy Link
               </button>
@@ -137,7 +137,7 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
                 type="button"
                 onClick={handleToggleQr}
                 disabled={loading}
-                className="px-3 py-2 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 text-center"
               >
                 Close Function QR
               </button>
@@ -145,7 +145,7 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
                 type="button"
                 onClick={handleRegenerateQr}
                 disabled={loading}
-                className="px-3 py-2 rounded-lg text-xs font-semibold border border-[#E8E8E8] text-[#666] hover:border-[#FFC107] disabled:opacity-50"
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-[#E8E8E8] text-[#666] hover:border-[#FFC107] disabled:opacity-50 text-center"
               >
                 🔄 Regenerate QR
               </button>
