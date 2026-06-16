@@ -415,5 +415,107 @@ if ($method === 'POST' && $action === 'toggle-feature') {
     exit;
 }
 
+// ── Block / Unblock User ────────────────────────────────────────────────────────
+if ($method === 'POST' && $action === 'block_user') {
+    requireAdmin();
+    $db = getDB();
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $userId = (int)($data['user_id'] ?? 0);
+    $isBlocked = (int)($data['is_blocked'] ?? 0);
+
+    if (!$userId) {
+        http_response_code(400);
+        echo json_encode(['error' => 'User ID required']);
+        exit;
+    }
+
+    $stmt = $db->prepare('UPDATE users SET is_blocked = ? WHERE id = ?');
+    $stmt->bind_param('ii', $isBlocked, $userId);
+    $stmt->execute();
+
+    echo json_encode(['success' => true, 'message' => $isBlocked ? 'User blocked' : 'User unblocked']);
+    exit;
+}
+
+// ── Delete User ────────────────────────────────────────────────────────────────
+if ($method === 'POST' && $action === 'delete_user') {
+    requireAdmin();
+    $db = getDB();
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $userId = (int)($data['user_id'] ?? 0);
+
+    if (!$userId) {
+        http_response_code(400);
+        echo json_encode(['error' => 'User ID required']);
+        exit;
+    }
+
+    $stmt = $db->prepare('DELETE FROM users WHERE id = ?');
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+
+    echo json_encode(['success' => true, 'message' => 'User deleted']);
+    exit;
+}
+
+// ── Deactivate Private Event (QR) ──────────────────────────────────────────────
+if ($method === 'POST' && $action === 'deactivate_event') {
+    requireAdmin();
+    $db = getDB();
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $eventId = (int)($data['event_id'] ?? 0);
+
+    if (!$eventId) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Event ID required']);
+        exit;
+    }
+
+    $stmt = $db->prepare('UPDATE events SET qr_enabled = 0 WHERE id = ?');
+    $stmt->bind_param('i', $eventId);
+    $stmt->execute();
+
+    echo json_encode(['success' => true, 'message' => 'Event deactivated']);
+    exit;
+}
+
+// ── Get Private Events ─────────────────────────────────────────────────────────
+if ($method === 'GET' && $action === 'private_events') {
+    requireAdmin();
+    $db = getDB();
+
+    $search = trim($_GET['search'] ?? '');
+
+    $sql = "
+        SELECT e.id, e.event_type, e.wedding_date, e.venue, e.city,
+               e.host_name, e.host_email, e.host_phone,
+               (SELECT COUNT(*) FROM moi_entries WHERE event_id = e.id) as guest_count,
+               (SELECT COALESCE(SUM(amount),0) FROM moi_entries WHERE event_id = e.id) as total_moi,
+               e.qr_enabled, e.guest_token, e.created_at
+        FROM events e
+        WHERE e.event_mode = 'new' AND e.approval_status = 'approved' AND e.qr_enabled = 1
+    ";
+
+    if ($search) {
+        $sql .= " AND (e.host_name LIKE ? OR e.event_type LIKE ? OR e.city LIKE ? OR CAST(e.id AS CHAR) LIKE ?)";
+    }
+
+    $sql .= " ORDER BY e.created_at DESC";
+
+    $stmt = $db->prepare($sql);
+    if ($search) {
+        $like = "%{$search}%";
+        $stmt->bind_param('ssss', $like, $like, $like, $like);
+    }
+    $stmt->execute();
+    $events = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    echo json_encode(['success' => true, 'events' => $events]);
+    exit;
+}
+
 http_response_code(404);
 echo json_encode(['error' => 'Not found']);

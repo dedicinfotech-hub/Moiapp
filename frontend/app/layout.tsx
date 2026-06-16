@@ -8,12 +8,25 @@ import { Toaster } from 'react-hot-toast';
 export const metadata: Metadata = {
   title: 'Moi App – Wedding Gift Tracker',
   description: 'Track wedding moi (gift money) easily. Share with family.',
+  manifest: '/manifest.json',
+  themeColor: '#FFC107',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'MoiApp',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-[#FFFDF0]">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#FFC107" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+      </head>
+      <body className="min-h-screen bg-tn-light">
         <AuthProvider>
           <FeaturesProvider>
             <ConditionalNavbar />

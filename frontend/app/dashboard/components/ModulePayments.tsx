@@ -9,12 +9,17 @@ interface ModulePaymentsProps {
   events: Event[];
 }
 
+function getDefaultViewMode(): 'table' | 'cards' {
+  if (typeof window === 'undefined') return 'table';
+  return window.innerWidth < 640 ? 'cards' : 'table';
+}
+
 export default function ModulePayments({ entries, events }: ModulePaymentsProps) {
   const [search,      setSearch]      = useState('');
   const [filterMode,  setFilterMode]  = useState('all');
   const [filterEvent, setFilterEvent] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>(getDefaultViewMode());
   const itemsPerPage = 20;
 
   const filtered = entries.filter((e) => {

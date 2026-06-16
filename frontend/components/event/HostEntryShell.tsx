@@ -58,7 +58,7 @@ export default function HostEntryShell({ slug, title, subtitle, activeTab, onBac
   }, [pathname]);
 
   return (
-    <div className="h-screen flex overflow-hidden bg-[#F9FAFB]">
+    <div className="h-screen flex overflow-hidden bg-tn-light-alt">
       {sideOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-30 lg:hidden"
@@ -80,7 +80,7 @@ export default function HostEntryShell({ slug, title, subtitle, activeTab, onBac
         })}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+      <div className={`flex-1 min-w-0 flex flex-col overflow-hidden ${!sidebarCollapsed ? 'lg:pl-60' : ''}`}>
         <CreateFlowHeader
           title={title}
           onBack={onBack}
@@ -88,21 +88,21 @@ export default function HostEntryShell({ slug, title, subtitle, activeTab, onBac
             <button
               type="button"
               onClick={toggleSidebar}
-              className="w-10 h-10 flex items-center justify-center text-[#1F2937]"
+              className="w-10 h-10 flex items-center justify-center text-tn-text"
               aria-label={sidebarCollapsed ? 'Open menu' : 'Close menu'}
             >
               <Icon name="menu" size={22} />
             </button>
           )}
         />
-        {subtitle && <p className="text-xs text-[#6B7280] text-center px-6 -mt-2 mb-2">{subtitle}</p>}
-        <main className="flex-1 min-w-0 overflow-y-auto px-4 py-4 pb-28">{children}</main>
+        {subtitle && <p className="text-xs text-tn-muted text-center px-6 -mt-2 mb-2">{subtitle}</p>}
+        <main className="flex-1 min-w-0 overflow-y-auto px-4 py-4 pb-20">{children}</main>
         {activeTab && (
-          <nav className={`fixed bottom-0 left-0 right-0 h-[68px] bg-white border-t border-[#EBEBEB] flex items-center justify-around px-1 z-40 ${sidebarCollapsed ? 'lg:left-0' : 'lg:left-60'}`}>
+          <nav className={`fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-tn-border flex items-center justify-around px-1 z-40 safe-area-bottom ${sidebarCollapsed ? 'lg:left-0' : 'lg:left-60'}`}>
             {visibleNav.map((item) => (
-              <Link key={item.id} href={item.href} className={`flex flex-col items-center gap-0.5 px-2 py-1 min-w-[56px] ${activeTab === item.id ? 'text-[#4B218B]' : 'text-[#9CA3AF]'}`}>
+              <Link key={item.id} href={item.href} className={`flex flex-col items-center gap-0.5 px-2 py-1 min-w-[72px] ${activeTab === item.id ? 'text-tn-yellow' : 'text-tn-muted'}`}>
                 <Icon name={item.icon} size={20} />
-                <span className={`text-[9px] ${activeTab === item.id ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
+                <span className={`text-xs ${activeTab === item.id ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
               </Link>
             ))}
           </nav>

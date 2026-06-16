@@ -26,7 +26,7 @@ export function FeaturesProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const res = await featuresApi.list();
-      setToggles(res.toggles);
+      setToggles(Array.isArray(res.toggles) ? res.toggles : []);
     } catch {
       setToggles([]);
     } finally {
@@ -37,7 +37,7 @@ export function FeaturesProvider({ children }: { children: ReactNode }) {
   useEffect(() => { load(); }, []);
 
   const isEnabled = (key: string): boolean => {
-    const toggle = toggles.find((t) => t.feature_key === key);
+    const toggle = toggles?.find((t) => t.feature_key === key);
     return toggle ? toggle.is_enabled === 1 : false;
   };
 

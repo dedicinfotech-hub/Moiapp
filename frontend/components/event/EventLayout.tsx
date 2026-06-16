@@ -21,25 +21,25 @@ interface EventLayoutProps {
 }
 
 export function CreateFlowHeader({
- title,
- onBack,
- showHelp = true,
- leftAction,
+  title,
+  onBack,
+  showHelp = true,
+  leftAction,
 }: {
- title: string;
- onBack?: () => void;
- showHelp?: boolean;
- leftAction?: React.ReactNode;
+  title: string;
+  onBack?: () => void;
+  showHelp?: boolean;
+  leftAction?: React.ReactNode;
 }) {
   const router = useRouter();
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-[#F3F4F6] px-4 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-30 bg-white border-b border-tn-border-alt px-4 h-14 flex items-center justify-between">
       <div className="flex items-center">
         {leftAction}
         <button
           type="button"
           onClick={onBack || (() => router.back())}
-          className="w-10 h-10 flex items-center justify-center text-[#4B218B]"
+          className="w-10 h-10 flex items-center justify-center text-tn-purple"
           aria-label="Go back"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -47,9 +47,9 @@ export function CreateFlowHeader({
           </svg>
         </button>
       </div>
-      <h1 className="text-base font-bold text-[#1F2937]">{title}</h1>
+      <h1 className="text-base font-bold text-tn-text">{title}</h1>
       {showHelp ? (
-        <button type="button" className="w-10 h-10 flex items-center justify-center text-[#4B218B]" aria-label="Help">
+        <button type="button" className="w-10 h-10 flex items-center justify-center text-tn-purple" aria-label="Help">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
@@ -70,7 +70,7 @@ export function CreateStepProgress({ currentStep }: { currentStep: 1 | 2 | 3 | 4
   ] as const;
 
   return (
-    <div className="px-4 py-4 border-b border-[#F3F4F6] bg-white">
+    <div className="px-4 py-4 border-b border-tn-border-alt bg-white">
       <div className="flex items-start justify-between max-w-md mx-auto">
         {steps.map((step, idx) => {
           const isActive = step.num === currentStep;
@@ -79,17 +79,17 @@ export function CreateStepProgress({ currentStep }: { currentStep: 1 | 2 | 3 | 4
             <div key={step.num} className="flex flex-col items-center flex-1 relative">
               {idx > 0 && (
                 <div
-                  className={`absolute top-4 right-1/2 w-full h-0.5 -z-0 ${isDone || isActive ? 'bg-[#4B218B]' : 'bg-[#E5E7EB]'}`}
+                  className={`absolute top-4 right-1/2 w-full h-0.5 -z-0 ${isDone || isActive ? 'bg-tn-purple' : 'bg-tn-border-alt'}`}
                   style={{ width: '100%', transform: 'translateX(-50%)' }}
                 />
               )}
               <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                isActive || isDone ? 'bg-[#4B218B] text-white' : 'bg-[#E5E7EB] text-[#9CA3AF]'
+                isActive || isDone ? 'bg-tn-purple text-white' : 'bg-tn-border-alt text-tn-text-secondary'
               }`}>
                 {step.num}
               </div>
               <p className={`text-[9px] mt-1.5 font-medium text-center leading-tight max-w-[64px] ${
-                isActive ? 'text-[#4B218B] font-semibold' : isDone ? 'text-[#4B218B]' : 'text-[#9CA3AF]'
+                isActive ? 'text-tn-purple font-semibold' : isDone ? 'text-tn-purple' : 'text-tn-text-secondary'
               }`}>
                 {step.label}
               </p>
@@ -117,7 +117,7 @@ export function EventDetailsRow({ event }: { event: { wedding_date?: string; wed
   ];
 
   const Icon = ({ type }: { type: string }) => {
-    const cls = 'text-[#7C3AED]';
+    const cls = 'text-tn-purple-text';
     if (type === 'calendar') return (
       <svg className={cls} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
         <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
@@ -141,11 +141,11 @@ export function EventDetailsRow({ event }: { event: { wedding_date?: string; wed
   };
 
   return (
-    <div className="grid grid-cols-4 gap-2 bg-white border border-[#F3F4F6] rounded-2xl p-3 mb-5">
+    <div className="grid grid-cols-4 gap-2 bg-white border border-tn-border-alt rounded-2xl p-3 mb-5">
       {items.map((item) => (
         <div key={item.icon} className="text-center px-1">
           <div className="flex justify-center mb-1.5"><Icon type={item.icon} /></div>
-          <p className="text-[9px] text-[#6B7280] leading-tight line-clamp-3">{item.label}</p>
+          <p className="text-[9px] text-tn-text-secondary leading-tight line-clamp-3">{item.label}</p>
         </div>
       ))}
     </div>
@@ -199,7 +199,7 @@ function EventLayoutInner({
   }, [pathname]);
 
   return (
-    <div className="h-screen flex overflow-hidden bg-[#F9FAFB]">
+    <div className="h-screen flex overflow-hidden bg-tn-light-alt">
       {drawerOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-30 lg:hidden"
@@ -222,34 +222,34 @@ function EventLayoutInner({
         })}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        <header className="sticky top-0 z-30 bg-white border-b border-[#F3F4F6] px-4 pt-3 pb-3 shrink-0">
+      <div className={`flex-1 min-w-0 flex flex-col overflow-hidden ${!sidebarCollapsed ? 'lg:pl-60' : ''}`}>
+        <header className="sticky top-0 z-30 bg-white border-b border-tn-border-alt px-4 pt-3 pb-3 shrink-0">
           <div className="flex items-center justify-between mb-2">
-            <button type="button" onClick={toggleSidebar} className="w-10 h-10 flex items-center justify-center text-[#1F2937]" aria-label={sidebarCollapsed ? 'Open menu' : 'Close menu'}>
+            <button type="button" onClick={toggleSidebar} className="w-10 h-10 flex items-center justify-center text-tn-text" aria-label={sidebarCollapsed ? 'Open menu' : 'Close menu'}>
               <Icon name="menu" size={22} />
             </button>
             <div className="flex items-center gap-2">
               {showNotifications && (
-                <button type="button" className="relative w-10 h-10 flex items-center justify-center text-[#1F2937]" aria-label="Notifications">
+                <button type="button" className="relative w-10 h-10 flex items-center justify-center text-tn-text" aria-label="Notifications">
                   <Icon name="bell" size={20} />
                   {notificationCount > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 bg-[#7C3AED] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-tn-purple text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                       {notificationCount > 9 ? '9+' : notificationCount}
                     </span>
                   )}
                 </button>
               )}
-              <button type="button" className="w-10 h-10 flex items-center justify-center text-[#1F2937]" aria-label="More options">
+              <button type="button" className="w-10 h-10 flex items-center justify-center text-tn-text" aria-label="More options">
                 <Icon name="more-vertical" size={20} />
               </button>
             </div>
           </div>
           {title && (
             <>
-              <h1 className="text-lg font-bold text-[#1F2937] leading-tight">{title}</h1>
+              <h1 className="text-lg font-bold text-tn-text leading-tight">{title}</h1>
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="w-2 h-2 bg-[#22C55E] rounded-full" />
-                <span className="text-xs font-semibold text-[#22C55E]">Function is Active</span>
+                <span className="w-2 h-2 bg-tn-success rounded-full" />
+                <span className="text-xs font-semibold text-tn-success">Function is Active</span>
               </div>
             </>
           )}
@@ -257,20 +257,20 @@ function EventLayoutInner({
 
         <main className="flex-1 min-w-0 overflow-y-auto px-4 py-4 pb-24">{children}</main>
 
-        <nav className={`fixed bottom-0 left-0 right-0 h-[68px] bg-white border-t border-[#EBEBEB] flex items-center justify-around px-1 z-40 ${sidebarCollapsed ? 'lg:left-0' : 'lg:left-60'}`}>
-          {navItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`flex flex-col items-center gap-0.5 px-2 py-1 min-w-[64px] ${
-                activeTab === item.id ? 'text-[#4B218B]' : 'text-[#9CA3AF]'
-              }`}
-            >
-              <Icon name={item.icon} size={20} />
-              <span className={`text-[10px] ${activeTab === item.id ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
+        <nav className={`fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-tn-border flex items-center justify-around px-1 z-40 safe-area-bottom ${sidebarCollapsed ? 'lg:left-0' : 'lg:left-60'}`}>
+           {navItems.map((item) => (
+             <Link
+               key={item.id}
+               href={item.href}
+               className={`flex flex-col items-center gap-0.5 px-2 py-1 min-w-[72px] ${
+                 activeTab === item.id ? 'text-tn-yellow' : 'text-tn-muted'
+               }`}
+             >
+               <Icon name={item.icon} size={20} />
+               <span className={`text-xs ${activeTab === item.id ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
+             </Link>
+           ))}
+         </nav>
       </div>
     </div>
   );

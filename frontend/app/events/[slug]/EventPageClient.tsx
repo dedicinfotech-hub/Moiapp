@@ -160,7 +160,7 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
           })}
         />
         {/* ── Right panel ── */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-tn-light">
+        <div className={`flex-1 flex flex-col min-w-0 overflow-hidden bg-tn-light ${!sidebarCollapsed ? 'lg:pl-60' : ''}`}>
 
           {/* Top bar */}
           <header className="h-14 bg-white border-b border-tn-border flex items-center gap-3 px-4 lg:px-6 shrink-0">

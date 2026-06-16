@@ -1,0 +1,59 @@
+{
+  "name": "MoiApp - Wedding Gift Tracker",
+  "short_name": "MoiApp",
+  "description": "Track wedding moi (gift money) easily. Share with family and friends.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFC107",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "phone"
+    },
+    {
+      "src": "/screenshots/events.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "phone"
+    }
+  ],
+  "categories": ["lifestyle", "events"],
+  "lang": "en",
+  "scope": "/"
+}

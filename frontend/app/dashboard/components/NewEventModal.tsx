@@ -53,8 +53,8 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const inp = 'w-full border border-[#E8E8E8] rounded-lg px-3 py-2.5 text-sm text-[#101010] placeholder-[#bbb] focus:outline-none focus:border-[#FFC107] transition-colors bg-white';
-  const lbl = 'block text-xs font-semibold text-[#555] mb-1.5';
+  const inp = 'w-full border border-tn-border rounded-lg px-3 py-2.5 text-sm text-tn-text placeholder-tn-text-secondary focus:outline-none focus:border-tn-yellow transition-colors bg-white';
+  const lbl = 'block text-xs font-semibold text-tn-muted mb-1.5';
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -204,24 +204,29 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={handleBackdrop}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#F0F0F0]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-tn-border-alt">
           <div className="flex items-center gap-2.5">
             <span className="text-xl text-tn-gold"><Icon name={eventIcon} size={24} /></span>
             <div>
-              <h2 className="font-bold text-[#101010] text-base leading-tight">{eventTitle}</h2>
-              <p className="text-[11px] text-[#999]">
+              <h2 className="font-bold text-tn-text text-base leading-tight">{eventTitle}</h2>
+              <p className="text-[11px] text-tn-text-secondary">
                 {step === 1 && 'Choose event category'}
                 {step === 2 && 'Enter function details'}
                 {step === 3 && 'Review & submit'}
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full text-[#999] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors text-lg">×</button>
+          <button 
+            onClick={onClose} 
+            className="w-7 h-7 flex items-center justify-center rounded-full text-tn-text-secondary hover:bg-tn-light-alt hover:text-tn-text transition-colors text-lg"
+          >
+            ×
+          </button>
         </div>
 
         {/* Progress Stepper */}
         {step < 3 && (
-          <div className="px-6 py-4 border-b border-[#F5F5F5]">
+          <div className="px-6 py-4 border-b border-tn-border-alt">
             <div className="flex items-start justify-between max-w-xs mx-auto">
               {steps.map((s, idx) => {
                 const isActive = step === s.num;
@@ -230,17 +235,17 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                   <div key={s.num} className="flex flex-col items-center flex-1 relative">
                     {idx > 0 && (
                       <div
-                        className={`absolute top-4 right-1/2 w-full h-0.5 -z-0 ${isDone || isActive ? 'bg-[#FFC107]' : 'bg-[#E5E7EB]'}`}
+                        className={`absolute top-4 right-1/2 w-full h-0.5 -z-0 ${isDone || isActive ? 'bg-tn-yellow' : 'bg-tn-border'}`}
                         style={{ width: '100%', transform: 'translateX(-50%)' }}
                       />
                     )}
                     <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                      isActive || isDone ? 'bg-[#FFC107] text-black' : 'bg-[#E5E7EB] text-[#9CA3AF]'
+                      isActive || isDone ? 'bg-tn-yellow text-black' : 'bg-tn-border text-tn-text-secondary'
                     }`}>
                       {isDone ? '✓' : s.num}
                     </div>
                     <p className={`text-[9px] mt-1.5 font-medium text-center leading-tight max-w-[64px] ${
-                      isActive ? 'text-[#101010] font-semibold' : isDone ? 'text-[#101010]' : 'text-[#9CA3AF]'
+                      isActive ? 'text-tn-text font-semibold' : isDone ? 'text-tn-text' : 'text-tn-text-secondary'
                     }`}>
                       {s.label}
                     </p>
@@ -252,50 +257,50 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
         )}
 
         <div className="px-6 py-5">
-          {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm mb-4">{error}</div>}
+          {error && <div className="bg-tn-red-bg border border-tn-red-soft text-tn-red-soft rounded-lg px-4 py-2.5 text-sm mb-4">{error}</div>}
 
           {/* ── Step 1: Choose Event Type ── */}
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <label className={lbl}>Event Category <span className="text-[#FFC107]">*</span></label>
+                <label className={lbl}>Event Category <span className="text-tn-yellow">*</span></label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => handleModeChange('past')}
                     className={`flex flex-col items-start gap-1 p-4 rounded-xl border-2 text-left transition-all ${
                       isPast
-                        ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
-                        : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
+                        ? 'border-tn-yellow bg-tn-yellow-light text-tn-text'
+                        : 'border-tn-border text-tn-text-secondary hover:border-tn-border-alt'
                     }`}
                   >
                     <span className="text-lg text-tn-gold"><Icon name="calendar" size={20} /></span>
                     <span className="text-sm font-bold">Past Event</span>
-                    <span className="text-[10px] text-[#888] leading-relaxed">நடந்த நிகழ்வு · Record keeping only</span>
+                    <span className="text-[10px] text-tn-text-secondary leading-relaxed">நடந்த நிகழ்வு · Record keeping only</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleModeChange('new')}
                     className={`flex flex-col items-start gap-1 p-4 rounded-xl border-2 text-left transition-all ${
                       !isPast
-                        ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
-                        : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
+                        ? 'border-tn-yellow bg-tn-yellow-light text-tn-text'
+                        : 'border-tn-border text-tn-text-secondary hover:border-tn-border-alt'
                     }`}
                   >
                     <span className="text-lg text-tn-gold"><Icon name="plus" size={20} /></span>
                     <span className="text-sm font-bold">New Event</span>
-                    <span className="text-[10px] text-[#888] leading-relaxed">இனி நடக்கப்போகிறது · QR & guest payments</span>
+                    <span className="text-[10px] text-tn-text-secondary leading-relaxed">இனி நடக்கப்போகிறது · QR & guest payments</span>
                   </button>
                 </div>
-                <p className="text-[10px] text-[#FFC107] mt-2 font-medium">You can&apos;t change this later.</p>
+                <p className="text-[10px] text-tn-yellow mt-2 font-medium">You can&apos;t change this later.</p>
                 {!isPast && (
-                  <p className="text-[10px] text-[#999] mt-1.5">New events require admin approval before moi collection begins.</p>
+                  <p className="text-[10px] text-tn-text-secondary mt-1.5">New events require admin approval before moi collection begins.</p>
                 )}
               </div>
 
               {/* Event Type Selector */}
               <div>
-                <label className={lbl}>Event Type <span className="text-[#FFC107]">*</span></label>
+                <label className={lbl}>Event Type <span className="text-tn-yellow">*</span></label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {EVENT_TYPES.map((type) => (
                     <button
@@ -304,8 +309,8 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                       onClick={() => setForm({ ...form, event_type: type.value })}
                       className={`flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border-2 font-semibold text-xs transition-all ${
                         form.event_type === type.value
-                          ? 'border-[#FFC107] bg-[#FFFCF5] text-[#101010]'
-                          : 'border-[#E8E8E8] text-[#666] hover:border-[#ccc]'
+                          ? 'border-tn-yellow bg-tn-yellow-light text-tn-text'
+                          : 'border-tn-border text-tn-text-secondary hover:border-tn-border-alt'
                       }`}
                     >
                       <span className="text-lg text-tn-gold"><Icon name={type.icon} size={20} /></span>
@@ -318,7 +323,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               {/* Custom Title - only for custom events */}
               {form.event_type === 'custom' && (
                 <div>
-                  <label className={lbl}>Event Title <span className="text-[#FFC107]">*</span></label>
+                  <label className={lbl}>Event Title <span className="text-tn-yellow">*</span></label>
                   <input
                     required
                     value={form.custom_title}
@@ -330,8 +335,8 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               )}
 
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={onClose} className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold hover:border-[#ccc] transition-colors">Cancel</button>
-                <button type="button" onClick={handleStep1Continue} className="flex-1 bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors">
+                <button type="button" onClick={onClose} className="flex-1 border border-tn-border text-tn-text-secondary py-2.5 rounded-lg text-sm font-semibold hover:border-tn-border-alt transition-colors">Cancel</button>
+                <button type="button" onClick={handleStep1Continue} className="flex-1 bg-tn-yellow text-black py-2.5 rounded-lg text-sm font-bold hover:bg-tn-gold transition-colors">
                   Continue →
                 </button>
               </div>
@@ -343,7 +348,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
             <form onSubmit={handleStep2Submit} className="space-y-4">
               {/* Function Name */}
               <div>
-                <label className={lbl}>Function Name <span className="text-[#FFC107]">*</span></label>
+                <label className={lbl}>Function Name <span className="text-tn-yellow">*</span></label>
                 <input
                   required
                   value={form.function_name}
@@ -381,14 +386,14 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                     ''
                   }
                 />
-                <p className="text-[10px] text-[#999] mt-1">This name will be shown to guests. It syncs with the details you enter below.</p>
+                <p className="text-[10px] text-tn-text-secondary mt-1">This name will be shown to guests. It syncs with the details you enter below.</p>
               </div>
 
               {/* Name fields for specific event types */}
               {(form.event_type === 'wedding' || form.event_type === 'engagement' || form.event_type === 'valakaappu') && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={lbl}>{nameLabels.name1} <span className="text-[#FFC107]">*</span></label>
+                    <label className={lbl}>{nameLabels.name1} <span className="text-tn-yellow">*</span></label>
                     <input required value={form.bride_name} onChange={(e) => {
                       const val = e.target.value;
                       setForm((prev) => {
@@ -398,7 +403,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                     }} className={inp} placeholder={nameLabels.placeholder1} />
                   </div>
                   <div>
-                    <label className={lbl}>{nameLabels.name2} <span className="text-[#FFC107]">*</span></label>
+                    <label className={lbl}>{nameLabels.name2} <span className="text-tn-yellow">*</span></label>
                     <input required value={form.groom_name} onChange={(e) => {
                       const val = e.target.value;
                       setForm((prev) => {
@@ -413,7 +418,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               {form.event_type === 'birthday' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={lbl}>Person Name <span className="text-[#FFC107]">*</span></label>
+                    <label className={lbl}>Person Name <span className="text-tn-yellow">*</span></label>
                     <input required value={form.birthday_person_name} onChange={(e) => {
                       const val = e.target.value;
                       setForm((prev) => ({ ...prev, birthday_person_name: val, function_name: `${val}'s Birthday Celebration` }));
@@ -429,7 +434,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               {form.event_type === 'engagement' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={lbl}>Mother Name <span className="text-[#FFC107]">*</span></label>
+                    <label className={lbl}>Mother Name <span className="text-tn-yellow">*</span></label>
                     <input required value={form.mother_name} onChange={(e) => {
                       const val = e.target.value;
                       setForm((prev) => {
@@ -439,7 +444,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                     }} className={inp} placeholder="Lakshmi" />
                   </div>
                   <div>
-                    <label className={lbl}>Father Name <span className="text-[#FFC107]">*</span></label>
+                    <label className={lbl}>Father Name <span className="text-tn-yellow">*</span></label>
                     <input required value={form.father_name} onChange={(e) => {
                       const val = e.target.value;
                       setForm((prev) => {
@@ -454,7 +459,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               {form.event_type === 'housewarming' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={lbl}>Host Name <span className="text-[#FFC107]">*</span></label>
+                    <label className={lbl}>Host Name <span className="text-tn-yellow">*</span></label>
                     <input required value={form.host_name} onChange={(e) => {
                       const val = e.target.value;
                       setForm((prev) => {
@@ -464,7 +469,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                     }} className={inp} placeholder="Arun" />
                   </div>
                   <div>
-                    <label className={lbl}>Spouse Name <span className="text-[#FFC107]">*</span></label>
+                    <label className={lbl}>Spouse Name <span className="text-tn-yellow">*</span></label>
                     <input required value={form.spouse_name} onChange={(e) => {
                       const val = e.target.value;
                       setForm((prev) => {
@@ -478,7 +483,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
 
               {form.event_type === 'graduation' && (
                 <div>
-                  <label className={lbl}>Graduate Name <span className="text-[#FFC107]">*</span></label>
+                  <label className={lbl}>Graduate Name <span className="text-tn-yellow">*</span></label>
                   <input required value={form.graduate_name} onChange={(e) => {
                     const val = e.target.value;
                     setForm((prev) => ({ ...prev, graduate_name: val, function_name: `${val}'s Graduation` }));
@@ -490,8 +495,8 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>
-                    Date <span className="text-[#FFC107]">*</span>
-                    <span className="font-normal text-[#999] ml-1">
+                    Date <span className="text-tn-yellow">*</span>
+                    <span className="font-normal text-tn-text-secondary ml-1">
                       {isPast ? '(past dates only)' : '(today or upcoming)'}
                     </span>
                   </label>
@@ -531,7 +536,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               <div>
                 <label className={lbl}>Description (Optional)</label>
                 <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={`${inp} resize-none`} placeholder="A brief note about the event…" />
-                <p className="text-[10px] text-[#999] mt-1">ℹ️ These details will be shown to guests on the invitation page.</p>
+                <p className="text-[10px] text-tn-text-secondary mt-1">ℹ️ These details will be shown to guests on the invitation page.</p>
               </div>
 
               {/* Cover Photo */}
@@ -539,7 +544,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                 <label className={lbl}>Cover Photo</label>
                 <div
                   onClick={() => fileRef.current?.click()}
-                  className={`cursor-pointer rounded-xl overflow-hidden border-2 border-dashed transition-colors ${coverPreview ? 'border-[#FFC107]' : 'border-[#E8E8E8] hover:border-[#FFC107]'}`}
+                  className={`cursor-pointer rounded-xl overflow-hidden border-2 border-dashed transition-colors ${coverPreview ? 'border-[#FFC107]' : 'border-tn-border hover:border-[#FFC107]'}`}
                 >
                   {coverPreview ? (
                     <div className="relative h-32">
@@ -550,7 +555,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                       </div>
                     </div>
                   ) : (
-                    <div className="h-24 flex flex-col items-center justify-center gap-1.5 text-[#bbb]">
+                    <div className="h-24 flex flex-col items-center justify-center gap-1.5 text-tn-text-secondary">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                       <p className="text-xs font-medium">Click to upload cover photo</p>
                     </div>
@@ -560,8 +565,8 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               </div>
 
               <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setStep(1)} className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold hover:border-[#ccc] transition-colors">← Back</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
+                <button type="button" onClick={() => setStep(1)} className="flex-1 border border-tn-border text-tn-text-secondary py-2.5 rounded-lg text-sm font-semibold hover:border-tn-border-alt transition-colors">← Back</button>
+                <button type="submit" disabled={loading} className="flex-1 bg-tn-yellow text-black py-2.5 rounded-lg text-sm font-bold hover:bg-tn-gold transition-colors disabled:opacity-50">
                   {loading ? 'Submitting…' : 'Submit for Approval →'}
                 </button>
               </div>
@@ -571,26 +576,26 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
           {/* ── Step 3: Pending Approval ── */}
           {step === 3 && (
             <div className="space-y-5 text-center">
-              <div className="mx-auto w-16 h-16 bg-[#FFFCF5] border-2 border-[#FFC107] rounded-full flex items-center justify-center text-3xl">
+              <div className="mx-auto w-16 h-16 bg-tn-yellow-light border-2 border-[#FFC107] rounded-full flex items-center justify-center text-3xl">
                 ⏳
               </div>
               <div>
-                <h3 className="text-lg font-bold text-[#101010] mb-1">Your Function is Submitted!</h3>
-                <p className="text-xs text-[#999] leading-relaxed">
+                <h3 className="text-lg font-bold text-tn-text mb-1">Your Function is Submitted!</h3>
+                <p className="text-xs text-tn-text-secondary leading-relaxed">
                   Your function has been submitted for admin approval.<br />
                   You will be notified once it is approved.
                 </p>
               </div>
-              <div className="bg-[#FFFCF5] border border-[#FFE082] rounded-xl p-4">
+              <div className="bg-tn-yellow-light border border-tn-yellow-border rounded-xl p-4">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-xs font-bold text-[#B8860B] uppercase tracking-wider">Status</span>
-                  <span className="text-[10px] font-bold bg-[#FFC107] text-black px-2 py-0.5 rounded-full">Pending Approval</span>
+                  <span className="text-xs font-bold text-tn-yellow-text uppercase tracking-wider">Status</span>
+                  <span className="text-[10px] font-bold bg-tn-yellow text-black px-2 py-0.5 rounded-full">Pending Approval</span>
                 </div>
-                <p className="text-[10px] text-[#999]">
+                <p className="text-[10px] text-tn-text-secondary">
                   Review in progress · Event not yet active · Waiting for administrator verification
                 </p>
               </div>
-              <button type="button" onClick={handleStep3Done} className="w-full bg-[#FFC107] text-black py-2.5 rounded-lg text-sm font-bold hover:bg-[#E6AC00] transition-colors">
+              <button type="button" onClick={handleStep3Done} className="w-full bg-tn-yellow text-black py-2.5 rounded-lg text-sm font-bold hover:bg-tn-gold transition-colors">
                 Done
               </button>
             </div>

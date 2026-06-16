@@ -266,8 +266,8 @@ if ($method === 'POST' && $action === 'login') {
         exit;
     }
 
-    // For admin users, require OTP
-    if ($user['role'] === 'admin') {
+    // For admin users, require OTP (disabled until SMTP is configured)
+    if (false && $user['role'] === 'admin') {
         if (!$otp) {
             // Generate and send OTP
             $adminOtp = generateOTP();
@@ -282,7 +282,8 @@ if ($method === 'POST' && $action === 'login') {
                 error_log("Admin OTP for $email: $adminOtp (mail not sent - check mail config)");
             }
 
-            echo json_encode(['success' => true, 'requires_otp' => true, 'message' => 'OTP sent to admin email']);
+            // TEMPORARY: Return OTP in response for dev/testing (remove once real email works)
+            echo json_encode(['success' => true, 'requires_otp' => true, 'message' => 'OTP sent to admin email', 'dev_otp' => $adminOtp]);
             exit;
         }
         

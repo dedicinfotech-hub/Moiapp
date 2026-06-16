@@ -29,6 +29,10 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_URI} !^/[^/]+/api/ [NC]
 RewriteRule ^api/ - [L]
 
+# ── Also exclude direct API file access ───────────────────────────────────────
+RewriteCond %{REQUEST_FILENAME} -f [NC]
+RewriteRule ^api/.*$ - [L]
+
 # ── Dynamic routes: rewrite any slug to the pre-built _ shell ─────────────────
 # Supports case-insensitive subdir matching (e.g., /MoiApp/ or /moiapp/)
 RewriteCond %{REQUEST_URI} ^/[^/]+/e/[^/]+/?$ [NC]

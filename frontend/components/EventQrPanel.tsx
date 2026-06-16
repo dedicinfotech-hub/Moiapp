@@ -105,13 +105,13 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
         </div>
       ) : (
         <div className="flex flex-col md:flex-row gap-5 items-center md:items-start">
-          <div className="w-full shrink-0 flex justify-center bg-white p-3 border-2 border-[#101010] rounded-xl">
+          <div className="shrink-0 flex justify-center bg-white p-3 border-2 border-[#101010] rounded-xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrImg} alt="Event payment QR code" width={180} height={180} className="w-[180px] h-[180px] sm:w-[200px] sm:h-[200px]" />
           </div>
-          <div className="flex-1 space-y-2 w-full">
+          <div className="flex-1 space-y-2">
             <p className="text-[10px] text-[#999] break-all font-mono">{paymentUrl}</p>
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
               <button
                 type="button"
                 onClick={() => downloadQrPng(paymentUrl, `moi-qr-${event.slug}.png`)}

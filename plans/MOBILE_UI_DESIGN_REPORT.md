@@ -396,3 +396,68 @@ The MoiApp has a solid foundation for mobile but suffers from:
 3. Finally, add PWA configuration for Play Store deployment
 
 This will result in a more maintainable codebase and a better user experience across all devices.
+
+---
+
+## 12. Completed Changes (This Session)
+
+### 12.1 Design System Unification
+
+- [x] Created `frontend/components/ui/UnifiedComponents.tsx` with reusable components:
+  - `UnifiedInput` - Standardized form input styling
+  - `UnifiedSelect` - Standardized select dropdown styling
+  - `UnifiedStatCard` - Consistent stat card design
+  - `UnifiedQuickAction` - Unified quick action button
+  - `UnifiedPrimaryButton` - Primary button with black text on yellow
+  - `UnifiedSecondaryButton` - Secondary button styling
+  - `UnifiedFilterButton` - Filter button for date/payment filters
+  - `UnifiedPaymentButton` - Payment method button
+
+- [x] Updated `EventLayout.tsx` bottom navigation:
+  - Changed active tab color from `text-tn-purple` to `text-tn-yellow`
+  - Changed label size from `text-[10px]` to `text-xs`
+
+- [x] Updated `HostEntryShell.tsx` bottom navigation:
+  - Changed active tab color from `text-tn-purple` to `text-tn-yellow`
+  - Changed label size from `text-[10px]` to `text-xs`
+  - Fixed bottom content padding from `pb-28` to `pb-20`
+
+- [x] Updated `moi-entry/page.tsx`:
+  - Changed save button text from `text-white` to `text-black`
+
+- [x] Updated `reports/page.tsx`:
+  - Changed loading spinner to use `tn-yellow` color
+  - Changed error state to use `tn-subtle` color
+  - Fixed PDF export error handling (handles HTML responses)
+  - Fixed Excel export to use actual CSV endpoint
+
+- [x] Updated `dashboard-empty/page.tsx`:
+  - Changed primary button text from `text-white` to `text-black`
+
+- [x] Updated `entries/page.tsx`:
+  - Fixed fixed bottom button position from `bottom-[68px]` to `bottom-16`
+  - Updated button colors to use `tn-*` tokens
+
+- [x] Updated guest form pages:
+  - `g/[token]/form/page.tsx` - Converted to `tn-*` color system
+  - `g/[token]/GuestPaymentClient.tsx` - Updated header text colors
+
+- [x] Updated `.htaccess`:
+  - Added rule to exclude direct API file access from rewrites
+
+### 12.2 Export Functionality Fixes
+
+- [x] PDF Export: Added proper error handling for non-JSON responses
+- [x] Excel Export: Replaced placeholder with actual CSV export via `/api/export.php?format=csv`
+
+### 12.3 Color System Standardization
+
+All event pages now use the unified `tn-*` color system:
+- `tn-yellow` (#FFC107) - Primary action color
+- `tn-text` (#101010) - Primary text
+- `tn-muted` (#444444) - Secondary text
+- `tn-light` (#FAFAFA) - Background
+- `tn-light-alt` (#F9FAFB) - Card background
+- `tn-border` (#E8E8E8) - Border color
+- `tn-success` (#22C55E) - Success/positive values
+- `tn-warning` (#F59E0B) - Warning color

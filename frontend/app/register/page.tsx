@@ -1,18 +1,25 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import Icon from '@/components/ui/Icon';
+import MoiLogo from '@/components/ui/MoiLogo';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { user, loading: authLoading, login } = useAuth();
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -38,7 +45,9 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-8">
           <div className="text-center mb-8">
-            <Icon name="venue" size={44} className="mb-3 text-[#B8860B]" />
+            <div className="flex justify-center mb-4">
+              <MoiLogo variant="dark" size="md" />
+            </div>
             <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
             <p className="text-gray-400 text-sm mt-1">Start tracking your wedding moi</p>
           </div>

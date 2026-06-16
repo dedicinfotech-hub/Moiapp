@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import { eventsApi, Event } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 
 export default function HomePage() {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -301,9 +305,16 @@ export default function HomePage() {
             <p className="text-[#888] text-xs mt-1">Track wedding gifts easily. Share with family.</p>
           </div>
           <div className="flex gap-6 text-sm text-[#888]">
-            <Link href="/events"   className="hover:text-white transition-colors">Browse Events</Link>
-            <Link href="/register" className="hover:text-white transition-colors">List Event</Link>
-            <Link href="/login"    className="hover:text-white transition-colors">Sign In</Link>
+            <Link href="/events" className="hover:text-white transition-colors">Browse Events</Link>
+            {!authLoading && !user && (
+              <>
+                <button onClick={() => router.push('/register')} className="hover:text-white transition-colors">List Event</button>
+                <button onClick={() => router.push('/login')} className="hover:text-white transition-colors">Sign In</button>
+              </>
+            )}
+            {!authLoading && user && (
+              <button onClick={() => router.push('/dashboard')} className="hover:text-white transition-colors">Dashboard</button>
+            )}
           </div>
           <p className="text-[#555] text-xs">© {new Date().getFullYear()} MoiApp · Made with ❤️ for Tamil weddings</p>
         </div>

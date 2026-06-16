@@ -31,17 +31,34 @@ async function request<T>(
   if (token) headers['X-Auth-Token'] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
-  const data = await res.json();
-  if (!res.ok) {
-    const errorMsg = data.error || 'Request failed';
-    // Show toast notification for errors (client-side only)
+  const contentType = res.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+
+  let data: unknown;
+  try {
+    data = isJson ? await res.json() : await res.text();
+  } catch {
+    const errorMsg = 'Invalid response from server';
     if (typeof window !== 'undefined') {
       toast.error(errorMsg);
     }
     throw new Error(errorMsg);
   }
-  return data as T;
+
+  if (!res.ok) {
+    const errorMsg = (isJson && typeof data === 'object' && data !== null && 'error' in data)
+      ? (data as { error?: string }).error || 'Request failed'
+      : (typeof data === 'string' ? data : 'Request failed');
+    if (typeof window !== 'undefined') {
+      toast.error(errorMsg);
+    }
+    throw new Error(errorMsg);
+  }
+
+  return (isJson ? data : { raw: data }) as T;
 }
+
+export { request };
 
 // Helper to show success toast
 export function showSuccess(message: string) {
@@ -234,6 +251,30 @@ export const eventsApi = {
 
   delete: (id: number) =>
     request<{ success: boolean }>(`/events.php?id=${id}`, { method: 'DELETE' }),
+};
+
+// ── Organizers ──────────────────────────────────────────────────────────────────
+export interface Organizer {
+  id: number;
+  user_id: number;
+  name: string;
+  email: string;
+  role: string;
+  added_at: string;
+}
+
+export const organizersApi = {
+  list: (eventId: number) =>
+    request<{ organizers: Organizer[] }>(`/api/organizers?event_id=${eventId}`),
+
+  add: (body: { event_id: number; email: string; role: string }) =>
+    request<{ success: boolean; organizer: Organizer }>('/api/organizers?action=add', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  remove: (id: number) =>
+    request<{ success: boolean }>(`/api/organizers?id=${id}`, { method: 'DELETE' }),
 };
 
 // ── Moi Entries ───────────────────────────────────────────────────────────────

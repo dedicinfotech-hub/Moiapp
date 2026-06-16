@@ -1,23 +1,28 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import Icon from '@/components/ui/Icon';
+import MoiLogo from '@/components/ui/MoiLogo';
 
 type LoginMode = 'email' | 'phone';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
-  const [mode, setMode] = useState<LoginMode>('email');
+  const { user, loading: authLoading, login } = useAuth();
+  const [mode, setMode] = useState<LoginMode>('phone');
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('moiapp/dashboard');
+    }
+  }, [user, authLoading, router]);
   
   // Email login form
   const [emailForm, setEmailForm] = useState({ email: '', password: '' });
-  const [adminOtp, setAdminOtp] = useState('');
-  const [requiresAdminOtp, setRequiresAdminOtp] = useState(false);
   
   // Phone login form
   const [phoneForm, setPhoneForm] = useState({ phone: '', otp: '' });
@@ -36,31 +41,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await authApi.login(emailForm);
-      if (res.requires_otp) {
-        setRequiresAdminOtp(true);
-        setError('Admin OTP sent to your email. Please enter it below.');
-      } else {
-        login(res.token, res.user);
-        router.push('/dashboard');
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle admin OTP verification
-  const handleAdminOtpVerify = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const res = await authApi.login({ ...emailForm, otp: adminOtp });
       login(res.token, res.user);
       router.push('/dashboard');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'OTP verification failed');
+      setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -125,11 +109,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF0] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-8">
+    <div className="min-h-screen bg-[#FFFDF0] flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-sm">
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-6">
           <div className="text-center mb-8">
-            <Icon name="wedding" size={44} className="mb-3 text-[#B8860B]" />
+            <div className="flex justify-center mb-4">
+              <MoiLogo variant="dark" size="md" />
+            </div>
             <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
             <p className="text-gray-400 text-sm mt-1">Sign in to your MoiApp account</p>
           </div>
@@ -138,21 +124,21 @@ export default function LoginPage() {
           <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
             <button
               type="button"
-              onClick={() => setMode('email')}
-              className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${
-                mode === 'email' ? 'bg-[#FFC107] text-gray-900' : 'text-gray-600'
-              }`}
-            >
-              Email
-            </button>
-            <button
-              type="button"
               onClick={() => setMode('phone')}
               className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${
                 mode === 'phone' ? 'bg-[#FFC107] text-gray-900' : 'text-gray-600'
               }`}
             >
               Phone
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('email')}
+              className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                mode === 'email' ? 'bg-[#FFC107] text-gray-900' : 'text-gray-600'
+              }`}
+            >
+              Email
             </button>
           </div>
 
@@ -163,33 +149,33 @@ export default function LoginPage() {
           )}
 
           {/* Email Login Form */}
-          {mode === 'email' && !requiresAdminOtp && (
+          {mode === 'email' && (
             <form onSubmit={handleEmailLogin} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-600 mb-1.5">Email</label>
-                <input 
-                  type="email" 
-                  required 
-                  value={emailForm.email} 
-                  onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })} 
-                  className={inputCls} 
-                  placeholder="you@example.com" 
+                <input
+                  type="email"
+                  required
+                  value={emailForm.email}
+                  onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
+                  className={inputCls}
+                  placeholder="you@example.com"
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-600 mb-1.5">Password</label>
-                <input 
-                  type="password" 
-                  required 
-                  value={emailForm.password} 
-                  onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })} 
-                  className={inputCls} 
-                  placeholder="••••••••" 
+                <input
+                  type="password"
+                  required
+                  value={emailForm.password}
+                  onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
+                  className={inputCls}
+                  placeholder="••••••••"
                 />
               </div>
-              <button 
-                type="submit" 
-                disabled={loading} 
+              <button
+                type="submit"
+                disabled={loading}
                 className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50 mt-2"
               >
                 {loading ? 'Signing in…' : 'Sign In'}
@@ -199,40 +185,6 @@ export default function LoginPage() {
                   Forgot Password?
                 </Link>
               </div>
-            </form>
-          )}
-          
-          {mode === 'email' && requiresAdminOtp && (
-            <form onSubmit={handleAdminOtpVerify} className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-700 mb-3">
-                Admin OTP has been sent to your email. Please enter it below.
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Admin OTP</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={adminOtp} 
-                  onChange={(e) => setAdminOtp(e.target.value)} 
-                  className={inputCls} 
-                  placeholder="Enter 6-digit OTP" 
-                  maxLength={6}
-                />
-              </div>
-              <button 
-                type="submit" 
-                disabled={loading} 
-                className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50 mt-2"
-              >
-                {loading ? 'Verifying…' : 'Verify OTP & Sign In'}
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setRequiresAdminOtp(false)}
-                className="w-full text-sm text-gray-500 hover:underline"
-              >
-                Back to login
-              </button>
             </form>
           )}
 

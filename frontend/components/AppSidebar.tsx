@@ -144,7 +144,7 @@ export default function AppSidebar({
     baseClasses.push(
       'fixed inset-y-0 left-0 z-40 transition-all duration-200 ease-in-out',
       isOpen ? 'translate-x-0' : '-translate-x-full',
-      'lg:relative lg:translate-x-0',
+      'lg:fixed lg:translate-x-0',
       fixed && collapsed ? 'lg:border-r-0' : ''
     );
   }

@@ -4,11 +4,11 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import Icon from '@/components/ui/Icon';
+import MoiLogo from '@/components/ui/MoiLogo';
 
 export default function ProfileSetupPage() {
   const router = useRouter();
-  const { user, login } = useAuth();
+  const { user, loading: authLoading, login } = useAuth();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -19,10 +19,10 @@ export default function ProfileSetupPage() {
 
   useEffect(() => {
     // If user already has a name, redirect to dashboard
-    if (user?.name) {
+    if (!authLoading && user?.name) {
       router.push('/dashboard');
     }
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -58,7 +58,9 @@ export default function ProfileSetupPage() {
       <div className="w-full max-w-md">
         <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-8">
           <div className="text-center mb-8">
-            <Icon name="users" size={44} className="mb-3 text-[#B8860B]" />
+            <div className="flex justify-center mb-4">
+              <MoiLogo variant="dark" size="md" />
+            </div>
             <h1 className="text-2xl font-bold text-gray-900">Complete Your Profile</h1>
             <p className="text-gray-400 text-sm mt-1">Please provide your details to continue</p>
           </div>
