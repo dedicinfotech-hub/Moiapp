@@ -38,6 +38,7 @@ export default function MoiEntryScreen() {
   });
 
   useEffect(() => {
+    if (!slug) return; // wait for slug to resolve from window.location
     eventsApi.get(slug).then(setEvent).catch(() => router.push('/dashboard')).finally(() => setLoading(false));
     if (typeof window !== 'undefined') {
       const draft = sessionStorage.getItem(`host_moi_draft_${slug}`);

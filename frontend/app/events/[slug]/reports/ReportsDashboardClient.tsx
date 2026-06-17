@@ -20,6 +20,7 @@ export default function ReportsDashboardScreen() {
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
 
   const loadData = useCallback(async () => {
+    if (!slug) return;
     try {
       const eventData = await eventsApi.get(slug);
       setEvent(eventData);

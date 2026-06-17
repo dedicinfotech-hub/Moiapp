@@ -21,6 +21,7 @@ export default function PaymentMethodScreen() {
   const [guestData, setGuestData] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    if (!token) return;
     eventsApi.getByGuestToken(token).then((data) => {
       if (data.approval_status !== 'approved' || data.qr_enabled !== 1) router.push(`/g/${token}/expired`);
       else setEvent(data);

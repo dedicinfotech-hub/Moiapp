@@ -44,6 +44,7 @@ export default function GiftEntryScreen() {
   };
 
   useEffect(() => {
+    if (!slug) return;
     eventsApi.get(slug).then(setEvent).catch(() => router.push('/dashboard')).finally(() => setLoading(false));
   }, [slug, router]);
 

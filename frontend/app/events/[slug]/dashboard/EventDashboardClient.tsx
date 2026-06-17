@@ -42,6 +42,7 @@ export default function EventDashboardScreen() {
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
+    if (!slug) return;
     try {
       const eventData = await eventsApi.get(slug);
       if (eventData.approval_status === 'pending') {

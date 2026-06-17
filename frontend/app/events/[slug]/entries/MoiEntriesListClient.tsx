@@ -37,6 +37,7 @@ export default function MoiEntriesListScreen() {
 
 
   useEffect(() => {
+    if (!slug) return;
     (async () => {
       try {
         const eventData = await eventsApi.get(slug);

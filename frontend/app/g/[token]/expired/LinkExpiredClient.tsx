@@ -14,6 +14,7 @@ export default function LinkExpiredScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!token) return;
     eventsApi.getByGuestToken(token).then(setEvent).catch(() => setEvent(null)).finally(() => setLoading(false));
   }, [token]);
 

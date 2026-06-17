@@ -16,6 +16,7 @@ export default function GuestQRCodeLandingScreen() {
   const [origin, setOrigin] = useState('');
 
   useEffect(() => {
+    if (!token) return;
     setOrigin(window.location.origin);
     eventsApi.getByGuestToken(token).then((data) => {
       if (data.approval_status !== 'approved' || data.qr_enabled !== 1) setNotFound(true);

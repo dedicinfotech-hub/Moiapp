@@ -30,6 +30,7 @@ export default function HostPaymentMethodScreen() {
   const [selectedLabel, setSelectedLabel] = useState('Cash');
 
   useEffect(() => {
+    if (!slug) return;
     eventsApi.get(slug).then(setEvent).catch(() => router.push('/dashboard')).finally(() => setLoading(false));
     if (typeof window !== 'undefined') {
       const stored = sessionStorage.getItem(`host_payment_mode_${slug}`);

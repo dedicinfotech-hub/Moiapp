@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent, useEffect } from 'react';
+import { useState, type FormEvent, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
@@ -8,33 +8,48 @@ import { useAuth } from '@/lib/auth';
 import MoiLogo from '@/components/ui/MoiLogo';
 
 type LoginMode = 'email' | 'phone';
+type OtpStep = 'phone' | 'otp';
 
 export default function LoginPage() {
   const router = useRouter();
   const { user, loading: authLoading, login } = useAuth();
   const [mode, setMode] = useState<LoginMode>('phone');
 
-  // Redirect to dashboard if already logged in
+  // Redirect if already logged in
   useEffect(() => {
-    if (!authLoading && user) {
-      router.push('/dashboard');
-    }
+    if (!authLoading && user) router.push('/dashboard');
   }, [user, authLoading, router]);
-  
-  // Email login form
-  const [emailForm, setEmailForm] = useState({ email: '', password: '' });
-  
-  // Phone login form
-  const [phoneForm, setPhoneForm] = useState({ phone: '', otp: '' });
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(0);
 
-  const [error, setError] = useState('');
+  // ── Email form ────────────────────────────────────────────────────────────
+  const [emailForm, setEmailForm] = useState({ email: '', password: '' });
+
+  // ── Phone / OTP form ──────────────────────────────────────────────────────
+  const [phone, setPhone]         = useState('');
+  const [otp, setOtp]             = useState('');
+  const [otpStep, setOtpStep]     = useState<OtpStep>('phone');
+  const [otpTimer, setOtpTimer]   = useState(0);
+  const timerRef                  = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const [error, setError]   = useState('');
   const [loading, setLoading] = useState(false);
 
   const inputCls = "w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#FFC107] transition-colors";
-  
-  // Handle email login
+
+  // Start resend countdown
+  const startTimer = () => {
+    setOtpTimer(30);
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setOtpTimer((prev) => {
+        if (prev <= 1) { clearInterval(timerRef.current!); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+
+  // ── Email login ───────────────────────────────────────────────────────────
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -50,34 +65,20 @@ export default function LoginPage() {
     }
   };
 
-  // Handle send OTP
+  // ── Send OTP ──────────────────────────────────────────────────────────────
   const handleSendOTP = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
-    
-    // Validate 10-digit phone number
-    if (!/^[0-9]{10}$/.test(phoneForm.phone)) {
-      setError('Phone number must be 10 digits');
-      setLoading(false);
+    if (!/^[0-9]{10}$/.test(phone)) {
+      setError('Enter a valid 10-digit mobile number');
       return;
     }
-    
+    setLoading(true);
     try {
-      await authApi.sendOTP(phoneForm.phone);
-      setOtpSent(true);
-      setOtpTimer(30);
-      
-      // Start countdown
-      const interval = setInterval(() => {
-        setOtpTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      await authApi.sendOTP(phone);
+      setOtp('');
+      setOtpStep('otp');
+      startTimer();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to send OTP');
     } finally {
@@ -85,22 +86,35 @@ export default function LoginPage() {
     }
   };
 
-  // Handle verify OTP
+  // ── Resend OTP ────────────────────────────────────────────────────────────
+  const handleResendOTP = async () => {
+    if (otpTimer > 0 || loading) return;
+    setError('');
+    setLoading(true);
+    try {
+      await authApi.sendOTP(phone);
+      setOtp('');
+      startTimer();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to resend OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Verify OTP ────────────────────────────────────────────────────────────
   const handleVerifyOTP = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!/^[0-9]{4,6}$/.test(otp)) {
+      setError('Enter the OTP sent to your phone');
+      return;
+    }
     setLoading(true);
-    
     try {
-      const res = await authApi.verifyOTP(phoneForm.phone, phoneForm.otp);
+      const res = await authApi.verifyOTP(phone, otp);
       login(res.token, res.user);
-      
-      // If new user, redirect to profile setup
-      if (res.needsProfile) {
-        router.push('/profile-setup');
-      } else {
-        router.push('/dashboard');
-      }
+      router.push(res.needsProfile ? '/profile-setup' : '/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'OTP verification failed');
     } finally {
@@ -122,22 +136,12 @@ export default function LoginPage() {
 
           {/* Login Mode Toggle */}
           <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
-            <button
-              type="button"
-              onClick={() => setMode('phone')}
-              className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${
-                mode === 'phone' ? 'bg-[#FFC107] text-gray-900' : 'text-gray-600'
-              }`}
-            >
+            <button type="button" onClick={() => { setMode('phone'); setError(''); setOtpStep('phone'); }}
+              className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${mode === 'phone' ? 'bg-[#FFC107] text-gray-900' : 'text-gray-600'}`}>
               Phone
             </button>
-            <button
-              type="button"
-              onClick={() => setMode('email')}
-              className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${
-                mode === 'email' ? 'bg-[#FFC107] text-gray-900' : 'text-gray-600'
-              }`}
-            >
+            <button type="button" onClick={() => { setMode('email'); setError(''); }}
+              className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${mode === 'email' ? 'bg-[#FFC107] text-gray-900' : 'text-gray-600'}`}>
               Email
             </button>
           </div>
@@ -148,36 +152,23 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Email Login Form */}
+          {/* ── Email Login ─────────────────────────────────────────────── */}
           {mode === 'email' && (
             <form onSubmit={handleEmailLogin} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-600 mb-1.5">Email</label>
-                <input
-                  type="email"
-                  required
-                  value={emailForm.email}
+                <input type="email" required value={emailForm.email}
                   onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
-                  className={inputCls}
-                  placeholder="you@example.com"
-                />
+                  className={inputCls} placeholder="you@example.com" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-600 mb-1.5">Password</label>
-                <input
-                  type="password"
-                  required
-                  value={emailForm.password}
+                <input type="password" required value={emailForm.password}
                   onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
-                  className={inputCls}
-                  placeholder="••••••••"
-                />
+                  className={inputCls} placeholder="••••••••" />
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50 mt-2"
-              >
+              <button type="submit" disabled={loading}
+                className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50 mt-2">
                 {loading ? 'Signing in…' : 'Sign In'}
               </button>
               <div className="text-right mt-2">
@@ -188,66 +179,69 @@ export default function LoginPage() {
             </form>
           )}
 
-          {/* Phone Login Form */}
+          {/* ── Phone / OTP Login ──────────────────────────────────────── */}
           {mode === 'phone' && (
-            <div className="space-y-4">
-              <form onSubmit={handleSendOTP} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-1.5">Phone Number</label>
-                  <input 
-                    type="tel" 
-                    required 
-                    value={phoneForm.phone} 
-                    onChange={(e) => setPhoneForm({ ...phoneForm, phone: e.target.value })} 
-                    className={inputCls} 
-                    placeholder="9876543210" 
-                    maxLength={10}
-                    disabled={otpSent}
-                  />
-                </div>
-                
-                {!otpSent ? (
-                  <button 
-                    type="submit" 
-                    disabled={loading} 
-                    className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50 mt-2"
-                  >
-                    {loading ? 'Sending…' : 'Send OTP'}
+            <>
+              {/* Step 1 — Enter phone */}
+              {otpStep === 'phone' && (
+                <form onSubmit={handleSendOTP} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-600 mb-1.5">Mobile Number</label>
+                    <input type="tel" required value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      className={inputCls} placeholder="9876543210" maxLength={10}
+                      inputMode="numeric" autoComplete="tel" />
+                  </div>
+                  <button type="submit" disabled={loading || phone.length !== 10}
+                    className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
+                    {loading ? 'Sending OTP…' : 'Send OTP'}
                   </button>
-                ) : (
-                  <>
+                </form>
+              )}
+
+              {/* Step 2 — Enter OTP */}
+              {otpStep === 'otp' && (
+                <form onSubmit={handleVerifyOTP} className="space-y-4">
+                  {/* Phone number display with change option */}
+                  <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-600 mb-1.5">OTP Code</label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={phoneForm.otp} 
-                        onChange={(e) => setPhoneForm({ ...phoneForm, otp: e.target.value })} 
-                        className={inputCls} 
-                        placeholder="Enter 6-digit OTP" 
-                        maxLength={6}
-                      />
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">OTP sent to</p>
+                      <p className="text-sm font-bold text-gray-800">+91 {phone}</p>
                     </div>
-                    <button 
-                      type="button" 
-                      onClick={handleVerifyOTP}
-                      disabled={loading} 
-                      className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50 mt-2"
-                    >
-                      {loading ? 'Verifying…' : 'Verify OTP'}
+                    <button type="button" onClick={() => { setOtpStep('phone'); setOtp(''); setError(''); }}
+                      className="text-xs text-[#B8860B] font-semibold hover:underline">
+                      Change
                     </button>
-                    <button 
-                      type="button" 
-                      onClick={() => setOtpSent(false)}
-                      disabled={loading || otpTimer > 0}
-                      className="w-full text-sm text-gray-500 hover:underline disabled:opacity-50"
-                    >
-                      {otpTimer > 0 ? `Resend OTP in ${otpTimer}s` : 'Resend OTP'}
-                    </button>
-                  </>
-                )}
-              </form>
-            </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-600 mb-1.5">Enter OTP</label>
+                    <input type="text" required value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className={`${inputCls} text-center text-2xl font-bold tracking-[0.5em]`}
+                      placeholder="· · · · · ·" maxLength={6}
+                      inputMode="numeric" autoComplete="one-time-code" autoFocus />
+                  </div>
+
+                  <button type="submit" disabled={loading || otp.length < 4}
+                    className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
+                    {loading ? 'Verifying…' : 'Verify & Sign In'}
+                  </button>
+
+                  {/* Resend */}
+                  <div className="text-center">
+                    {otpTimer > 0 ? (
+                      <p className="text-sm text-gray-400">Resend OTP in <span className="font-bold text-[#B8860B]">{otpTimer}s</span></p>
+                    ) : (
+                      <button type="button" onClick={handleResendOTP} disabled={loading}
+                        className="text-sm text-[#B8860B] font-semibold hover:underline disabled:opacity-50">
+                        Resend OTP
+                      </button>
+                    )}
+                  </div>
+                </form>
+              )}
+            </>
           )}
 
           <p className="text-center text-sm text-gray-400 mt-6">

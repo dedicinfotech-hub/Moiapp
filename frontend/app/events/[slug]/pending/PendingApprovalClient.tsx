@@ -28,6 +28,7 @@ export default function PendingApprovalScreen() {
   const [polling, setPolling] = useState(true);
 
   useEffect(() => {
+    if (!slug) return;
     eventsApi.get(slug).then(setEvent).catch(() => router.push('/dashboard')).finally(() => setLoading(false));
   }, [slug, router]);
 

@@ -16,6 +16,7 @@ export default function GuestPaymentQRScreen() {
   const [origin, setOrigin] = useState('');
 
   useEffect(() => {
+    if (!slug) return;
     setOrigin(window.location.origin);
     eventsApi.get(slug).then(setEvent).catch(() => router.push('/dashboard')).finally(() => setLoading(false));
   }, [slug, router]);

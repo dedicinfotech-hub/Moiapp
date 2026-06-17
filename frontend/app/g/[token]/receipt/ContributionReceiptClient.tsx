@@ -20,6 +20,7 @@ export default function ContributionReceiptScreen() {
   } | null>(null);
 
   useEffect(() => {
+    if (!token) return;
     eventsApi.getByGuestToken(token).then(setEvent).catch(() => setEvent(null)).finally(() => setLoading(false));
     const stored = sessionStorage.getItem(`guest_contribution_${token}`);
     if (stored) {

@@ -19,6 +19,7 @@ export default function InviteesUploadScreen() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (!slug) return;
     const fetchEvent = async () => {
       try {
         const data = await eventsApi.get(slug);
