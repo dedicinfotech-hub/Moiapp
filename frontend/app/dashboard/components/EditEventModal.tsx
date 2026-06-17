@@ -120,11 +120,15 @@ export default function EditEventModal({
         const fd = new FormData();
         fd.append('event_id', String(event.id));
         fd.append('cover', coverFile);
-        await fetch(`${BASE_URL}/events.php?action=cover`, {
+        const coverRes = await fetch(`${BASE_URL}/events.php?action=cover`, {
           method: 'POST',
           headers: { 'X-Auth-Token': `Bearer ${token}` },
           body: fd,
         });
+        if (!coverRes.ok) {
+          const errorData = await coverRes.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to upload cover photo');
+        }
       }
       setStep(3);
     } catch (err: unknown) {

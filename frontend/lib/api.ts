@@ -30,7 +30,11 @@ async function request<T>(
   // Use X-Auth-Token — MAMP's Apache strips the Authorization header
   if (token) headers['X-Auth-Token'] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+  // Add cache-busting timestamp to prevent stale cached responses in dev
+  const url = new URL(`${BASE}${path}`, 'http://localhost:3000');
+  url.searchParams.set('_t', Date.now().toString());
+
+  const res = await fetch(url.toString(), { ...options, headers, cache: 'no-store' });
   const contentType = res.headers.get('content-type') || '';
   const isJson = contentType.includes('application/json');
 

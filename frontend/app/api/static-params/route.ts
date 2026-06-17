@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-
-const PHP_BACKEND = 'http://localhost:8888/MoiApp/api';
+import { API_BASE } from '@/lib/api';
 
 export async function GET() {
   try {
     const [eventsRes, guestsRes] = await Promise.all([
-      fetch(`${PHP_BACKEND}/events.php?public=1`),
-      fetch(`${PHP_BACKEND}/moi.php?action=guest_tokens`),
+      fetch(`${API_BASE}/events.php?public=1`),
+      fetch(`${API_BASE}/moi.php?action=guest_tokens`),
     ]);
 
     const events = await eventsRes.json();

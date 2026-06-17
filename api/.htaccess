@@ -14,15 +14,15 @@ RewriteRule .* - [E=HTTP_X_AUTH_TOKEN:%{HTTP:X-Auth-Token}]
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 SetEnvIf X-Auth-Token "(.*)" HTTP_X_AUTH_TOKEN=$1
 
+# Handle CORS preflight — let PHP handle it via config/cors.php
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^ - [L]
+
 # Disable directory listing
 Options -Indexes
 
-# Ensure PHP files are executed, not downloaded
-<FilesMatch "\.php$">
-    SetHandler application/x-httpd-php
-</FilesMatch>
-
 # If a directory or a PHP file exists, use it directly
+# (MAMP handles PHP execution globally — no SetHandler needed)
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]

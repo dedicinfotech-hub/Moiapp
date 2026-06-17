@@ -21,22 +21,37 @@ $public = $_GET['public'] ?? '';
 $action = $_GET['action'] ?? '';
 
 // ── POST upload cover photo ───────────────────────────────────────────────────
-if ($method === 'POST' && $action === 'cover') {
-    $user = getAuthUser();
-    if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+ if ($method === 'POST' && $action === 'cover') {
+     $user = getAuthUser();
+     if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized - please log in']); exit; }
 
-    $evId = intval($_POST['event_id'] ?? 0);
-    if (!$evId || empty($_FILES['cover'])) {
-        http_response_code(400); echo json_encode(['error' => 'event_id and cover file required']); exit;
-    }
+     $evId = intval($_POST['event_id'] ?? 0);
+     if (!$evId) {
+         http_response_code(400); echo json_encode(['error' => 'event_id is required']); exit;
+     }
+     if (empty($_FILES['cover'])) {
+         http_response_code(400); echo json_encode(['error' => 'cover file is required']); exit;
+     }
 
-    $db   = getDB();
-    $stmt = $db->prepare('SELECT id FROM events WHERE id = ? AND user_id = ?');
-    $stmt->bind_param('ii', $evId, $user['id']);
-    $stmt->execute();
-    if ($stmt->get_result()->num_rows === 0) {
-        http_response_code(403); echo json_encode(['error' => 'Forbidden']); exit;
-    }
+     $db   = getDB();
+     $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+     $stmtRole->bind_param('i', $user['id']);
+     $stmtRole->execute();
+     $roleRow = $stmtRole->get_result()->fetch_assoc();
+     $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+
+     if (!$isAdmin) {
+         $stmt = $db->prepare('SELECT id, user_id FROM events WHERE id = ?');
+         $stmt->bind_param('i', $evId);
+         $stmt->execute();
+         $eventRow = $stmt->get_result()->fetch_assoc();
+         if (!$eventRow) {
+             http_response_code(404); echo json_encode(['error' => 'Event not found']); exit;
+         }
+         if ($eventRow['user_id'] !== $user['id']) {
+             http_response_code(403); echo json_encode(['error' => 'Forbidden - you do not have permission to upload cover for this event']); exit;
+         }
+     }
 
     $file     = $_FILES['cover'];
     $allowed  = ['image/jpeg', 'image/png', 'image/webp'];

@@ -10,7 +10,7 @@ import { Toaster } from 'react-hot-toast';
 export const metadata: Metadata = {
   title: 'Moi App – Wedding Gift Tracker',
   description: 'Track wedding moi (gift money) easily. Share with family.',
-  manifest: '/moiapp/manifest.json',
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <link rel="manifest" href="/moiapp/manifest.json" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#FFC107" />
         <link rel="apple-touch-icon" href="/moiapp/icons/icon-192x192.png" />
       </head>

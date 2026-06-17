@@ -29,6 +29,7 @@ export default function GiftEntryScreen() {
     guest_name: '',
     gift_type: 'gift' as GiftType,
     description: '',
+    weight: '',
     relation: 'other' as 'self' | 'spouse' | 'parent' | 'sibling' | 'friend' | 'other',
     note: '',
   });
@@ -52,16 +53,36 @@ export default function GiftEntryScreen() {
     setSaving(true);
     setError('');
     try {
-      await moiApi.add({
-        event_id: event.id,
-        guest_name: form.guest_name || 'Anonymous',
-        relation: relationMap[form.relation],
-        amount: 0,
-        gift_type: form.gift_type,
-        payment_mode: 'other',
-        note: form.description || form.note,
-        entered_by: 'gift_entry',
-      });
+      // Use slug for public access (no auth required), event_id for authenticated users
+      const token = localStorage.getItem('moi_token');
+      const payload: Record<string, unknown> = token
+        ? {
+            event_id: event.id,
+            guest_name: form.guest_name || 'Anonymous',
+            relation: relationMap[form.relation],
+            amount: 0,
+            gift_type: form.gift_type,
+            payment_mode: 'other',
+            gift_description: form.description || form.note,
+            note: form.note,
+            entered_by: 'gift_entry',
+          }
+        : {
+            slug: slug,
+            guest_name: form.guest_name || 'Anonymous',
+            relation: relationMap[form.relation],
+            amount: 0,
+            gift_type: form.gift_type,
+            payment_mode: 'other',
+            gift_description: form.description || form.note,
+            note: form.note,
+            entered_by: 'gift_entry',
+          };
+      // For gold/silver, include weight
+      if (form.gift_type === 'gold' || form.gift_type === 'silver') {
+        payload.gold_weight = form.weight ? parseFloat(form.weight) : null;
+      }
+      await moiApi.add(payload);
       router.push(`/events/${slug}/entries`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save entry');
@@ -126,6 +147,22 @@ export default function GiftEntryScreen() {
             placeholder="e.g., Gold chain, Silver plate..."
           />
         </div>
+
+        {(form.gift_type === 'gold' || form.gift_type === 'silver') && (
+          <div>
+            <label className="block text-sm font-semibold text-[#1F2937] mb-1.5">Weight (grams)</label>
+            <input
+              type="number"
+              step="any"
+              min="0"
+              value={form.weight}
+              onChange={(e) => setForm({ ...form, weight: e.target.value })}
+              className="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FFC107]"
+              placeholder="Enter weight in grams"
+              required
+            />
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-semibold text-[#1F2937] mb-1.5">Note (Optional)</label>

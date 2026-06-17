@@ -32,26 +32,30 @@ $eventId = intval($_GET['event_id'] ?? 0);
 $entryId = intval($_GET['id']       ?? 0);
 
 // ── GET all moi entries (admin sees all, user sees own) ───────────────────────
-if ($method === 'GET' && $eventId) {
-    $user = getAuthUser();
-    if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+ if ($method === 'GET' && $eventId) {
+     $user = getAuthUser();
+     if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized - please log in']); exit; }
 
-    $db   = getDB();
-    // Check if admin
-    $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
-    $stmtRole->bind_param('i', $user['id']);
-    $stmtRole->execute();
-    $roleRow = $stmtRole->get_result()->fetch_assoc();
-    $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
+     $db   = getDB();
+     // Check if admin
+     $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+     $stmtRole->bind_param('i', $user['id']);
+     $stmtRole->execute();
+     $roleRow = $stmtRole->get_result()->fetch_assoc();
+     $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
 
-    if (!$isAdmin) {
-        $stmt = $db->prepare('SELECT id FROM events WHERE id=? AND user_id=?');
-        $stmt->bind_param('ii', $eventId, $user['id']);
-        $stmt->execute();
-        if ($stmt->get_result()->num_rows === 0) {
-            http_response_code(403); echo json_encode(['error' => 'Forbidden']); exit;
-        }
-    }
+     if (!$isAdmin) {
+         $stmt = $db->prepare('SELECT id, user_id FROM events WHERE id=?');
+         $stmt->bind_param('i', $eventId);
+         $stmt->execute();
+         $eventRow = $stmt->get_result()->fetch_assoc();
+         if (!$eventRow) {
+             http_response_code(404); echo json_encode(['error' => 'Event not found']); exit;
+         }
+         if ($eventRow['user_id'] !== $user['id']) {
+             http_response_code(403); echo json_encode(['error' => 'Forbidden - you do not have permission to view entries for this event']); exit;
+         }
+     }
 
     $stmt = $db->prepare('SELECT * FROM moi_entries WHERE event_id=? ORDER BY created_at DESC');
     $stmt->bind_param('i', $eventId);
@@ -185,18 +189,22 @@ if ($method === 'POST') {
     // Admin flow — verify ownership or admin access
     if (!$eventSlug && !$guestToken && $evId) {
         $user = getAuthUser();
-        if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+        if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized - please log in']); exit; }
         $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
         $stmtRole->bind_param('i', $user['id']);
         $stmtRole->execute();
         $roleRow = $stmtRole->get_result()->fetch_assoc();
         $isAdmin = ($roleRow['role'] ?? 'user') === 'admin';
         if (!$isAdmin) {
-            $stmt = $db->prepare('SELECT id FROM events WHERE id=? AND user_id=?');
-            $stmt->bind_param('ii', $evId, $user['id']);
+            $stmt = $db->prepare('SELECT id, user_id FROM events WHERE id=?');
+            $stmt->bind_param('i', $evId);
             $stmt->execute();
-            if ($stmt->get_result()->num_rows === 0) {
-                http_response_code(403); echo json_encode(['error' => 'Forbidden']); exit;
+            $eventRow = $stmt->get_result()->fetch_assoc();
+            if (!$eventRow) {
+                http_response_code(404); echo json_encode(['error' => 'Event not found']); exit;
+            }
+            if ($eventRow['user_id'] !== $user['id']) {
+                http_response_code(403); echo json_encode(['error' => 'Forbidden - you do not have permission to add entries to this event']); exit;
             }
         }
     }
@@ -214,15 +222,14 @@ if ($method === 'POST') {
     $evRow = $stmtEv->get_result()->fetch_assoc();
     if ($evRow && $evRow['event_mode'] === 'new' && $evRow['approval_status'] !== 'approved') {
         $bypass = false;
-        if (!$eventSlug && !$guestToken) {
-            $authUser = getAuthUser();
-            if ($authUser) {
-                $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
-                $stmtRole->bind_param('i', $authUser['id']);
-                $stmtRole->execute();
-                $roleRow = $stmtRole->get_result()->fetch_assoc();
-                $bypass = ($roleRow['role'] ?? 'user') === 'admin';
-            }
+        // Check if user is admin
+        $authUser = getAuthUser();
+        if ($authUser) {
+            $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
+            $stmtRole->bind_param('i', $authUser['id']);
+            $stmtRole->execute();
+            $roleRow = $stmtRole->get_result()->fetch_assoc();
+            $bypass = ($roleRow['role'] ?? 'user') === 'admin';
         }
         if (!$bypass) {
             http_response_code(403);

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const PHP_BACKEND = 'http://localhost:8888/MoiApp/api';
+import { API_BASE } from '@/lib/api';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const eventId = searchParams.get('event_id') || '';
-  const phpUrl = `${PHP_BACKEND}/organizers.php?event_id=${eventId}`;
+  const phpUrl = `${API_BASE}/organizers.php?event_id=${eventId}`;
 
   try {
     const token = request.headers.get('x-auth-token') || request.headers.get('authorization') || '';
@@ -27,7 +26,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const action = searchParams.get('action') || '';
-  const phpUrl = `${PHP_BACKEND}/organizers.php?action=${action}`;
+  const phpUrl = `${API_BASE}/organizers.php?action=${action}`;
 
   try {
     const body = await request.json();
@@ -52,7 +51,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const id = searchParams.get('id') || '';
-  const phpUrl = `${PHP_BACKEND}/organizers.php?id=${id}`;
+  const phpUrl = `${API_BASE}/organizers.php?id=${id}`;
 
   try {
     const token = request.headers.get('x-auth-token') || request.headers.get('authorization') || '';
