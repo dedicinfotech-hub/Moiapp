@@ -283,25 +283,49 @@ export default function ModuleDashboard({
 
       {/* Quick actions */}
       <div className="bg-white border border-tn-border rounded-xl p-5">
-        <h3 className="font-semibold text-tn-text text-sm mb-3">Quick Actions</h3>
-        <div className="flex flex-wrap gap-2.5">
+        <h3 className="font-semibold text-tn-text text-sm mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <button
             onClick={onNewEvent}
-            className="flex items-center gap-2 bg-tn-yellow text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-tn-yellow-2 transition-colors"
+            className="flex flex-col items-center gap-2 bg-tn-yellow text-black px-4 py-4 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors shadow-sm"
           >
-            <Icon name="plus" size={16} /> New Event
+            <Icon name="plus" size={22} />
+            <span>New Event</span>
           </button>
           <button
             onClick={() => onNavigate('moi-notebook')}
-            className="flex items-center gap-2 border border-tn-border text-tn-muted px-4 py-2 rounded-lg text-sm font-medium hover:border-tn-yellow transition-colors"
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
           >
-            <Icon name="list" size={16} /> Moi Notebook
+            <Icon name="list" size={22} />
+            <span>Moi Notebook</span>
           </button>
           <button
             onClick={() => onNavigate('analytics')}
-            className="flex items-center gap-2 border border-tn-border text-tn-muted px-4 py-2 rounded-lg text-sm font-medium hover:border-tn-yellow transition-colors"
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
           >
-            <Icon name="trend" size={16} /> Analytics
+            <Icon name="trend" size={22} />
+            <span>Analytics</span>
+          </button>
+          <button
+            onClick={() => onNavigate('events')}
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
+          >
+            <Icon name="wedding" size={22} />
+            <span>All Events</span>
+          </button>
+          <button
+            onClick={() => onNavigate('users')}
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
+          >
+            <Icon name="users" size={22} />
+            <span>Guests</span>
+          </button>
+          <button
+            onClick={() => onNavigate('settings')}
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
+          >
+            <Icon name="settings" size={22} />
+            <span>Settings</span>
           </button>
         </div>
       </div>

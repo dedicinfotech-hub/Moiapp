@@ -52,7 +52,7 @@ export default function EventsListingPage() {
   const paginatedEvents = filtered.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="bg-[#FAFAFA] text-[#101010] min-h-screen">
+    <div className="bg-[#FAFAFA] text-[#101010] min-h-screen pb-20 lg:pb-0">
 
       {/* ── Header banner ── */}
       <div className="bg-white border-b border-[#E8E8E8]">

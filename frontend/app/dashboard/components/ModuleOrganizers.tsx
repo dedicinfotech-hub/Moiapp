@@ -81,7 +81,7 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-bold text-tn-text">Event Organizers</h2>
           <p className="text-xs text-tn-muted">Manage who can access and edit this event</p>
@@ -119,12 +119,12 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Registered Email"
                 type="email"
-                className="border border-tn-border rounded-lg px-3 py-2 text-sm text-tn-text"
+                className="border border-tn-border rounded-lg px-3 py-2.5 text-sm text-tn-text"
               />
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="border border-tn-border rounded-lg px-3 py-2 text-sm text-tn-text"
+                className="border border-tn-border rounded-lg px-3 py-2.5 text-sm text-tn-text"
               >
                 <option value="organizer">Organizer</option>
                 <option value="admin">Admin</option>
@@ -132,14 +132,15 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-tn-yellow text-black rounded-lg text-sm font-semibold hover:bg-tn-yellow-2 disabled:opacity-50"
+                className="bg-tn-yellow text-black rounded-lg text-sm font-semibold hover:bg-tn-yellow-2 disabled:opacity-50 px-4 py-2.5"
               >
                 {loading ? 'Adding…' : 'Add'}
               </button>
             </form>
           </div>
 
-          <div className="bg-white border border-tn-border rounded-xl overflow-hidden">
+          {/* Desktop table */}
+          <div className="hidden md:block bg-white border border-tn-border rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-tn-light text-tn-muted text-xs uppercase">
                 <tr>
@@ -179,6 +180,36 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile card view */}
+          <div className="md:hidden bg-white border border-tn-border rounded-xl divide-y divide-tn-border">
+            {organizers.length === 0 ? (
+              <div className="px-4 py-6 text-center text-tn-muted text-xs">
+                No organizers added yet
+              </div>
+            ) : (
+              organizers.map((org) => (
+                <div key={org.id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-tn-text text-sm truncate">{org.name}</p>
+                      <p className="text-xs text-tn-muted truncate">{org.email}</p>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-tn-muted">
+                        <span className="capitalize bg-tn-light px-2 py-0.5 rounded-full font-medium text-tn-text">{org.role}</span>
+                        <span>{org.added_at ? new Date(org.added_at).toLocaleDateString() : '—'}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemove(org.id)}
+                      className="text-red-500 text-xs font-semibold hover:text-red-700 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors shrink-0"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </>
       )}

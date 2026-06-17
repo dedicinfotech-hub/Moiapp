@@ -245,10 +245,12 @@ if ($action === 'download') {
     exit;
 }
 
+$recipientEmail = $event['creator_email'];
 echo json_encode([
     'success' => true,
-    'message' => $mailSent ? 'PDF report emailed successfully' : 'Report generated (email may not have been sent)',
+    'message' => $mailSent ? "PDF report emailed successfully to {$recipientEmail}" : "Report generated (email may not have been sent to {$recipientEmail})",
     'download_url' => '/api/pdf.php?event_id=' . $eventId . '&action=download',
+    'recipient_email' => $recipientEmail,
     'stats' => [
         'total_guests' => $totalGuests,
         'total_cash' => $totalCash,
