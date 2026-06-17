@@ -489,26 +489,26 @@ function MoiRegisterTab({ slug, entries, blocked, onUpdate, onDelete }: { slug: 
         <button
           onClick={() => router.push(`/events/${slug}/moi-entry`)}
           disabled={blocked}
-          className="flex flex-col items-center gap-2 p-4 bg-white border border-tn-border rounded-xl hover:bg-tn-light transition-colors disabled:opacity-50"
+          className="flex flex-col items-center gap-2 p-4 bg-[#FFC107] text-white rounded-xl hover:bg-[#FFB300] transition-colors disabled:opacity-50"
         >
-          <span className="text-2xl text-tn-yellow"><Icon name="list" size={28} /></span>
-          <span className="text-xs font-semibold">Manual Entry</span>
+          <Icon name="list" size={28} />
+          <span className="text-xs font-bold">Manual Entry</span>
         </button>
         <button
           onClick={() => router.push(`/events/${slug}/voice-entry`)}
           disabled={blocked}
-          className="flex flex-col items-center gap-2 p-4 bg-white border border-tn-border rounded-xl hover:bg-tn-light transition-colors disabled:opacity-50"
+          className="flex flex-col items-center gap-2 p-4 bg-[#3B82F6] text-white rounded-xl hover:bg-[#2563EB] transition-colors disabled:opacity-50"
         >
-          <span className="text-2xl text-tn-yellow"><Icon name="users" size={28} /></span>
-          <span className="text-xs font-semibold">Voice Entry</span>
+          <Icon name="users" size={28} />
+          <span className="text-xs font-bold">Voice Entry</span>
         </button>
         <button
           onClick={() => router.push(`/events/${slug}/gift-entry`)}
           disabled={blocked}
-          className="flex flex-col items-center gap-2 p-4 bg-white border border-tn-border rounded-xl hover:bg-tn-light transition-colors disabled:opacity-50"
+          className="flex flex-col items-center gap-2 p-4 bg-[#F97316] text-white rounded-xl hover:bg-[#EA580C] transition-colors disabled:opacity-50"
         >
-          <span className="text-2xl text-tn-yellow"><Icon name="gift" size={28} /></span>
-          <span className="text-xs font-semibold">Gift Entry</span>
+          <Icon name="gift" size={28} />
+          <span className="text-xs font-bold">Gift Entry</span>
         </button>
       </div>
 
@@ -670,14 +670,32 @@ function PhotosTab({ eventId, photos, onAdd, onDelete }: { eventId: number; phot
     <div className="space-y-5">
       <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-card">
         <h2 className="font-bold text-gray-900 mb-4">Upload Photos</h2>
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex gap-3 flex-wrap mb-3">
           <input type="text" value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Caption (optional)" className="bg-tn-light border border-tn-border rounded-xl px-3 py-2.5 text-sm text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow transition-colors flex-1 min-w-[180px]" />
-          <label className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer transition-colors ${uploading ? 'bg-gray-100 text-gray-400' : 'bg-tn-yellow text-tn-text hover:bg-tn-yellow-2'}`}>
-            {uploading ? 'Uploading…' : <><Icon name="photo" size={16} /> Choose Photo</>}
-            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleUpload} disabled={uploading} />
-          </label>
         </div>
-        <p className="text-xs text-gray-300 mt-2">JPG, PNG, WEBP · Max 10MB</p>
+        <div
+          onClick={() => !uploading && fileRef.current?.click()}
+          className="border-2 border-dashed border-tn-border rounded-2xl p-6 text-center cursor-pointer hover:border-tn-yellow transition-colors"
+        >
+          {uploading ? (
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
+              <p className="text-sm text-tn-subtle">Uploading...</p>
+            </div>
+          ) : (
+            <>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-tn-muted mb-3">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p className="text-sm font-semibold text-tn-text mb-1">Drag & Drop</p>
+              <p className="text-xs text-tn-subtle">or click to upload photos</p>
+            </>
+          )}
+          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleUpload} disabled={uploading} />
+        </div>
+        <p className="text-xs text-tn-subtle mt-2">JPG, PNG, WEBP · Max 10MB</p>
       </div>
 
       {photos.length === 0 ? (
@@ -1047,14 +1065,49 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
      <div className="space-y-5">
        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-card">
          <h2 className="font-bold text-gray-900 mb-4">Upload Invitation List</h2>
-         <div className="flex gap-3 flex-wrap">
+         <div className="flex gap-3 flex-wrap mb-3">
+           <button
+             type="button"
+             className="flex-1 py-2.5 border border-tn-border rounded-xl text-xs font-semibold text-tn-muted hover:bg-tn-light transition-colors"
+           >
+             Excel
+           </button>
+           <button
+             type="button"
+             className="flex-1 py-2.5 border border-tn-border rounded-xl text-xs font-semibold text-tn-muted hover:bg-tn-light transition-colors"
+           >
+             CSV
+           </button>
+         </div>
+         <div
+           onClick={() => !uploading && fileInputRef.current?.click()}
+           className="border-2 border-dashed border-tn-border rounded-2xl p-6 text-center cursor-pointer hover:border-tn-yellow transition-colors"
+         >
+           {uploading ? (
+             <div className="flex flex-col items-center gap-3">
+               <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
+               <p className="text-sm text-tn-subtle">Uploading...</p>
+             </div>
+           ) : (
+             <>
+               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-tn-muted mb-3">
+                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                 <polyline points="17 8 12 3 7 8"/>
+                 <line x1="12" y1="3" x2="12" y2="15"/>
+               </svg>
+               <p className="text-sm font-semibold text-tn-text mb-1">Drag & Drop</p>
+               <p className="text-xs text-tn-subtle">or click to upload Excel file</p>
+             </>
+           )}
            <input
              ref={fileInputRef}
              type="file"
              accept=".csv,.xlsx"
              onChange={(e) => setFile(e.target.files?.[0] || null)}
-             className="bg-tn-light border border-tn-border rounded-xl px-3 py-2.5 text-sm text-tn-text focus:outline-none focus:border-tn-yellow transition-colors flex-1 min-w-[180px]"
+             className="hidden"
            />
+         </div>
+         <div className="flex gap-3 mt-3">
            <button
              onClick={handleUpload}
              disabled={!file || uploading}
@@ -1075,10 +1128,10 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
                a.click();
                URL.revokeObjectURL(url);
              }}
-             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50"
+             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border border-tn-border text-tn-muted hover:bg-tn-light transition-colors"
             >
-              <Icon name="download" size={16} /> Sample Template
-            </button>
+               <Icon name="download" size={16} /> Sample Template
+             </button>
          </div>
          <p className="text-xs text-gray-300 mt-2">CSV or XLSX format. Required columns: Name, Phone, Relation, City. <button onClick={() => {
            const csvContent = 'Name,Phone,Relation,City\nRamesh,9876543210,family,Chennai\nPriya,9876543211,friend,Bangalore\n';

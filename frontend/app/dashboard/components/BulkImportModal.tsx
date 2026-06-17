@@ -55,7 +55,19 @@ export default function BulkImportModal({ events, onClose, onImported }: BulkImp
           </div>
           <div>
             <label className="block text-xs font-semibold text-[#555] mb-1.5">CSV File</label>
-            <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0] || null)} className="w-full text-sm" />
+            <div
+              onClick={() => document.getElementById('bulk-import-file')?.click()}
+              className="border-2 border-dashed border-[#E8E8E8] rounded-xl p-6 text-center cursor-pointer hover:border-[#FFC107] transition-colors"
+            >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-[#9CA3AF] mb-2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p className="text-sm font-semibold text-[#1F2937] mb-1">Drag & Drop</p>
+              <p className="text-xs text-[#6B7280]">or click to upload CSV file</p>
+            </div>
+            <input id="bulk-import-file" type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0] || null)} className="hidden" />
             <p className="text-[10px] text-[#999] mt-1">Format: guest_name, amount, gift_type, relation, payment_mode, note</p>
           </div>
           <button type="submit" disabled={loading || !file} className="w-full bg-[#FFC107] text-black py-3 rounded-lg font-semibold hover:bg-[#E6AC00] disabled:opacity-50">
