@@ -1,14 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { eventsApi, Event } from '@/lib/api';
 import Icon, { IconName } from '@/components/ui/Icon';
+import { useSlug } from '@/lib/useSlug';
 
 export default function GuestQRCodeLandingScreen() {
-  const params = useParams();
-  const token = params.token as string;
+  const token = useSlug(1); // /g/[token]/landing → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { eventsApi, Event } from '@/lib/api';
 import Icon from '@/components/ui/Icon';
+import { useSlug } from '@/lib/useSlug';
 
 export default function LinkExpiredScreen() {
-  const params = useParams();
   const router = useRouter();
-  const token = params.token as string;
+  const token = useSlug(1); // /g/[token]/expired → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

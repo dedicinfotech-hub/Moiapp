@@ -132,7 +132,10 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const totalGold = safeEntries.filter(e => e.gift_type === 'gold').reduce((s, e) => s + Number(e.gold_weight || 0), 0);
   const totalSilver = safeEntries.filter(e => e.gift_type === 'silver').reduce((s, e) => s + Number(e.gold_weight || 0), 0);
   const totalGifts = safeEntries.filter(e => e.gift_type === 'gift').length;
-  const shareUrl = `${window.location.origin}/e/${event.slug}`;
+  // Build share URL safely — window is not available during static pre-render
+  const shareUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/e/${event.slug}`
+    : `/e/${event.slug}`;
 
   return (
     <>

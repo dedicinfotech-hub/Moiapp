@@ -10,7 +10,7 @@ import { Toaster } from 'react-hot-toast';
 export const metadata: Metadata = {
   title: 'Moi App – Wedding Gift Tracker',
   description: 'Track wedding moi (gift money) easily. Share with family.',
-  manifest: '/manifest.json',
+  // manifest href is injected manually in <head> below with basePath prefix
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -26,18 +26,23 @@ export const viewport: Viewport = {
   themeColor: '#FFC107',
 };
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <link rel="manifest" href="/manifest.json" />
+        {/* Use BASE_PATH prefix so manifest resolves correctly on subpath deployments */}
+        <link rel="manifest" href={`${BASE_PATH}/manifest.json`} />
         <meta name="theme-color" content="#FFC107" />
-        <link rel="apple-touch-icon" href="/moiapp/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" href={`${BASE_PATH}/icons/icon-192x192.png`} />
       </head>
-      <body className="min-h-screen bg-tn-light">
+      <body className="min-h-screen bg-tn-light" suppressHydrationWarning>
         <AuthProvider>
           <FeaturesProvider>
             <NewEventModalProvider>
+              {/* ConditionalNavbar uses usePathname() which differs between
+                  static pre-render and client — suppress hydration for this subtree */}
               <ConditionalNavbar />
               <main>{children}</main>
               <ConditionalBottomNav />

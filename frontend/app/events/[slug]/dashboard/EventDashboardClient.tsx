@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { eventsApi, moiApi, Event, MoiEntry } from '@/lib/api';
 import EventLayout, { EventDetailsRow } from '@/components/event/EventLayout';
+import { useSlug } from '@/lib/useSlug';
 
 const AVATAR_COLORS = ['bg-[#EDE9FE] text-[#FFC107]', 'bg-[#DBEAFE] text-[#3B82F6]', 'bg-[#D1FAE5] text-[#059669]', 'bg-[#FEF3C7] text-[#D97706]', 'bg-[#FCE7F3] text-[#DB2777]'];
 
@@ -33,9 +34,8 @@ function QuickAction({ icon, label, sub, onClick }: { icon: React.ReactNode; lab
 }
 
 export default function EventDashboardScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/dashboard → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [entries, setEntries] = useState<MoiEntry[]>([]);

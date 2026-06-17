@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { eventsApi, moiApi, Event } from '@/lib/api';
 import GuestFlowHeader from '@/components/guest/GuestFlowHeader';
 import Icon from '@/components/ui/Icon';
+import { useSlug } from '@/lib/useSlug';
 
 type PaymentMethod = 'upi' | 'card' | 'netbanking' | 'wallet' | 'scan';
 
 export default function PaymentMethodScreen() {
-  const params = useParams();
   const router = useRouter();
-  const token = params.token as string;
+  const token = useSlug(1); // /g/[token]/payment → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

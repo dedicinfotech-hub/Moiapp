@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import { eventsApi, Event } from '@/lib/api';
 import HostEntryShell from '@/components/event/HostEntryShell';
 import EventContextCard from '@/components/event/EventContextCard';
+import { useSlug } from '@/lib/useSlug';
 
 type PaymentMode = 'cash' | 'upi' | 'card' | 'cheque' | 'other';
 
@@ -20,9 +21,8 @@ const METHODS: { id: PaymentMode; label: string; desc: string; color: string; ic
 ];
 
 export default function HostPaymentMethodScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/payment-method → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

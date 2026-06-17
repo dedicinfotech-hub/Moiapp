@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { eventsApi, Event } from '@/lib/api';
 import GuestFlowHeader from '@/components/guest/GuestFlowHeader';
 import Icon, { IconName } from '@/components/ui/Icon';
+import { useSlug } from '@/lib/useSlug';
 
 type GiftType = 'cash' | 'gold' | 'silver' | 'gift';
 
 export default function GuestMoiFormScreen() {
-  const params = useParams();
   const router = useRouter();
-  const token = params.token as string;
+  const token = useSlug(1); // /g/[token]/form → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

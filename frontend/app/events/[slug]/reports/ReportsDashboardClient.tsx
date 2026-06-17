@@ -1,17 +1,17 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { eventsApi, moiApi, Event, MoiEntry, showSuccess, showError } from '@/lib/api';
 import EventLayout from '@/components/event/EventLayout';
+import { useSlug } from '@/lib/useSlug';
 
 type DateFilter = 'today' | 'week' | 'month' | 'all';
 type PaymentFilter = 'all' | 'cash' | 'upi' | 'bank' | 'cheque';
 
 export default function ReportsDashboardScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/reports → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [entries, setEntries] = useState<MoiEntry[]>([]);

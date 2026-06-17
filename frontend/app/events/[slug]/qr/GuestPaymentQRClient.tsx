@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { eventsApi, Event } from '@/lib/api';
 import { CreateFlowHeader } from '@/components/event/EventLayout';
+import { useSlug } from '@/lib/useSlug';
 
 export default function GuestPaymentQRScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/qr → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

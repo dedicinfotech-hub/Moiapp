@@ -2,15 +2,15 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import { eventsApi, Event, showSuccess } from '@/lib/api';
 import MobileHeader from '@/components/MobileHeader';
+import { useSlug } from '@/lib/useSlug';
 
 export default function InviteesUploadScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/invitees → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

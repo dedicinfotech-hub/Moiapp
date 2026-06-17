@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { eventsApi, Event } from '@/lib/api';
 import { CreateFlowHeader } from '@/components/event/EventLayout';
+import { useSlug } from '@/lib/useSlug';
 
 function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
@@ -19,9 +20,8 @@ function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: strin
 }
 
 export default function PendingApprovalScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/pending → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

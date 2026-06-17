@@ -1,20 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import { eventsApi, moiApi, Event, MoiEntry } from '@/lib/api';
 import HostEntryShell from '@/components/event/HostEntryShell';
 import EventContextCard from '@/components/event/EventContextCard';
+import { useSlug } from '@/lib/useSlug';
 
 type EntryType = 'collection' | 'advance';
 
 const PRESETS = [101, 501, 1001];
 
 export default function MoiEntryScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/moi-entry → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

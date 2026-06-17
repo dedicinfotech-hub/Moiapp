@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { eventsApi, moiApi, Event } from '@/lib/api';
 import EventLayout, { EventDetailsRow } from '@/components/event/EventLayout';
+import { useSlug } from '@/lib/useSlug';
 
 function StatCard({ icon, label, value, sub, bg }: { icon: React.ReactNode; label: string; value: string; sub?: string; bg: string }) {
   return (
@@ -27,9 +28,8 @@ function QuickAction({ icon, label, sub, onClick }: { icon: React.ReactNode; lab
 }
 
 export default function EventDashboardEmptyStateScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/dashboard-empty → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);

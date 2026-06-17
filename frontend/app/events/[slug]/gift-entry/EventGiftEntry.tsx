@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import { eventsApi, moiApi, Event, type MoiEntry } from '@/lib/api';
 import HostEntryShell from '@/components/event/HostEntryShell';
 import EventContextCard from '@/components/event/EventContextCard';
+import { useSlug } from '@/lib/useSlug';
 
 type GiftType = 'gold' | 'silver' | 'gift';
 
@@ -16,9 +17,8 @@ const GIFT_TYPES: { id: GiftType; label: string; desc: string; icon: IconName }[
 ];
 
 export default function GiftEntryScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/gift-entry → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,33 +55,28 @@ export default function GiftEntryScreen() {
     try {
       // Use slug for public access (no auth required), event_id for authenticated users
       const token = localStorage.getItem('moi_token');
-      const payload: Record<string, unknown> = token
-        ? {
-            event_id: event.id,
-            guest_name: form.guest_name || 'Anonymous',
-            relation: relationMap[form.relation],
-            amount: 0,
-            gift_type: form.gift_type,
-            payment_mode: 'other',
-            gift_description: form.description || form.note,
-            note: form.note,
-            entered_by: 'gift_entry',
-          }
-        : {
-            slug: slug,
-            guest_name: form.guest_name || 'Anonymous',
-            relation: relationMap[form.relation],
-            amount: 0,
-            gift_type: form.gift_type,
-            payment_mode: 'other',
-            gift_description: form.description || form.note,
-            note: form.note,
-            entered_by: 'gift_entry',
-          };
-      // For gold/silver, include weight
-      if (form.gift_type === 'gold' || form.gift_type === 'silver') {
-        payload.gold_weight = form.weight ? parseFloat(form.weight) : null;
+      const weightValue = form.gift_type === 'gold' || form.gift_type === 'silver'
+        ? (form.weight ? parseFloat(form.weight) : null)
+        : null;
+
+      const payload: Partial<MoiEntry> & { slug?: string; event_id?: number } = {
+        guest_name: form.guest_name || 'Anonymous',
+        relation: relationMap[form.relation],
+        amount: 0,
+        gift_type: form.gift_type,
+        payment_mode: 'other',
+        gift_description: form.description || form.note,
+        note: form.note,
+        entered_by: 'gift_entry',
+        gold_weight: weightValue,
+      };
+
+      if (token) {
+        payload.event_id = event.id;
+      } else {
+        payload.slug = slug;
       }
+
       await moiApi.add(payload);
       router.push(`/events/${slug}/entries`);
     } catch (err: unknown) {

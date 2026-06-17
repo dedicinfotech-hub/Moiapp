@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import { useSlug } from '@/lib/useSlug';
 
 export default function PaymentSuccessScreen() {
-  const params = useParams();
   const router = useRouter();
-  const token = params.token as string;
+  const token = useSlug(1); // /g/[token]/success → skip 1 segment
 
   const [guestData, setGuestData] = useState<{
     guest_name?: string;

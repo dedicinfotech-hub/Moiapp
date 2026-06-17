@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
 import { eventsApi, moiApi, Event, MoiEntry } from '@/lib/api';
 import HostEntryShell from '@/components/event/HostEntryShell';
 import EventContextCard from '@/components/event/EventContextCard';
 import ConfirmModal from '@/components/ConfirmModal';
+import { useSlug } from '@/lib/useSlug';
 
 type SortKey = 'newest' | 'oldest' | 'high' | 'low';
 
@@ -17,9 +18,8 @@ function initials(name: string) {
 const AVATAR_COLORS = ['#FFC107', '#22C55E', '#3B82F6', '#F97316', '#EC4899'];
 
 export default function MoiEntriesListScreen() {
-  const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = useSlug(1); // /events/[slug]/entries → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
   const [entries, setEntries] = useState<MoiEntry[]>([]);

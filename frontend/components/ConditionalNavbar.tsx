@@ -1,19 +1,25 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Navbar from './Navbar';
 import BottomNavigation from './BottomNavigation';
 
-// Routes where the global navbar should be hidden
-// (these pages manage their own full-screen layout or event-specific header)
-const HIDDEN_ROUTES = [
-  '/dashboard',
-  '/e/',
-  '/g/',
-];
+// Render nothing until the component has mounted on the client.
+// This prevents hydration mismatches caused by usePathname() returning a
+// different value during static pre-render vs. the real browser URL.
+function useMounted() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  return mounted;
+}
 
 export default function ConditionalNavbar() {
+  const mounted = useMounted();
   const pathname = usePathname();
+
+  // During static pre-render (and first client frame before mount) render nothing.
+  if (!mounted) return null;
 
   // Hide on dashboard and all its subpaths
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
@@ -36,7 +42,11 @@ export default function ConditionalNavbar() {
 
 // Separate component for conditional bottom nav
 export function ConditionalBottomNav() {
+  const mounted = useMounted();
   const pathname = usePathname();
+
+  // During static pre-render render nothing.
+  if (!mounted) return null;
 
   // Hide on dashboard and all its subpaths
   if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
