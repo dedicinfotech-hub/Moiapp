@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Event, Organizer, organizersApi } from '@/lib/api';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface ModuleOrganizersProps {
   events: Event[];
@@ -15,6 +16,7 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
   const [role, setRole] = useState('organizer');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [confirmRemoveId, setConfirmRemoveId] = useState<number | null>(null);
 
   const loadOrganizers = useCallback(async () => {
     if (!selectedEventId) return;
@@ -59,7 +61,13 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
   };
 
   const handleRemove = async (id: number) => {
-    if (!confirm('Remove this organizer?')) return;
+    setConfirmRemoveId(id);
+  };
+
+  const confirmRemove = async () => {
+    if (!confirmRemoveId) return;
+    const id = confirmRemoveId;
+    setConfirmRemoveId(null);
     setLoading(true);
     try {
       await organizersApi.remove(id);
@@ -174,6 +182,16 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
           </div>
         </>
       )}
+
+      <ConfirmModal
+        isOpen={confirmRemoveId !== null}
+        title="Remove Organizer"
+        message="Are you sure you want to remove this organizer?"
+        confirmText="Remove"
+        variant="danger"
+        onConfirm={confirmRemove}
+        onCancel={() => setConfirmRemoveId(null)}
+      />
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Icon, { type IconName } from '@/components/ui/Icon';
-import { Event, eventsApi, exportCSV, emailPDF } from '@/lib/api';
+import { Event, eventsApi, exportCSV, emailPDF, showSuccess, showError } from '@/lib/api';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 import EventStatusBadges from '@/components/EventStatusBadges';
 import { canAddMoi, showEventQr } from '@/lib/eventHelpers';
@@ -181,7 +181,7 @@ export default function ModuleEvents({
                             className="p-1.5 text-tn-muted hover:text-tn-text transition-colors">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                           </button>
-                          <button onClick={async () => { try { await emailPDF(ev.id); alert('PDF report emailed successfully!'); } catch { alert('Failed to email PDF'); } }} title="Email PDF Report"
+                          <button onClick={async () => { try { await emailPDF(ev.id); showSuccess('PDF report emailed successfully!'); } catch { showError('Failed to email PDF'); } }} title="Email PDF Report"
                             className="p-1.5 text-tn-muted hover:text-tn-text transition-colors">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                           </button>
@@ -252,7 +252,7 @@ export default function ModuleEvents({
                         className="p-1.5 text-tn-muted hover:text-tn-text transition-colors">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                       </button>
-                      <button onClick={async () => { try { await emailPDF(ev.id); alert('PDF report emailed!'); } catch { alert('Failed'); } }} title="Email PDF"
+                      <button onClick={async () => { try { await emailPDF(ev.id); showSuccess('PDF report emailed!'); } catch { showError('Failed'); } }} title="Email PDF"
                         className="p-1.5 text-tn-muted hover:text-tn-text transition-colors">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                       </button>

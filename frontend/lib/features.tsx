@@ -1,57 +1,64 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { featuresApi } from './api';
+import { request } from './api';
 
-export interface FeatureToggle {
+interface FeatureToggle {
   feature_key: string;
   is_enabled: number;
   description: string;
 }
 
-interface FeaturesContextType {
+interface FeaturesContextValue {
   toggles: FeatureToggle[];
-  loading: boolean;
   isEnabled: (key: string) => boolean;
-  refresh: () => Promise<void>;
+  loading: boolean;
 }
 
-const FeaturesContext = createContext<FeaturesContextType | undefined>(undefined);
+const FeaturesContext = createContext<FeaturesContextValue | undefined>(undefined);
 
 export function FeaturesProvider({ children }: { children: ReactNode }) {
   const [toggles, setToggles] = useState<FeatureToggle[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const res = await featuresApi.list();
-      setToggles(Array.isArray(res.toggles) ? res.toggles : []);
-    } catch {
-      setToggles([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await request<{ toggles: FeatureToggle[] }>('/features.php');
+        if (!cancelled) {
+          setToggles(Array.isArray(res.toggles) ? res.toggles : []);
+        }
+      } catch {
+        if (!cancelled) {
+          setToggles([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const isEnabled = (key: string): boolean => {
-    const toggle = toggles?.find((t) => t.feature_key === key);
+    const toggle = toggles.find((t) => t.feature_key === key);
     return toggle ? toggle.is_enabled === 1 : false;
   };
 
   return (
-    <FeaturesContext.Provider value={{ toggles, loading, isEnabled, refresh: load }}>
+    <FeaturesContext.Provider value={{ toggles, isEnabled, loading }}>
       {children}
     </FeaturesContext.Provider>
   );
 }
 
-export function useFeatures(): FeaturesContextType {
+export function useFeatures(): FeaturesContextValue {
   const context = useContext(FeaturesContext);
   if (!context) {
-    throw new Error('useFeatures must be used within a FeaturesProvider');
+    // Return safe defaults if used outside provider
+    return { toggles: [], isEnabled: () => false, loading: false };
   }
   return context;
 }

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Event, eventsApi, showSuccess } from '@/lib/api';
 import { getGuestPaymentUrl, getQrImageUrl, downloadQrPng } from '@/lib/guestUrl';
 import { getEventDisplayName } from '@/lib/eventHelpers';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface EventQrPanelProps {
   event: Event;
@@ -14,6 +15,8 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
   const [qrCount, setQrCount] = useState(Number(event.qr_payment_count ?? event.stats?.qr_payment_count ?? 0));
   const [qrEnabled, setQrEnabled] = useState(event.qr_enabled !== 0);
   const [loading, setLoading] = useState(false);
+  const [confirmToggleQr, setConfirmToggleQr] = useState(false);
+  const [confirmRegenerateQr, setConfirmRegenerateQr] = useState(false);
 
   const token = event.guest_token;
   const paymentUrl = token ? getGuestPaymentUrl(token) : '';
@@ -44,7 +47,11 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
   }
 
   const handleToggleQr = async () => {
-    if (!confirm(qrEnabled ? 'Close guest QR payments? Guests will not be able to scan and pay.' : 'Re-enable guest QR payments?')) return;
+    setConfirmToggleQr(true);
+  };
+
+  const confirmToggleQrAction = async () => {
+    setConfirmToggleQr(false);
     setLoading(true);
     try {
       const res = await eventsApi.setQrEnabled(event.id, !qrEnabled);
@@ -57,7 +64,11 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
   };
 
   const handleRegenerateQr = async () => {
-    if (!confirm('Regenerate QR code? The old QR code and link will stop working immediately.')) return;
+    setConfirmRegenerateQr(true);
+  };
+
+  const confirmRegenerateQrAction = async () => {
+    setConfirmRegenerateQr(false);
     setLoading(true);
     try {
       const res = await eventsApi.regenerateQr(event.id);
@@ -153,6 +164,26 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmToggleQr}
+        title={qrEnabled ? 'Close QR Payments' : 'Re-enable QR Payments'}
+        message={qrEnabled ? 'Guests will not be able to scan and pay. Are you sure?' : 'Re-enable guest QR payments?'}
+        confirmText={qrEnabled ? 'Close' : 'Enable'}
+        variant="warning"
+        onConfirm={confirmToggleQrAction}
+        onCancel={() => setConfirmToggleQr(false)}
+      />
+
+      <ConfirmModal
+        isOpen={confirmRegenerateQr}
+        title="Regenerate QR Code"
+        message="The old QR code and link will stop working immediately. Are you sure?"
+        confirmText="Regenerate"
+        variant="danger"
+        onConfirm={confirmRegenerateQrAction}
+        onCancel={() => setConfirmRegenerateQr(false)}
+      />
     </div>
   );
 }

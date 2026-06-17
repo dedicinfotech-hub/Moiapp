@@ -280,7 +280,7 @@ export default function Icon({ name, size = 18, className = '', ...props }: Icon
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
+      className={`${className} inline-block align-middle`}
       aria-hidden="true"
       {...props}
     >

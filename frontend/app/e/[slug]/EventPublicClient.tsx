@@ -72,6 +72,13 @@ export default function PublicEventPage() {
   const [loading, setLoading]   = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [step, setStep]         = useState<Step>('event');
+  const [shareUrl, setShareUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShareUrl(window.location.href);
+    }
+  }, []);
 
   useEffect(() => {
     if (!slug) return;
@@ -106,7 +113,7 @@ export default function PublicEventPage() {
 
   if (step === 'form') {
     if (!canAcceptGuestMoi(event)) {
-      return <EventDetailView event={event} photos={photos} onGiveMoi={() => {}} guestMoiClosed />;
+      return <EventDetailView event={event} photos={photos} onGiveMoi={() => {}} guestMoiClosed shareUrl={shareUrl} />;
     }
     return <MoiForm event={event} onBack={() => setStep('event')} onNext={(formData) => { (window as Window & { __guestForm?: GuestForm }).__guestForm = formData; setStep('payment'); }} />;
   }
@@ -114,21 +121,21 @@ export default function PublicEventPage() {
   if (step === 'success') return <SuccessView event={event} onBack={() => setStep('event')} onContinue={() => setStep('thankyou')} txn={(window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn} />;
   if (step === 'thankyou') return <ThankYouScreen event={event} onBack={() => setStep('event')} txn={(window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn} />;
 
-  return <EventDetailView event={event} photos={photos} onGiveMoi={() => setStep('form')} guestMoiClosed={!canAcceptGuestMoi(event)} />;
+  return <EventDetailView event={event} photos={photos} onGiveMoi={() => setStep('form')} guestMoiClosed={!canAcceptGuestMoi(event)} shareUrl={shareUrl} />;
 }
 
 // ── Event Detail View (TicketNadu layout) ─────────────────────────────────────
-function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed }: { event: Event; photos: Photo[]; onGiveMoi: () => void; guestMoiClosed?: boolean }) {
+function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }: { event: Event; photos: Photo[]; onGiveMoi: () => void; guestMoiClosed?: boolean; shareUrl?: string }) {
   const [showMore, setShowMore]   = useState(false);
   const [copied, setCopied]       = useState(false);
   const guestCount = Number(event.stats?.guest_count || 0);
-
   const weddingDate = new Date(event.wedding_date).toLocaleDateString('en-IN', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   const handleShare = async () => {
+    if (!shareUrl) return;
+
     if (navigator.share) {
       try {
         await navigator.share({

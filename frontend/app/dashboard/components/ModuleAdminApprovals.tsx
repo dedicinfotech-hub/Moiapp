@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Event, eventsApi, showSuccess } from '@/lib/api';
+import { Event, eventsApi, showSuccess, showError } from '@/lib/api';
 import EventStatusBadges from '@/components/EventStatusBadges';
+import ConfirmModal from '@/components/ConfirmModal';
 
 type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support' | 'admin-approvals';
 
@@ -27,6 +28,7 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [confirmApproveId, setConfirmApproveId] = useState<number | null>(null);
 
   const load = async () => {
     try {
@@ -46,7 +48,13 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
   }, [filter]);
 
   const handleApprove = async (id: number) => {
-    if (!confirm('Approve this function? Host can start moi collection after approval.')) return;
+    setConfirmApproveId(id);
+  };
+
+  const confirmApprove = async () => {
+    if (!confirmApproveId) return;
+    const id = confirmApproveId;
+    setConfirmApproveId(null);
     try {
       setActionLoading(id);
       await eventsApi.approve(id, { status: 'approved' });
@@ -54,7 +62,7 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
       await load();
       onRefresh?.();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to approve');
+      showError(err instanceof Error ? err.message : 'Failed to approve');
     } finally {
       setActionLoading(null);
     }
@@ -71,7 +79,7 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
       await load();
       onRefresh?.();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to reject');
+      showError(err instanceof Error ? err.message : 'Failed to reject');
     } finally {
       setActionLoading(null);
     }
@@ -204,6 +212,16 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmApproveId !== null}
+        title="Approve Function"
+        message="Host can start moi collection after approval. Are you sure?"
+        confirmText="Approve"
+        variant="info"
+        onConfirm={confirmApprove}
+        onCancel={() => setConfirmApproveId(null)}
+      />
     </div>
   );
 }

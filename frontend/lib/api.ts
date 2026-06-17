@@ -67,6 +67,13 @@ export function showSuccess(message: string) {
   }
 }
 
+// Helper to show error toast
+export function showError(message: string) {
+  if (typeof window !== 'undefined') {
+    toast.error(message);
+  }
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const authApi = {
   register: (body: { name: string; email: string; password: string; phone?: string }) =>
@@ -120,7 +127,7 @@ export const authApi = {
     }),
 };
 
-// ── Events ────────────────────────────────────────────────────────────────────
+// ── Features ───────────────────────────────────────────────────────────────────
 export const featuresApi = {
   list: () => request<{ toggles: { feature_key: string; is_enabled: number; description: string }[] }>('/features.php'),
   update: (feature_key: string, is_enabled: number) =>
@@ -265,16 +272,16 @@ export interface Organizer {
 
 export const organizersApi = {
   list: (eventId: number) =>
-    request<{ organizers: Organizer[] }>(`/api/organizers?event_id=${eventId}`),
+    request<{ organizers: Organizer[] }>(`/organizers.php?event_id=${eventId}`),
 
   add: (body: { event_id: number; email: string; role: string }) =>
-    request<{ success: boolean; organizer: Organizer }>('/api/organizers?action=add', {
+    request<{ success: boolean; organizer: Organizer }>('/organizers.php?action=add', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
 
   remove: (id: number) =>
-    request<{ success: boolean }>(`/api/organizers?id=${id}`, { method: 'DELETE' }),
+    request<{ success: boolean }>(`/organizers.php?id=${id}`, { method: 'DELETE' }),
 };
 
 // ── Moi Entries ───────────────────────────────────────────────────────────────

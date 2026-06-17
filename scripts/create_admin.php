@@ -4,10 +4,8 @@
 
 require_once __DIR__ . '/../config/bootstrap.php';
 
-use Config\Db;
-
 // Get database connection
-$pdo = Db::getConnection();
+$pdo = getPDO();
 
 // Admin user details - change these as needed
 $name = 'Admin';

@@ -20,6 +20,19 @@ function refValues($arr) {
     return $arr;
 }
 
+function normalizeEnumValue($value, array $validValues, string $default): string {
+    if (!is_string($value)) {
+        return $default;
+    }
+
+    $normalized = strtolower(trim($value));
+    return in_array($normalized, $validValues, true) ? $normalized : $default;
+}
+
+const VALID_GIFT_TYPES = ['cash', 'gold', 'silver', 'gift'];
+const VALID_RELATIONS = ['family', 'friend', 'colleague', 'relative', 'neighbor', 'business', 'other'];
+const VALID_PAYMENT_MODES = ['cash', 'upi', 'card', 'cheque', 'other'];
+
 $method = $_SERVER['REQUEST_METHOD'];
 $user = getAuthUser();
 if (!$user) {
@@ -93,30 +106,15 @@ if ($method === 'POST' && ($_GET['action'] ?? '') === 'csv') {
 
         $guestName = trim($data[0] ?? '');
         $amount = floatval($data[1] ?? 0);
-        $giftType = strtolower(trim($data[2] ?? 'cash'));
-        $relation = strtolower(trim($data[3] ?? 'friend'));
-        $paymentMode = strtolower(trim($data[4] ?? 'cash'));
+        $giftType = normalizeEnumValue($data[2] ?? 'cash', VALID_GIFT_TYPES, 'cash');
+        $relation = normalizeEnumValue($data[3] ?? 'friend', VALID_RELATIONS, 'friend');
+        $paymentMode = normalizeEnumValue($data[4] ?? 'cash', VALID_PAYMENT_MODES, 'cash');
         $note = trim($data[5] ?? '');
         $originalDate = trim($data[6] ?? '');
 
         if (!$guestName) {
             $errors[] = "Line $line: Guest name is required";
             continue;
-        }
-
-        // Validate gift type
-        if (!in_array($giftType, ['cash', 'gold', 'gift'])) {
-            $giftType = 'cash';
-        }
-
-        // Validate relation
-        if (!in_array($relation, ['family', 'friend', 'colleague', 'other'])) {
-            $relation = 'friend';
-        }
-
-        // Validate payment mode
-        if (!in_array($paymentMode, ['cash', 'upi', 'card', 'cheque'])) {
-            $paymentMode = 'cash';
         }
 
         $goldWeight = null;
@@ -191,9 +189,9 @@ if ($method === 'POST' && ($_GET['action'] ?? '') === 'add') {
     $eventId = intval($data['event_id'] ?? 0);
     $guestName = trim($data['guest_name'] ?? '');
     $amount = floatval($data['amount'] ?? 0);
-    $giftType = strtolower(trim($data['gift_type'] ?? 'cash'));
-    $relation = strtolower(trim($data['relation'] ?? 'friend'));
-    $paymentMode = strtolower(trim($data['payment_mode'] ?? 'cash'));
+    $giftType = normalizeEnumValue($data['gift_type'] ?? 'cash', VALID_GIFT_TYPES, 'cash');
+    $relation = normalizeEnumValue($data['relation'] ?? 'friend', VALID_RELATIONS, 'friend');
+    $paymentMode = normalizeEnumValue($data['payment_mode'] ?? 'cash', VALID_PAYMENT_MODES, 'cash');
     $note = trim($data['note'] ?? '');
     $originalDate = trim($data['original_entry_date'] ?? '');
 

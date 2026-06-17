@@ -112,12 +112,13 @@ if ($method === 'POST') {
     }
 
     // Build types and values dynamically to handle null values
+    // For MySQLi, we need to handle null values specially - use 's' type and convert null to string
     $types = 'i';
     $values = [$evId];
     
     // moi_entry_id - can be null, use 's' for null handling
     $types .= 's';
-    $values[] = $moiEntryId;
+    $values[] = $moiEntryId !== null ? (string)$moiEntryId : null;
     
     // guest_name, return_type
     $types .= 'ss';
@@ -125,12 +126,12 @@ if ($method === 'POST') {
     $values[] = $returnType;
     
     // return_amount - can be null
-    $types .= 'd';
-    $values[] = $returnAmount;
+    $types .= 's';
+    $values[] = $returnAmount !== null ? (string)$returnAmount : null;
     
     // return_gold_weight - can be null
-    $types .= 'd';
-    $values[] = $returnGoldWeight;
+    $types .= 's';
+    $values[] = $returnGoldWeight !== null ? (string)$returnGoldWeight : null;
     
     // return_gift_description, return_date, status, note - can be null
     $types .= 'ssss';

@@ -1,4 +1,4 @@
-# Ensure all API PHP files are accessible from any origin
+# API directory configuration
 <IfModule mod_authz_core.c>
     Require all granted
 </IfModule>
@@ -7,9 +7,22 @@
     Allow from all
 </IfModule>
 
-# Pass auth headers
+# Pass auth headers to PHP
 RewriteEngine On
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 RewriteRule .* - [E=HTTP_X_AUTH_TOKEN:%{HTTP:X-Auth-Token}]
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 SetEnvIf X-Auth-Token "(.*)" HTTP_X_AUTH_TOKEN=$1
+
+# Disable directory listing
+Options -Indexes
+
+# Ensure PHP files are executed, not downloaded
+<FilesMatch "\.php$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+# If a directory or a PHP file exists, use it directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]

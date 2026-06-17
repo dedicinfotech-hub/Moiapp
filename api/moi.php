@@ -14,6 +14,19 @@ function refValues($arr) {
     return $arr;
 }
 
+function normalizeEnumValue($value, array $validValues, string $default): string {
+    if (!is_string($value)) {
+        return $default;
+    }
+
+    $normalized = strtolower(trim($value));
+    return in_array($normalized, $validValues, true) ? $normalized : $default;
+}
+
+const VALID_GIFT_TYPES = ['cash', 'gold', 'silver', 'gift'];
+const VALID_RELATIONS = ['family', 'friend', 'colleague', 'relative', 'neighbor', 'business', 'other'];
+const VALID_PAYMENT_MODES = ['cash', 'upi', 'card', 'cheque', 'other'];
+
 $method  = $_SERVER['REQUEST_METHOD'];
 $eventId = intval($_GET['event_id'] ?? 0);
 $entryId = intval($_GET['id']       ?? 0);
@@ -54,6 +67,18 @@ if ($method === 'GET' && $eventId) {
     exit;
 }
 
+// ── GET all guest tokens for static params ────────────────────────────────────
+$action = $_GET['action'] ?? '';
+if ($method === 'GET' && $action === 'guest_tokens') {
+    $db = getDB();
+    $stmt = $db->prepare('SELECT guest_token FROM events WHERE guest_token IS NOT NULL AND guest_token != \'\' AND is_active = 1');
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $tokens = array_map(fn($r) => $r['guest_token'], $rows);
+    echo json_encode($tokens);
+    exit;
+}
+
 // ── POST add moi entry ────────────────────────────────────────────────────────
 // Guest (public): sends slug — no auth needed
 // Admin:          sends event_id + auth token
@@ -66,22 +91,13 @@ if ($method === 'POST') {
     $city            = isset($data['city']) && trim($data['city']) !== '' ? trim($data['city']) : null;
     $company         = isset($data['company']) && trim($data['company']) !== '' ? trim($data['company']) : null;
     $occupation      = isset($data['occupation']) && trim($data['occupation']) !== '' ? trim($data['occupation']) : null;
-    $giftType        = trim($data['gift_type']        ?? 'cash');
+    $giftType        = normalizeEnumValue($data['gift_type'] ?? 'cash', VALID_GIFT_TYPES, 'cash');
     $approximateValue = isset($data['approximate_value']) && $data['approximate_value'] !== '' && $data['approximate_value'] !== null ? floatval($data['approximate_value']) : null;
-    if (!in_array($giftType, ['cash', 'gold', 'silver', 'gift'])) {
-        $giftType = 'cash';
-    }
     $amount          = floatval($data['amount']       ?? 0);
     $goldWeight      = isset($data['gold_weight']) && $data['gold_weight'] !== '' ? floatval($data['gold_weight']) : null;
     $giftDescription = isset($data['gift_description']) && trim($data['gift_description']) !== '' ? trim($data['gift_description']) : null;
-    $relation        = $data['relation']              ?? 'friend';
-    
-    // Validate relation
-    $validRelations = ['family', 'friend', 'colleague', 'relative', 'neighbor', 'business', 'other'];
-    if (!in_array($relation, $validRelations)) {
-        $relation = 'other';
-    }
-    $paymentMode     = $data['payment_mode']          ?? 'cash';
+    $relation        = normalizeEnumValue($data['relation'] ?? 'friend', VALID_RELATIONS, 'friend');
+    $paymentMode     = normalizeEnumValue($data['payment_mode'] ?? 'cash', VALID_PAYMENT_MODES, 'cash');
     $note            = trim($data['note']             ?? '');
     $enteredBy       = trim($data['entered_by']       ?? $guestName);
     $eventSlug       = trim($data['slug']             ?? '');
@@ -262,7 +278,16 @@ if ($method === 'POST') {
     // Use call_user_func_array to handle null values properly
     $params = array_merge([$types], $values);
     call_user_func_array([$stmt, 'bind_param'], refValues($params));
-    $stmt->execute();
+    try {
+        $stmt->execute();
+    } catch (mysqli_sql_exception $e) {
+        http_response_code(400);
+        echo json_encode([
+            'error' => 'Invalid moi entry data',
+            'details' => $e->getMessage(),
+        ]);
+        exit;
+    }
 
     echo json_encode(['success' => true, 'id' => $db->insert_id]);
     exit;
@@ -300,23 +325,17 @@ if ($method === 'PUT' && $entryId) {
     $data = json_decode(file_get_contents('php://input'), true);
     $guestName = trim($data['guest_name'] ?? '');
     $city = isset($data['city']) && trim($data['city']) !== '' ? trim($data['city']) : null;
-    $giftType = trim($data['gift_type'] ?? 'cash');
+    $giftType = normalizeEnumValue($data['gift_type'] ?? 'cash', VALID_GIFT_TYPES, 'cash');
     $approximateValue = isset($data['approximate_value']) && $data['approximate_value'] !== '' && $data['approximate_value'] !== null ? floatval($data['approximate_value']) : null;
     $amount = floatval($data['amount'] ?? 0);
     $goldWeight = isset($data['gold_weight']) && $data['gold_weight'] !== '' ? floatval($data['gold_weight']) : null;
     $giftDescription = isset($data['gift_description']) && trim($data['gift_description']) !== '' ? trim($data['gift_description']) : null;
-    $relation = $data['relation'] ?? 'friend';
-    $paymentMode = $data['payment_mode'] ?? 'cash';
+    $relation = normalizeEnumValue($data['relation'] ?? 'friend', VALID_RELATIONS, 'friend');
+    $paymentMode = normalizeEnumValue($data['payment_mode'] ?? 'cash', VALID_PAYMENT_MODES, 'cash');
     $upiRefId = isset($data['upi_ref_id']) && trim($data['upi_ref_id']) !== '' ? trim($data['upi_ref_id']) : null;
     $otherPaymentDetails = isset($data['other_payment_details']) && trim($data['other_payment_details']) !== '' ? trim($data['other_payment_details']) : null;
     $note = trim($data['note'] ?? '');
     $enteredBy = trim($data['entered_by'] ?? $guestName);
-
-    // Validate relation
-    $validRelations = ['family', 'friend', 'colleague', 'relative', 'neighbor', 'business', 'other'];
-    if (!in_array($relation, $validRelations)) {
-        $relation = 'other';
-    }
 
     // Validate gift type
     if ($giftType === 'cash') {
@@ -374,7 +393,16 @@ if ($method === 'PUT' && $entryId) {
 
     $params = array_merge([$types], $values);
     call_user_func_array([$stmt, 'bind_param'], refValues($params));
-    $stmt->execute();
+    try {
+        $stmt->execute();
+    } catch (mysqli_sql_exception $e) {
+        http_response_code(400);
+        echo json_encode([
+            'error' => 'Invalid moi entry data',
+            'details' => $e->getMessage(),
+        ]);
+        exit;
+    }
 
     echo json_encode(['success' => true]);
     exit;

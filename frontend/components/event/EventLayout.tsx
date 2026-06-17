@@ -36,7 +36,7 @@ export function CreateFlowHeader({
     <header className="sticky top-0 z-30 bg-white border-b border-tn-border-alt px-4 h-14 flex items-center justify-between">
       <div className="flex items-center">
         {leftAction}
-        <button
+        {/* <button
           type="button"
           onClick={onBack || (() => router.back())}
           className="w-10 h-10 flex items-center justify-center text-tn-purple"
@@ -45,10 +45,11 @@ export function CreateFlowHeader({
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-        </button>
+        </button> */}
+         <h1 className="text-base font-bold text-tn-text">{title}</h1>
       </div>
-      <h1 className="text-base font-bold text-tn-text">{title}</h1>
-      {showHelp ? (
+     
+      {/* {showHelp ? (
         <button type="button" className="w-10 h-10 flex items-center justify-center text-tn-purple" aria-label="Help">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -56,7 +57,7 @@ export function CreateFlowHeader({
         </button>
       ) : (
         <div className="w-10" />
-      )}
+      )} */}
     </header>
   );
 }
@@ -167,7 +168,7 @@ function EventLayoutInner({
   children,
   activeTab = 'dashboard',
   title,
-  showNotifications = true,
+  showNotifications = false,
   notificationCount = 0,
 }: EventLayoutProps) {
   const router = useRouter();
@@ -214,7 +215,7 @@ function EventLayoutInner({
         adminBadge={isAdmin}
         user={user}
         onLogout={() => { logout(); router.push('/'); }}
-        footer={<EventSidebarFooter slug={slug} />}
+        // footer={<EventSidebarFooter slug={slug} />}
         sections={getAppSidebarSections({
           isAdmin,
           isEnabled,
@@ -222,12 +223,19 @@ function EventLayoutInner({
         })}
       />
 
-      <div className={`flex-1 min-w-0 flex flex-col overflow-hidden ${!sidebarCollapsed ? 'lg:pl-60' : ''}`}>
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         <header className="sticky top-0 z-30 bg-white border-b border-tn-border-alt px-4 pt-3 pb-3 shrink-0">
           <div className="flex items-center justify-between mb-2">
             <button type="button" onClick={toggleSidebar} className="w-10 h-10 flex items-center justify-center text-tn-text" aria-label={sidebarCollapsed ? 'Open menu' : 'Close menu'}>
               <Icon name="menu" size={22} />
             </button>
+            {title && (
+            <>
+              <h1 className="text-lg font-bold text-tn-text leading-tight">{title}</h1>
+              <div className="flex items-center gap-1.5 mt-1">
+              </div>
+            </>
+          )}
             <div className="flex items-center gap-2">
               {showNotifications && (
                 <button type="button" className="relative w-10 h-10 flex items-center justify-center text-tn-text" aria-label="Notifications">
@@ -239,20 +247,12 @@ function EventLayoutInner({
                   )}
                 </button>
               )}
-              <button type="button" className="w-10 h-10 flex items-center justify-center text-tn-text" aria-label="More options">
+              {/* <button type="button" className="w-10 h-10 flex items-center justify-center text-tn-text" aria-label="More options">
                 <Icon name="more-vertical" size={20} />
-              </button>
+              </button> */}
             </div>
           </div>
-          {title && (
-            <>
-              <h1 className="text-lg font-bold text-tn-text leading-tight">{title}</h1>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="w-2 h-2 bg-tn-success rounded-full" />
-                <span className="text-xs font-semibold text-tn-success">Function is Active</span>
-              </div>
-            </>
-          )}
+       
         </header>
 
         <main className="flex-1 min-w-0 overflow-y-auto px-4 py-4 pb-24">{children}</main>

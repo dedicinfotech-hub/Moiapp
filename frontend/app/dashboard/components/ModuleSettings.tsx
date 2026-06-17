@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/Icon';
-import { User, authApi } from '@/lib/api';
+import { User, authApi, showSuccess } from '@/lib/api';
 
 interface ModuleSettingsProps {
   user: User | null;
@@ -70,9 +70,13 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
       const res = await authApi.updateProfile(form);
       // Update localStorage so Navbar/sidebar reflect new name immediately
       const stored = localStorage.getItem('moi_user');
-      if (stored) {
-        const u = JSON.parse(stored);
-        localStorage.setItem('moi_user', JSON.stringify({ ...u, ...res.user }));
+      if (stored && stored !== 'undefined' && stored !== 'null') {
+        try {
+          const u = JSON.parse(stored);
+          localStorage.setItem('moi_user', JSON.stringify({ ...u, ...res.user }));
+        } catch {
+          localStorage.removeItem('moi_user');
+        }
       }
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -433,7 +437,7 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
                 Cancel
               </button>
               <button onClick={() => {
-                alert('Account deletion scheduled. You have 30 days to cancel.');
+                showSuccess('Account deletion scheduled. You have 30 days to cancel.');
                 setShowDeleteConfirm(false);
               }}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600">

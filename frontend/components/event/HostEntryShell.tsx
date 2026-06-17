@@ -1,14 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import AppSidebar from '@/components/AppSidebar';
-import Icon, { type IconName } from '@/components/ui/Icon';
 import { CreateFlowHeader } from '@/components/event/EventLayout';
 import { useAuth } from '@/lib/auth';
 import { useFeatures } from '@/lib/features';
 import { getAppSidebarSections } from '@/lib/navigation';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export type HostNavTab = 'dashboard' | 'entries' | 'voice' | 'gift' | 'reports' | 'settings';
 
@@ -19,34 +17,27 @@ interface HostEntryShellProps {
   activeTab?: HostNavTab;
   onBack?: () => void;
   children: React.ReactNode;
+  sidebarOverride?: 'open' | 'closed' | null;
 }
 
-export default function HostEntryShell({ slug, title, subtitle, activeTab, onBack, children }: HostEntryShellProps) {
+const isDesktopViewport = () => {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(min-width: 1024px)').matches;
+};
+
+export default function HostEntryShell(props: HostEntryShellProps) {
+  const { slug: _slug, title, subtitle, activeTab: _activeTab, onBack, children, sidebarOverride: sidebarOverrideProp } = props;
   const router = useRouter();
   const pathname = usePathname();
   const [sideOpen, setSideOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarOverride, setSidebarOverride] = useState<'open' | 'closed' | null>(sidebarOverrideProp ?? null);
   const { user, logout } = useAuth();
   const { isEnabled } = useFeatures();
   const isAdmin = user?.role === 'admin';
-  const nav: { id: HostNavTab; label: string; href: string; icon: IconName }[] = [
-    { id: 'dashboard', label: 'Dashboard', href: `/events/${slug}/dashboard`, icon: 'dashboard' },
-    { id: 'entries', label: 'Moi Entries', href: `/events/${slug}/entries`, icon: 'list' },
-    { id: 'voice', label: 'Voice Entry', href: `/events/${slug}/voice-entry`, icon: 'mic' },
-    { id: 'gift', label: 'Gift Entry', href: `/events/${slug}/gift-entry`, icon: 'gift' },
-    { id: 'reports', label: 'Reports', href: `/events/${slug}/reports`, icon: 'chart' },
-    { id: 'settings', label: 'Settings', href: `/events/${slug}/moi-entry`, icon: 'settings' },
-  ];
-
-  const visibleNav = activeTab === 'voice'
-    ? nav.filter((n) => ['dashboard', 'entries', 'voice', 'settings'].includes(n.id))
-    : activeTab === 'gift'
-    ? nav.filter((n) => ['dashboard', 'entries', 'gift', 'settings'].includes(n.id))
-    : nav.filter((n) => ['dashboard', 'entries', 'reports', 'settings'].includes(n.id));
 
   const toggleSidebar = () => {
-    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-    if (isDesktop) {
+    if (isDesktopViewport()) {
       setSidebarCollapsed((value) => !value);
     } else {
       setSideOpen((value) => !value);
@@ -54,8 +45,16 @@ export default function HostEntryShell({ slug, title, subtitle, activeTab, onBac
   };
 
   useEffect(() => {
-    setSideOpen(false);
-  }, [pathname]);
+    setSidebarOverride(sidebarOverrideProp ?? null);
+  }, [sidebarOverrideProp]);
+
+  useEffect(() => {
+    if (sidebarOverride === 'open') {
+      setSideOpen(true);
+    } else if (sidebarOverride === 'closed') {
+      setSideOpen(false);
+    }
+  }, [pathname, sidebarOverride]);
 
   return (
     <div className="h-screen flex overflow-hidden bg-tn-light-alt">
@@ -80,7 +79,7 @@ export default function HostEntryShell({ slug, title, subtitle, activeTab, onBac
         })}
       />
 
-      <div className={`flex-1 min-w-0 flex flex-col overflow-hidden ${!sidebarCollapsed ? 'lg:pl-60' : ''}`}>
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         <CreateFlowHeader
           title={title}
           onBack={onBack}
@@ -91,22 +90,16 @@ export default function HostEntryShell({ slug, title, subtitle, activeTab, onBac
               className="w-10 h-10 flex items-center justify-center text-tn-text"
               aria-label={sidebarCollapsed ? 'Open menu' : 'Close menu'}
             >
-              <Icon name="menu" size={22} />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              </svg>
             </button>
           )}
         />
-        {subtitle && <p className="text-xs text-tn-muted text-center px-6 -mt-2 mb-2">{subtitle}</p>}
-        <main className="flex-1 min-w-0 overflow-y-auto px-4 py-4 pb-20">{children}</main>
-        {activeTab && (
-          <nav className={`fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-tn-border flex items-center justify-around px-1 z-40 safe-area-bottom ${sidebarCollapsed ? 'lg:left-0' : 'lg:left-60'}`}>
-            {visibleNav.map((item) => (
-              <Link key={item.id} href={item.href} className={`flex flex-col items-center gap-0.5 px-2 py-1 min-w-[72px] ${activeTab === item.id ? 'text-tn-yellow' : 'text-tn-muted'}`}>
-                <Icon name={item.icon} size={20} />
-                <span className={`text-xs ${activeTab === item.id ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        )}
+        {subtitle && <p className="text-xs text-tn-muted text-center px-6 -mt-8 mb-2">{subtitle}</p>}
+        <main className="flex-1 min-w-0 overflow-y-auto px-4 py-4 pb-20">
+          {children}
+        </main>
       </div>
     </div>
   );

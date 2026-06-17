@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Icon from '@/components/ui/Icon';
-import { adminApi } from '@/lib/api';
+import { adminApi, showError } from '@/lib/api';
+import ConfirmModal from '@/components/ConfirmModal';
 
 type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support' | 'admin-approvals' | 'admin-private-events';
 
@@ -32,6 +33,7 @@ export default function ModuleAdminPrivateEvents({ onNavigate }: ModuleAdminPriv
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [search, setSearch] = useState('');
+  const [confirmDeactivateId, setConfirmDeactivateId] = useState<number | null>(null);
 
   const load = async () => {
     try {
@@ -51,13 +53,19 @@ export default function ModuleAdminPrivateEvents({ onNavigate }: ModuleAdminPriv
   }, []);
 
   const handleDeactivate = async (id: number) => {
-    if (!confirm('Deactivate this private event? The QR code will stop working immediately.')) return;
+    setConfirmDeactivateId(id);
+  };
+
+  const confirmDeactivate = async () => {
+    if (!confirmDeactivateId) return;
+    const id = confirmDeactivateId;
+    setConfirmDeactivateId(null);
     try {
       setActionLoading(id);
       await adminApi.deactivateEvent(id);
       setEvents(prev => prev.map(ev => ev.id === id ? { ...ev, qr_enabled: 0 } : ev));
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to deactivate event');
+      showError(err instanceof Error ? err.message : 'Failed to deactivate event');
     } finally {
       setActionLoading(null);
     }
@@ -156,6 +164,16 @@ export default function ModuleAdminPrivateEvents({ onNavigate }: ModuleAdminPriv
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmDeactivateId !== null}
+        title="Deactivate Private Event"
+        message="The QR code will stop working immediately. Are you sure?"
+        confirmText="Deactivate"
+        variant="danger"
+        onConfirm={confirmDeactivate}
+        onCancel={() => setConfirmDeactivateId(null)}
+      />
     </div>
   );
 }

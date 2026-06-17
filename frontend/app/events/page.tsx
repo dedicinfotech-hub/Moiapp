@@ -14,7 +14,14 @@ export default function EventsListingPage() {
   const itemsPerPage = 8;
 
   useEffect(() => {
-    eventsApi.listPublic().then(setEvents).finally(() => setLoading(false));
+    eventsApi.listPublic()
+      .then((evs) => {
+        // Ensure we always have an array
+        const eventList = Array.isArray(evs) ? evs : [];
+        setEvents(eventList);
+      })
+      .catch(() => setEvents([]))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {

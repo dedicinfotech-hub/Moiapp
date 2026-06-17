@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { eventsApi, moiApi, Event, MoiEntry } from '@/lib/api';
 import NotificationBell from '@/components/NotificationBell';
 import AppSidebar from '@/components/AppSidebar';
 import Icon from '@/components/ui/Icon';
 import { useAuth } from '@/lib/auth';
-import { FeaturesProvider, useFeatures } from '@/lib/features';
+import { useFeatures } from '@/lib/features';
 import { ADMIN_NAV_LABELS, getAppSidebarSections } from '@/lib/navigation';
 import {
   ModuleDashboard,
@@ -61,6 +61,16 @@ function DashboardInner() {
   const [module,   setModule]   = useState<Module>('dashboard');
   const searchParams = useSearchParams();
   const [sideOpen, setSideOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    if (isDesktop) {
+      setSidebarCollapsed((value) => !value);
+    } else {
+      setSideOpen((value) => !value);
+    }
+  };
   const [showNew,  setShowNew]  = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [showBulkImport, setShowBulkImport] = useState(false);
@@ -83,6 +93,8 @@ function DashboardInner() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
+    if (authLoading) return; // Wait for auth to load before processing module
+    
     const mod = searchParams.get('module') as Module | null;
     if (mod && ['dashboard', 'events', 'moi-notebook', 'users', 'analytics', 'settings', 'organizers', 'features', 'admin-dashboard', 'admin-users', 'admin-analytics', 'admin-revenue', 'admin-support', 'admin-approvals', 'admin-private-events'].includes(mod)) {
       // Only allow features module for admin users
@@ -92,7 +104,7 @@ function DashboardInner() {
         setModule(mod);
       }
     }
-  }, [searchParams, isAdmin]);
+  }, [searchParams, isAdmin, authLoading]);
 
   const loadAll = useCallback(async () => {
     if (!user) return;
@@ -140,6 +152,7 @@ function DashboardInner() {
         <AppSidebar
           fixed
           isOpen={sideOpen}
+          collapsed={sidebarCollapsed}
           onClose={() => setSideOpen(false)}
           adminBadge={isAdmin}
           user={user}
@@ -154,9 +167,9 @@ function DashboardInner() {
           <header className="h-14 bg-white border-b border-tn-border flex items-center gap-3 px-4 lg:px-6 shrink-0">
             {/* Hamburger */}
             <button
-              className="lg:hidden text-tn-muted hover:text-tn-text p-1"
-              onClick={() => setSideOpen(true)}
-              aria-label="Open menu"
+              className="text-tn-muted hover:text-tn-text p-1"
+              onClick={toggleSidebar}
+              aria-label="Toggle menu"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <line x1="3" y1="6"  x2="21" y2="6"/>
@@ -243,10 +256,21 @@ function DashboardInner() {
   );
 }
 
+function DashboardContent() {
+  return <DashboardInner />;
+}
+
 export default function DashboardPage() {
   return (
-    <FeaturesProvider>
-      <DashboardInner />
-    </FeaturesProvider>
+    <Suspense fallback={
+      <div className="h-screen bg-tn-light flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
+          <p className="text-tn-muted text-sm">Loading…</p>
+        </div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

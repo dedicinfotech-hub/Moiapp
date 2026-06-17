@@ -17,7 +17,7 @@ export default function LoginPage() {
   // Redirect to dashboard if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('moiapp/dashboard');
+      router.push('/dashboard');
     }
   }, [user, authLoading, router]);
   

@@ -27,10 +27,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const t = localStorage.getItem('moi_token');
     const u = localStorage.getItem('moi_user');
-    if (t && u) {
-      setToken(t);
-      setUser(JSON.parse(u));
+
+    const invalidToken = !t || t === 'undefined' || t === 'null';
+    const invalidUser = !u || u === 'undefined' || u === 'null';
+
+    if (invalidToken || invalidUser) {
+      localStorage.removeItem('moi_token');
+      localStorage.removeItem('moi_user');
+    } else {
+      try {
+        const parsedUser = JSON.parse(u);
+        if (parsedUser && typeof parsedUser === 'object') {
+          setToken(t);
+          setUser(parsedUser as User);
+        } else {
+          throw new Error('Invalid stored user');
+        }
+      } catch {
+        localStorage.removeItem('moi_token');
+        localStorage.removeItem('moi_user');
+      }
     }
+
     setLoading(false);
   }, []);
 

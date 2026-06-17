@@ -498,7 +498,13 @@ if ($method === 'POST') {
         }
         $bride = $graduate;
         $groom = $graduate;
-    } elseif (in_array($eventType, ['engagement', 'valakaappu', 'housewarming'])) {
+    } elseif ($eventType === 'housewarming') {
+        if (!$host || !$spouse || !$date) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Host name, spouse name and date are required for housewarming events']);
+            exit;
+        }
+    } elseif (in_array($eventType, ['engagement', 'valakaappu'])) {
         if (!$bride || !$groom || !$date) {
             http_response_code(400);
             echo json_encode(['error' => 'Names and date are required for this event type']);
@@ -508,12 +514,6 @@ if ($method === 'POST') {
         if ($eventType === 'engagement' && (!$parent1 || !$parent2 || !$mother || !$father)) {
             http_response_code(400);
             echo json_encode(['error' => 'Parent 1, Parent 2, Mother and Father names are required for engagement events']);
-            exit;
-        }
-        // For housewarming, also require host and spouse names
-        if ($eventType === 'housewarming' && (!$host || !$spouse)) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Host and Spouse names are required for housewarming events']);
             exit;
         }
     }
@@ -588,6 +588,7 @@ if ($method === 'POST') {
 
 // ── Admin: Approve/Reject event ───────────────────────────────────────────────
 if ($method === 'PUT' && $action === 'approve' && $id) {
+    header('Content-Type: application/json');
     $user = getAuthUser();
     if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
@@ -649,10 +650,14 @@ if ($method === 'PUT' && $action === 'approve' && $id) {
             $message = $reason . ' — Please edit and resubmit. / தயவுசெய்து திருத்தி மீண்டும் சமர்ப்பிக்கவும்.';
         }
 
-        $stmtNotif = $db->prepare('INSERT INTO notifications (user_id, event_id, title, message, type) VALUES (?, ?, ?, ?, ?)');
-        $notifType = 'approval';
-        $stmtNotif->bind_param('iisss', $ownerRow['user_id'], $id, $title, $message, $notifType);
-        $stmtNotif->execute();
+        try {
+            $stmtNotif = $db->prepare('INSERT INTO notifications (user_id, event_id, title, message, type) VALUES (?, ?, ?, ?, ?)');
+            $notifType = 'approval';
+            $stmtNotif->bind_param('iisss', $ownerRow['user_id'], $id, $title, $message, $notifType);
+            $stmtNotif->execute();
+        } catch (Exception $e) {
+            error_log('Notification insert failed: ' . $e->getMessage());
+        }
     }
 
     echo json_encode(['success' => true, 'message' => 'Event ' . $status]);
@@ -808,7 +813,13 @@ if ($method === 'PUT' && $id && !$action) {
         }
         $bride = $graduate;
         $groom = $graduate;
-    } elseif (in_array($eventType, ['engagement', 'valakaappu', 'housewarming'])) {
+    } elseif ($eventType === 'housewarming') {
+        if (!$host || !$spouse || !$date) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Host name, spouse name and date are required for housewarming events']);
+            exit;
+        }
+    } elseif (in_array($eventType, ['engagement', 'valakaappu'])) {
         if (!$bride || !$groom || !$date) {
             http_response_code(400);
             echo json_encode(['error' => 'Names and date required for this event type']);
@@ -817,11 +828,6 @@ if ($method === 'PUT' && $id && !$action) {
         if ($eventType === 'engagement' && (!$parent1 || !$parent2 || !$mother || !$father)) {
             http_response_code(400);
             echo json_encode(['error' => 'Parent 1, Parent 2, Mother and Father names are required for engagement events']);
-            exit;
-        }
-        if ($eventType === 'housewarming' && (!$host || !$spouse)) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Host and Spouse names are required for housewarming events']);
             exit;
         }
     }

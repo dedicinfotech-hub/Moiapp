@@ -1,6 +1,8 @@
 import GuestPaymentClient from './GuestPaymentClient';
 
-export function generateStaticParams() {
+export const dynamic = 'force-static';
+
+export async function generateStaticParams() {
   return [{ token: '_' }];
 }
 

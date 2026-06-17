@@ -4,6 +4,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // GET endpoint is public (no auth required)
 if ($method === 'GET') {
+  header('Content-Type: application/json');
   try {
     $pdo = getPDO();
     $stmt = $pdo->query("SELECT feature_key, is_enabled, description FROM feature_toggles ORDER BY feature_key");
@@ -30,6 +31,7 @@ $roleRow = $stmt->get_result()->fetch_assoc();
 $userRole = $roleRow['role'] ?? 'user';
 
 if ($method === 'PUT' || $method === 'POST') {
+  header('Content-Type: application/json');
   // Only admin can update feature toggles
   if ($userRole !== 'admin') {
     http_response_code(403);
@@ -53,4 +55,5 @@ if ($method === 'PUT' || $method === 'POST') {
   exit;
 }
 
+header('Content-Type: application/json');
 http_response_code(405); echo json_encode(['error' => 'Method not allowed']);

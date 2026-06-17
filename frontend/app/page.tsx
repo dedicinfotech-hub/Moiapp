@@ -15,8 +15,12 @@ export default function HomePage() {
 
   useEffect(() => {
     eventsApi.listPublic()
-      .then((evs) => setEvents(evs))
-      .catch(() => {})
+      .then((evs) => {
+        // Ensure we always have an array
+        const eventList = Array.isArray(evs) ? evs : [];
+        setEvents(eventList);
+      })
+      .catch(() => setEvents([]))
       .finally(() => setLoaded(true));
   }, []);
 

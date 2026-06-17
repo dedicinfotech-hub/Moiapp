@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import Icon, { type IconName } from '@/components/ui/Icon';
 
 export interface AppSidebarItem {
@@ -35,11 +35,8 @@ interface AppSidebarProps {
 function SidebarContent({
   items = [],
   sections,
-  user,
-  onLogout,
   onClose,
-  footer,
-}: Pick<AppSidebarProps, 'items' | 'sections' | 'user' | 'onLogout' | 'adminBadge' | 'onClose' | 'footer'>) {
+}: Pick<AppSidebarProps, 'items' | 'sections' | 'onClose'>) {
   const navSections = sections?.length ? sections : [{ label: 'Menu', items }];
 
   return (
@@ -94,6 +91,72 @@ function SidebarContent({
           })}
         </div>
       ))}
+    </>
+  );
+}
+
+export default function AppSidebar({
+  items = [],
+  sections,
+  user,
+  onLogout,
+  adminBadge,
+  isOpen = true,
+  onClose,
+  fixed = false,
+  collapsed = false,
+  footer,
+  className = '',
+}: AppSidebarProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Mobile: fixed overlay sidebar
+  // Desktop: static sidebar in normal flow, collapsible
+  const baseClasses = [
+    'w-60 flex flex-col bg-white border-r border-tn-border shrink-0',
+    className,
+  ];
+
+  if (fixed && isMobile) {
+    baseClasses.push(
+      'fixed inset-y-0 left-0 z-40 transition-all duration-200 ease-in-out',
+      isOpen ? 'translate-x-0' : '-translate-x-full'
+    );
+  } else if (fixed && !isMobile) {
+    baseClasses.push(
+      'relative transition-all duration-200 ease-in-out',
+      collapsed ? 'lg:w-0 lg:overflow-hidden lg:border-r-0' : 'lg:w-60'
+    );
+  }
+
+  return (
+    <aside className={baseClasses.join(' ')}>
+      <div className="h-14 flex items-center gap-2 px-5 border-b border-tn-border shrink-0">
+        <Link href="/" className="font-extrabold text-lg text-tn-text leading-none">
+          Moi<span className="text-tn-yellow">App</span>
+        </Link>
+        {adminBadge && (
+          <span className="text-[9px] font-bold bg-tn-yellow text-black px-1.5 py-0.5 rounded uppercase tracking-wider">
+            Admin
+          </span>
+        )}
+      </div>
+
+      <nav className="flex-1 overflow-y-auto py-3">
+        <SidebarContent
+          items={items}
+          sections={sections}
+          onClose={onClose}
+        />
+      </nav>
 
       <div className="border-t border-tn-border px-4 py-3 shrink-0">
         {footer || (
@@ -117,62 +180,6 @@ function SidebarContent({
           </div>
         )}
       </div>
-    </>
-  );
-}
-
-export default function AppSidebar({
-  items = [],
-  sections,
-  user,
-  onLogout,
-  adminBadge,
-  isOpen = true,
-  onClose,
-  fixed = false,
-  collapsed = false,
-  footer,
-  className = '',
-}: AppSidebarProps) {
-  const widthClass = fixed && collapsed ? 'w-60 lg:w-0 lg:overflow-hidden' : 'w-60';
-  const baseClasses = [
-    `${widthClass} flex flex-col bg-white border-r border-tn-border shrink-0`,
-    className,
-  ];
-
-  if (fixed) {
-    baseClasses.push(
-      'fixed inset-y-0 left-0 z-40 transition-all duration-200 ease-in-out',
-      isOpen ? 'translate-x-0' : '-translate-x-full',
-      'lg:fixed lg:translate-x-0',
-      fixed && collapsed ? 'lg:border-r-0' : ''
-    );
-  }
-
-  return (
-    <aside className={baseClasses.join(' ')}>
-      <div className="h-14 flex items-center gap-2 px-5 border-b border-tn-border shrink-0">
-        <Link href="/" className="font-extrabold text-lg text-tn-text leading-none">
-          Moi<span className="text-tn-yellow">App</span>
-        </Link>
-        {adminBadge && (
-          <span className="text-[9px] font-bold bg-tn-yellow text-black px-1.5 py-0.5 rounded uppercase tracking-wider">
-            Admin
-          </span>
-        )}
-      </div>
-
-      <nav className="flex-1 overflow-y-auto py-3">
-        <SidebarContent
-          items={items}
-          sections={sections}
-          user={user}
-          onLogout={onLogout}
-          adminBadge={adminBadge}
-          onClose={onClose}
-          footer={footer}
-        />
-      </nav>
     </aside>
   );
 }

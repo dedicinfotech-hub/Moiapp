@@ -5,12 +5,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Icon, { type IconName } from '@/components/ui/Icon';
-import { eventsApi, moiApi, photosApi, invitationsApi, returnGiftsApi, exportCSV, showSuccess, Event, MoiEntry, Photo, Invitation, ReturnGift } from '@/lib/api';
+import { eventsApi, moiApi, photosApi, invitationsApi, returnGiftsApi, exportCSV, showSuccess, showError, Event, MoiEntry, Photo, Invitation, ReturnGift } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useFeatures } from '@/lib/features';
 import { getAppSidebarSections } from '@/lib/navigation';
 import { canAddMoi, getEventDisplayName } from '@/lib/eventHelpers';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
+import ConfirmModal from '@/components/ConfirmModal';
 import AppSidebar from '@/components/AppSidebar';
 import ApprovalBanner from '@/components/ApprovalBanner';
 import EventQrPanel from '@/components/EventQrPanel';
@@ -66,7 +67,7 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
       setSettingsForm({ venue: ev.venue || '', city: ev.city || '' });
       return Promise.all([moiApi.list(ev.id), photosApi.list(ev.id)]);
     }).then(([moiData, photoData]) => {
-      setEntries(moiData.entries);
+      setEntries(moiData.entries || []);
       setPhotos(photoData);
     }).finally(() => setLoading(false));
   }, [user, slug]);
@@ -126,10 +127,11 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   };
 
   const moiAllowed = canAddMoi(event);
-  const totalCash = entries.filter(e => e.gift_type === 'cash' || !e.gift_type).reduce((s, e) => s + Number(e.amount), 0);
-  const totalGold = entries.filter(e => e.gift_type === 'gold').reduce((s, e) => s + Number(e.gold_weight || 0), 0);
-  const totalSilver = entries.filter(e => e.gift_type === 'silver').reduce((s, e) => s + Number(e.gold_weight || 0), 0);
-  const totalGifts = entries.filter(e => e.gift_type === 'gift').length;
+  const safeEntries = Array.isArray(entries) ? entries : [];
+  const totalCash = safeEntries.filter(e => e.gift_type === 'cash' || !e.gift_type).reduce((s, e) => s + Number(e.amount), 0);
+  const totalGold = safeEntries.filter(e => e.gift_type === 'gold').reduce((s, e) => s + Number(e.gold_weight || 0), 0);
+  const totalSilver = safeEntries.filter(e => e.gift_type === 'silver').reduce((s, e) => s + Number(e.gold_weight || 0), 0);
+  const totalGifts = safeEntries.filter(e => e.gift_type === 'gift').length;
   const shareUrl = `${window.location.origin}/e/${event.slug}`;
 
   return (
@@ -160,7 +162,7 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
           })}
         />
         {/* ── Right panel ── */}
-        <div className={`flex-1 flex flex-col min-w-0 overflow-hidden bg-tn-light ${!sidebarCollapsed ? 'lg:pl-60' : ''}`}>
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-tn-light">
 
           {/* Top bar */}
           <header className="h-14 bg-white border-b border-tn-border flex items-center gap-3 px-4 lg:px-6 shrink-0">
@@ -180,12 +182,12 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
                <p className="text-[11px] text-tn-subtle hidden sm:block">Event details and moi management</p>
              </div>
 
-            <Link
+            {/* <Link
               href="/dashboard?module=events"
               className="flex items-center gap-1.5 border border-tn-border text-tn-muted px-3.5 py-2 rounded-lg text-sm font-semibold hover:border-tn-yellow transition-colors whitespace-nowrap bg-white hover:bg-tn-light"
             >
               ← Back to Events
-            </Link>
+            </Link> */}
           </header>
 
           {/* Scrollable content */}
@@ -221,7 +223,7 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
                     <button onClick={() => setShowSettings(true)} className="flex items-center gap-1.5 px-4 py-2 bg-tn-light border border-tn-border rounded-xl text-sm text-tn-muted hover:bg-tn-yellow-light transition-colors">
                       <Icon name="settings" size={16} /> Settings
                     </button>
-                    <button onClick={() => { navigator.clipboard.writeText(shareUrl); alert('Share link copied!'); }} className="flex items-center gap-1.5 px-4 py-2 bg-tn-light border border-tn-border rounded-xl text-sm text-tn-muted hover:bg-tn-yellow-light transition-colors">
+                    <button onClick={() => { navigator.clipboard.writeText(shareUrl); showSuccess('Share link copied!'); }} className="flex items-center gap-1.5 px-4 py-2 bg-tn-light border border-tn-border rounded-xl text-sm text-tn-muted hover:bg-tn-yellow-light transition-colors">
                       <Icon name="arrow-right" size={16} /> Share
                     </button>
                     <button onClick={() => exportCSV(event.id)} className="flex items-center gap-1.5 px-4 py-2 bg-tn-light border border-tn-border rounded-xl text-sm text-tn-muted hover:bg-tn-yellow-light transition-colors">
@@ -248,7 +250,7 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
                     <p className="text-[10px] text-tn-subtle mt-1 uppercase font-semibold">Total Gifts</p>
                   </div>
                   <div className="bg-tn-light border border-tn-border rounded-xl p-4 text-center">
-                    <p className="text-lg font-bold text-tn-text">{entries.length}</p>
+                    <p className="text-lg font-bold text-tn-text">{safeEntries.length}</p>
                     <p className="text-[10px] text-tn-subtle mt-1 uppercase font-semibold">Guests</p>
                   </div>
                   <div className="bg-tn-light border border-tn-border rounded-xl p-4 text-center col-span-2 md:col-span-1">
@@ -270,11 +272,11 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
                 </div>
               </div>
 
-              {tab === 'moi'     && <MoiRegisterTab slug={slug} entries={entries} blocked={!moiAllowed} onUpdate={(e) => setEntries(entries.map((en) => en.id === e.id ? e : en))} onDelete={(id) => setEntries(entries.filter((e) => e.id !== id))} />}
+              {tab === 'moi'     && <MoiRegisterTab slug={slug} entries={safeEntries} blocked={!moiAllowed} onUpdate={(e) => setEntries(safeEntries.map((en) => en.id === e.id ? e : en))} onDelete={(id) => setEntries(safeEntries.filter((e) => e.id !== id))} />}
                 {tab === 'photos'  && <PhotosTab  eventId={event.id} photos={photos}   onAdd={(p) => setPhotos([p, ...photos])}   onDelete={(id) => setPhotos(photos.filter((p) => p.id !== id))} />}
-                {tab === 'summary' && <SummaryTab entries={entries} eventId={event.id} />}
-                {tab === 'invitations' && <InvitationTab eventId={event.id} entries={entries} />}
-                {tab === 'returns' && <ReturnTrackerTab eventId={event.id} entries={entries} />}
+                {tab === 'summary' && <SummaryTab entries={safeEntries} eventId={event.id} />}
+                {tab === 'invitations' && <InvitationTab eventId={event.id} entries={safeEntries} />}
+                {tab === 'returns' && <ReturnTrackerTab eventId={event.id} entries={safeEntries} />}
         {/* Function Settings Modal */}
         {showSettings && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowSettings(false)}>
@@ -376,6 +378,7 @@ function MoiRegisterTab({ slug, entries, blocked, onUpdate, onDelete }: { slug: 
   });
   const [updating, setUpdating] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [confirmDeleteEntryId, setConfirmDeleteEntryId] = useState<number | null>(null);
 
   const filtered = entries.filter((e) => {
     const q = search.trim().toLowerCase();
@@ -539,7 +542,7 @@ function MoiRegisterTab({ slug, entries, blocked, onUpdate, onDelete }: { slug: 
                 <div className="flex flex-col gap-1">
                   <button onClick={() => openEdit(entry)} className="text-[10px] font-semibold text-tn-yellow">Edit</button>
                   <button
-                    onClick={() => { if (confirm('Delete this entry?')) confirmDelete(entry.id); }}
+                    onClick={() => setConfirmDeleteEntryId(entry.id)}
                     className="text-[10px] font-semibold text-red-500"
                   >
                     {deletingId === entry.id ? 'Deleting...' : 'Delete'}
@@ -560,6 +563,16 @@ function MoiRegisterTab({ slug, entries, blocked, onUpdate, onDelete }: { slug: 
           Load More ({filtered.length - visibleCount} remaining)
         </button>
       )}
+
+      <ConfirmModal
+        isOpen={confirmDeleteEntryId !== null}
+        title="Delete Entry"
+        message="Are you sure you want to delete this moi entry?"
+        confirmText="Delete"
+        variant="danger"
+        onConfirm={() => { if (confirmDeleteEntryId) confirmDelete(confirmDeleteEntryId); setConfirmDeleteEntryId(null); }}
+        onCancel={() => setConfirmDeleteEntryId(null)}
+      />
 
       {/* Edit Modal */}
       {editingEntry && (
@@ -759,10 +772,10 @@ function SummaryTab({ entries, eventId }: { entries: MoiEntry[]; eventId: number
         a.click();
         window.URL.revokeObjectURL(url);
       } else {
-        alert('Failed to download PDF. Please try again.');
+        showError('Failed to download PDF. Please try again.');
       }
     } catch {
-        alert('Error downloading PDF. Please try again.');
+        showError('Error downloading PDF. Please try again.');
       }
   };
 
@@ -980,12 +993,12 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
         setInvitations([...invitations, ...data.invitations || []].slice(0, 100));
         setFile(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
-        alert(`Successfully uploaded ${data.count} invitations`);
+        showSuccess(`Successfully uploaded ${data.count} invitations`);
       } else {
-        alert(data.error || 'Failed to upload invitations');
+        showError(data.error || 'Failed to upload invitations');
       }
     } catch {
-      alert('Error uploading file. Please try again.');
+      showError('Error uploading file. Please try again.');
     } finally {
       setUploading(false);
     }

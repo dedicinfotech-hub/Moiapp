@@ -2,10 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Icon, { type IconName } from '@/components/ui/Icon';
-import { featuresApi } from '@/lib/api';
+import { request } from '@/lib/api';
 
 interface ModuleFeaturesProps {
   isAdmin: boolean;
+}
+
+interface FeatureToggle {
+  feature_key: string;
+  is_enabled: number;
+  description: string;
 }
 
 const featureIconMap: Record<string, IconName> = {
@@ -22,17 +28,20 @@ function getFeatureIcon(featureKey: string): IconName {
 }
 
 export default function ModuleFeatures({ isAdmin }: ModuleFeaturesProps) {
-  const [toggles, setToggles] = useState<{ feature_key: string; is_enabled: number; description: string }[]>([]);
+  const [toggles, setToggles] = useState<FeatureToggle[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const res = await featuresApi.list();
+      const res = await request<{ toggles: FeatureToggle[] }>('/features.php');
       setToggles(Array.isArray(res.toggles) ? res.toggles : []);
-    } catch {
+    } catch (e) {
       setToggles([]);
+      setError(e instanceof Error ? e.message : 'Failed to load feature toggles');
     } finally {
       setLoading(false);
     }
@@ -42,14 +51,23 @@ export default function ModuleFeatures({ isAdmin }: ModuleFeaturesProps) {
 
   const toggle = async (key: string, current: number) => {
     setSaving(key);
+    setError(null);
     try {
-      await featuresApi.update(key, current ? 0 : 1);
-      setToggles((prev) => prev.map((t) => t.feature_key === key ? { ...t, is_enabled: current ? 0 : 1 } : t));
-    } catch {
-      // silent
+      await request<{ success: boolean }>('/features.php', {
+        method: 'PUT',
+        body: JSON.stringify({ feature_key: key, is_enabled: current ? 0 : 1 }),
+      });
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to update feature toggle');
     } finally {
       setSaving(null);
     }
+  };
+
+  const isEnabled = (key: string) => {
+    const t = toggles.find((x) => x.feature_key === key);
+    return t ? t.is_enabled === 1 : false;
   };
 
   // If not admin, show access denied
@@ -74,6 +92,12 @@ export default function ModuleFeatures({ isAdmin }: ModuleFeaturesProps) {
         <p className="text-xs text-tn-muted">Enable or disable app features post-launch</p>
       </div>
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl p-3">
+          {error}
+        </div>
+      )}
+
       {loading ? (
         <div className="text-sm text-tn-muted">Loading…</div>
       ) : (toggles || []).length === 0 ? (
@@ -96,15 +120,15 @@ export default function ModuleFeatures({ isAdmin }: ModuleFeaturesProps) {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${t.is_enabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {t.is_enabled ? 'Enabled' : 'Disabled'}
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${isEnabled(t.feature_key) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {isEnabled(t.feature_key) ? 'Enabled' : 'Disabled'}
                   </span>
                   <button
                     onClick={() => toggle(t.feature_key, t.is_enabled)}
                     disabled={saving === t.feature_key}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${t.is_enabled ? 'border border-red-200 text-red-500 hover:bg-red-50' : 'bg-tn-yellow text-black hover:bg-tn-yellow-2'}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isEnabled(t.feature_key) ? 'border border-red-200 text-red-500 hover:bg-red-50' : 'bg-tn-yellow text-black hover:bg-tn-yellow-2'}`}
                   >
-                    {saving === t.feature_key ? 'Saving…' : t.is_enabled ? 'Disable' : 'Enable'}
+                    {saving === t.feature_key ? 'Saving…' : isEnabled(t.feature_key) ? 'Disable' : 'Enable'}
                   </button>
                 </div>
               </div>
@@ -133,17 +157,17 @@ export default function ModuleFeatures({ isAdmin }: ModuleFeaturesProps) {
                     </td>
                     <td className="px-4 py-3 text-tn-muted">{t.description}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${t.is_enabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {t.is_enabled ? 'Enabled' : 'Disabled'}
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${isEnabled(t.feature_key) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {isEnabled(t.feature_key) ? 'Enabled' : 'Disabled'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => toggle(t.feature_key, t.is_enabled)}
                         disabled={saving === t.feature_key}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${t.is_enabled ? 'border border-red-200 text-red-500 hover:bg-red-50' : 'bg-tn-yellow text-black hover:bg-tn-yellow-2'}`}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isEnabled(t.feature_key) ? 'border border-red-200 text-red-500 hover:bg-red-50' : 'bg-tn-yellow text-black hover:bg-tn-yellow-2'}`}
                       >
-                        {saving === t.feature_key ? 'Saving…' : t.is_enabled ? 'Disable' : 'Enable'}
+                        {saving === t.feature_key ? 'Saving…' : isEnabled(t.feature_key) ? 'Disable' : 'Enable'}
                       </button>
                     </td>
                   </tr>

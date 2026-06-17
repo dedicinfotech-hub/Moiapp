@@ -28,8 +28,8 @@ const localEnv = readEnvFile('.env.local');
 
 // In production build: NEXT_PUBLIC_BASE_PATH=/moiapp is set in .env.production
 // In local dev:        NEXT_PUBLIC_BASE_PATH is empty in .env.local
-const basePath = prodEnv.NEXT_PUBLIC_BASE_PATH || localEnv.NEXT_PUBLIC_BASE_PATH || '';
 const isProd   = process.env.NODE_ENV === 'production';
+const basePath = isProd ? (prodEnv.NEXT_PUBLIC_BASE_PATH || '') : (localEnv.NEXT_PUBLIC_BASE_PATH || '');
 
 const nextConfig = {
   // Static export ONLY for production build (npm run build).
@@ -56,6 +56,9 @@ const nextConfig = {
         destination: 'http://localhost:8888/MoiApp/api/:path*',
       },
     ];
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 

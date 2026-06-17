@@ -7,6 +7,19 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/cors.php';
 
+function normalizeEnumValue($value, array $validValues, string $default): string {
+    if (!is_string($value)) {
+        return $default;
+    }
+
+    $normalized = strtolower(trim($value));
+    return in_array($normalized, $validValues, true) ? $normalized : $default;
+}
+
+const VALID_GIFT_TYPES = ['cash', 'gold', 'silver', 'gift'];
+const VALID_RELATIONS = ['family', 'friend', 'colleague', 'relative', 'neighbor', 'business', 'other'];
+const VALID_PAYMENT_MODES = ['cash', 'upi', 'card', 'cheque', 'other'];
+
 $method = $_SERVER['REQUEST_METHOD'];
 $user = getAuthUser();
 if (!$user) {
@@ -34,7 +47,7 @@ if ($method === 'POST') {
         $eventId = intval($entry['event_id'] ?? 0);
         $guestName = trim($entry['guest_name'] ?? '');
         $amount = floatval($entry['amount'] ?? 0);
-        $giftType = in_array($entry['gift_type'] ?? 'cash', ['cash', 'gold', 'silver', 'gift']) ? $entry['gift_type'] : 'cash';
+        $giftType = normalizeEnumValue($entry['gift_type'] ?? 'cash', VALID_GIFT_TYPES, 'cash');
 
         if (!$eventId || !$guestName) {
             $failed[] = ['entry' => $entry, 'reason' => 'Missing event_id or guest_name'];
@@ -58,8 +71,8 @@ if ($method === 'POST') {
         $goldWeight = isset($entry['gold_weight']) && $entry['gold_weight'] !== '' ? floatval($entry['gold_weight']) : null;
         $giftDescription = isset($entry['gift_description']) && trim($entry['gift_description']) !== '' ? trim($entry['gift_description']) : null;
         $approximateValue = isset($entry['approximate_value']) && $entry['approximate_value'] !== '' && $entry['approximate_value'] !== null ? floatval($entry['approximate_value']) : null;
-        $relation = in_array($entry['relation'] ?? 'friend', ['family', 'friend', 'colleague', 'relative', 'neighbor', 'business', 'other']) ? $entry['relation'] : 'friend';
-        $paymentMode = in_array($entry['payment_mode'] ?? 'cash', ['cash', 'upi', 'card', 'cheque', 'other']) ? $entry['payment_mode'] : 'cash';
+        $relation = normalizeEnumValue($entry['relation'] ?? 'friend', VALID_RELATIONS, 'friend');
+        $paymentMode = normalizeEnumValue($entry['payment_mode'] ?? 'cash', VALID_PAYMENT_MODES, 'cash');
         $upiRefId = $entry['upi_ref_id'] ?? null;
         $otherDetails = $entry['other_payment_details'] ?? null;
         $note = trim($entry['note'] ?? '');

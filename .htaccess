@@ -20,18 +20,18 @@ SetEnvIf X-Auth-Token "(.*)" HTTP_X_AUTH_TOKEN=$1
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^ - [R=200,L]
 
+# ── API requests: serve PHP files directly (do not rewrite) ───────────────────
+RewriteCond %{REQUEST_URI} ^/[^/]+/api/ [NC]
+RewriteRule ^ - [L]
+
+# ── Config directory: deny access to .env and other sensitive files ─────────────
+RewriteCond %{REQUEST_URI} ^/[^/]+/config/ [NC]
+RewriteRule ^ - [L]
+
 # ── Serve real files and directories directly ─────────────────────────────────
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
-
-# ── Exclude API directory from rewrites ─────────────────────────────────────────
-RewriteCond %{REQUEST_URI} !^/[^/]+/api/ [NC]
-RewriteRule ^api/ - [L]
-
-# ── Also exclude direct API file access ───────────────────────────────────────
-RewriteCond %{REQUEST_FILENAME} -f [NC]
-RewriteRule ^api/.*$ - [L]
 
 # ── Dynamic routes: rewrite any slug to the pre-built _ shell ─────────────────
 # Supports case-insensitive subdir matching (e.g., /MoiApp/ or /moiapp/)

@@ -39,12 +39,16 @@ function getAuthUser(): ?array {
     // Check if account is deleted (soft delete)
     if (isset($payload['id'])) {
         $db = getDB();
-        $stmt = $db->prepare('SELECT deleted_at FROM users WHERE id = ?');
-        $stmt->bind_param('i', $payload['id']);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc();
-        if ($row && $row['deleted_at']) {
-            return null; // Account is deleted, reject token
+        // Check if deleted_at column exists (for backward compatibility)
+        $checkColumn = $db->query("SHOW COLUMNS FROM users LIKE 'deleted_at'");
+        if ($checkColumn && $checkColumn->num_rows > 0) {
+            $stmt = $db->prepare('SELECT deleted_at FROM users WHERE id = ?');
+            $stmt->bind_param('i', $payload['id']);
+            $stmt->execute();
+            $row = $stmt->get_result()->fetch_assoc();
+            if ($row && $row['deleted_at']) {
+                return null; // Account is deleted, reject token
+            }
         }
     }
 

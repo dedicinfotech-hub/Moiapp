@@ -1,0 +1,21 @@
+<?php
+/**
+ * Migration: Update moi_entries enum columns to match current schema.
+ */
+
+require_once __DIR__ . '/../config/db.php';
+
+$db = getDB();
+
+$sql = "ALTER TABLE moi_entries
+  MODIFY COLUMN gift_type ENUM('cash','gold','silver','gift') NOT NULL DEFAULT 'cash',
+  MODIFY COLUMN relation ENUM('family','friend','colleague','relative','neighbor','business','other') DEFAULT 'friend',
+  MODIFY COLUMN payment_mode ENUM('cash','upi','card','cheque','other') DEFAULT 'cash'";
+
+try {
+    $db->query($sql);
+    echo "OK: moi_entries enum columns updated.\n";
+} catch (Exception $e) {
+    fwrite(STDERR, "ERROR: {$e->getMessage()}\n");
+    exit(1);
+}

@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { adminApi, SupportTicket } from '@/lib/api';
+import { adminApi, SupportTicket, showError } from '@/lib/api';
+import ConfirmModal from '@/components/ConfirmModal';
 
 type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support';
 
@@ -16,6 +17,7 @@ export default function ModuleAdminSupport({ onNavigate }: ModuleAdminSupportPro
   const [status, setStatus] = useState('open');
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [confirmResolveId, setConfirmResolveId] = useState<number | null>(null);
 
   const loadTickets = async () => {
     try {
@@ -34,13 +36,19 @@ export default function ModuleAdminSupport({ onNavigate }: ModuleAdminSupportPro
   }, [status]);
 
   const handleResolve = async (ticketId: number) => {
-    if (!confirm('Mark this ticket as resolved?')) return;
+    setConfirmResolveId(ticketId);
+  };
+
+  const confirmResolve = async () => {
+    if (!confirmResolveId) return;
+    const ticketId = confirmResolveId;
+    setConfirmResolveId(null);
     try {
       setActionLoading(ticketId);
       await adminApi.resolveTicket(ticketId);
       loadTickets();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to resolve ticket');
+      showError(err instanceof Error ? err.message : 'Failed to resolve ticket');
     } finally {
       setActionLoading(null);
     }
@@ -186,6 +194,16 @@ export default function ModuleAdminSupport({ onNavigate }: ModuleAdminSupportPro
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmResolveId !== null}
+        title="Resolve Ticket"
+        message="Mark this ticket as resolved?"
+        confirmText="Resolve"
+        variant="info"
+        onConfirm={confirmResolve}
+        onCancel={() => setConfirmResolveId(null)}
+      />
     </div>
   );
 }
