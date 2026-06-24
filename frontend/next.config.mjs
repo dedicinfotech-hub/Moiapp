@@ -25,29 +25,40 @@ function readEnvFile(filename) {
 // next.config.mjs runs before Next.js loads .env files, so read manually.
 const prodEnv  = readEnvFile('.env.production');
 const localEnv = readEnvFile('.env.local');
+const apkEnv   = readEnvFile('.env.apk');
 
-// In production build: NEXT_PUBLIC_BASE_PATH=/moiapp is set in .env.production
-// In local dev:        NEXT_PUBLIC_BASE_PATH is empty in .env.local
-const isProd   = process.env.NODE_ENV === 'production';
-const basePath = isProd ? (prodEnv.NEXT_PUBLIC_BASE_PATH || '') : (localEnv.NEXT_PUBLIC_BASE_PATH || '');
+const isProd     = process.env.NODE_ENV === 'production';
+const isAPKBuild = process.env.APK_BUILD === 'true';
+
+const basePath = isAPKBuild
+  ? (apkEnv.NEXT_PUBLIC_BASE_PATH || '')
+  : isProd
+  ? (prodEnv.NEXT_PUBLIC_BASE_PATH || '')
+  : (localEnv.NEXT_PUBLIC_BASE_PATH || '');
+
+const apiUrl = isAPKBuild
+  ? (apkEnv.NEXT_PUBLIC_API_URL || prodEnv.NEXT_PUBLIC_API_URL || '')
+  : isProd
+  ? (prodEnv.NEXT_PUBLIC_API_URL || '')
+  : (localEnv.NEXT_PUBLIC_API_URL || '');
 
 const nextConfig = {
-  // Static export ONLY for production build (npm run build).
-  // Local dev (npm run dev) runs as a normal Next.js server with rewrites.
   ...(isProd ? { output: 'export' } : {}),
 
   basePath,
 
   env: {
     NEXT_PUBLIC_BASE_PATH: basePath,
+    ...(apiUrl ? { NEXT_PUBLIC_API_URL: apiUrl } : {}),
   },
 
   images: { unoptimized: true },
 
+  // Keep false for both web and APK.
+  // Capacitor 6 handles .html file routing correctly (dashboard.html serves /dashboard).
+  // trailingSlash: true would break the existing working pages.
   trailingSlash: false,
 
-  // Rewrites only work in dev (Next.js server mode).
-  // In production static export the browser calls NEXT_PUBLIC_API_URL directly.
   async rewrites() {
     if (isProd) return [];
     return [

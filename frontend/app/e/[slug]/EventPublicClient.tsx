@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Icon, { type IconName } from '@/components/ui/Icon';
-import { eventsApi, moiApi, photosApi, Event, Photo } from '@/lib/api';
+import { eventsApi, moiApi, photosApi, Event, Photo, paymentApi, RazorpayPaymentMethod } from '@/lib/api';
 import { useFeatures } from '@/lib/features';
 import { canAcceptGuestMoi } from '@/lib/eventHelpers';
 
@@ -21,6 +21,56 @@ function useSlug(): string {
     setSlug(s === '_' ? '' : s);
   }, []);
   return slug;
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (event: string, handler: (...args: unknown[]) => void) => void;
+    };
+  }
+}
+
+type RazorpayFailureResponse = {
+  error?: {
+    description?: string;
+    reason?: string;
+    source?: string;
+    step?: string;
+    code?: string;
+  };
+};
+
+function loadRazorpayScript(): Promise<void> {
+  if (typeof window === 'undefined') {
+    return Promise.resolve();
+  }
+
+  if (window.Razorpay) {
+    return Promise.resolve();
+  }
+
+  const existingScript = document.querySelector<HTMLScriptElement>('#razorpay-checkout-js');
+  if (existingScript) {
+    return new Promise((resolve, reject) => {
+      existingScript.addEventListener('load', () => resolve(), { once: true });
+      existingScript.addEventListener('error', () => reject(new Error('Razorpay checkout script failed to load.')), { once: true });
+    });
+  }
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.id = 'razorpay-checkout-js';
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => {
+      if (window.Razorpay) resolve();
+      else reject(new Error('Razorpay checkout script failed to initialize.'));
+    };
+    script.onerror = () => reject(new Error('Razorpay checkout script failed to load.'));
+    document.body.appendChild(script);
+  });
 }
 
 type Step = 'event' | 'form' | 'payment' | 'success' | 'thankyou';
@@ -65,6 +115,22 @@ function getEventLabel(eventType: string): string {
   return labels[eventType] || 'Event';
 }
 
+function PublicGuestNavbar() {
+  return (
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-tn-border">
+      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 font-extrabold text-tn-text">
+          <span className="w-8 h-8 rounded-xl bg-tn-yellow text-white flex items-center justify-center shadow-sm">M</span>
+          <span className="text-sm">MoiApp</span>
+        </Link>
+        <Link href="/" className="text-xs font-semibold text-tn-text bg-tn-light border border-tn-border px-3 py-2 rounded-full hover:bg-tn-yellow-bg transition-colors">
+          Home
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
 export default function PublicEventPage() {
   const slug = useSlug();
   const [event, setEvent]       = useState<Event | null>(null);
@@ -90,16 +156,21 @@ export default function PublicEventPage() {
   }, [slug]);
 
   if (loading) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
+    <>
+      <PublicGuestNavbar />
+      <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FFC107] rounded-full animate-spin" />
         <p className="text-[#666666] text-sm">Loading event…</p>
       </div>
     </div>
+    </>
   );
 
   if (notFound || !event) return (
-    <div className="min-h-screen bg-white flex items-center justify-center text-center px-6">
+    <>
+      <PublicGuestNavbar />
+      <div className="min-h-screen bg-white flex items-center justify-center text-center px-6">
         <div>
           <div className="mb-4 text-tn-gold">
             <Icon name="sad" size={48} />
@@ -109,19 +180,20 @@ export default function PublicEventPage() {
         <Link href="/events" className="mt-4 inline-block text-[#FFC107] font-semibold underline text-sm">Browse all events</Link>
       </div>
     </div>
+    </>
   );
 
   if (step === 'form') {
     if (!canAcceptGuestMoi(event)) {
-      return <EventDetailView event={event} photos={photos} onGiveMoi={() => {}} guestMoiClosed shareUrl={shareUrl} />;
+      return <><PublicGuestNavbar /><EventDetailView event={event} photos={photos} onGiveMoi={() => {}} guestMoiClosed shareUrl={shareUrl} /></>;
     }
-    return <MoiForm event={event} onBack={() => setStep('event')} onNext={(formData) => { (window as Window & { __guestForm?: GuestForm }).__guestForm = formData; setStep('payment'); }} />;
+    return <><PublicGuestNavbar /><MoiForm event={event} onBack={() => setStep('event')} onNext={(formData) => { (window as Window & { __guestForm?: GuestForm }).__guestForm = formData; setStep('payment'); }} /></>;
   }
-  if (step === 'payment') return <PaymentMethod event={event} onBack={() => setStep('form')} onSuccess={(txn) => { (window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn = txn; setStep('success'); }} />;
-  if (step === 'success') return <SuccessView event={event} onBack={() => setStep('event')} onContinue={() => setStep('thankyou')} txn={(window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn} />;
-  if (step === 'thankyou') return <ThankYouScreen event={event} onBack={() => setStep('event')} txn={(window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn} />;
+  if (step === 'payment') return <><PublicGuestNavbar /><PaymentMethod event={event} onBack={() => setStep('form')} onSuccess={(txn) => { (window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn = txn; setStep('success'); }} /></>;
+  if (step === 'success') return <><PublicGuestNavbar /><SuccessView event={event} onBack={() => setStep('event')} onContinue={() => setStep('thankyou')} txn={(window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn} /></>;
+  if (step === 'thankyou') return <><PublicGuestNavbar /><ThankYouScreen event={event} onBack={() => setStep('event')} txn={(window as Window & { __txn?: { transactionId: string; amount: number; method: string; date: string } }).__txn} /></>;
 
-  return <EventDetailView event={event} photos={photos} onGiveMoi={() => setStep('form')} guestMoiClosed={!canAcceptGuestMoi(event)} shareUrl={shareUrl} />;
+  return <><PublicGuestNavbar /><EventDetailView event={event} photos={photos} onGiveMoi={() => setStep('form')} guestMoiClosed={!canAcceptGuestMoi(event)} shareUrl={shareUrl} /></>;
 }
 
 // ── Event Detail View (TicketNadu layout) ─────────────────────────────────────
@@ -717,11 +789,18 @@ function VenueMap({ venue }: { venue: string }) {
 }
 
 // ── Payment Method ─────────────────────────────────────────────────────────────
-type PaymentMethod = 'upi' | 'card' | 'netbanking' | 'wallet' | 'scan';
+type PaymentMethod = RazorpayPaymentMethod;
+type RazorpaySuccessResponse = {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+};
 
 function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () => void; onSuccess: (txn: { transactionId: string; amount: number; method: string; date: string }) => void }) {
   const form = (window as Window & { __guestForm?: GuestForm }).__guestForm;
+  const paymentCompletedRef = useRef(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('upi');
+  const [scanRef, setScanRef] = useState('');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
 
@@ -731,35 +810,151 @@ function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () 
   const fee = Math.round(amount * 0.0018) || 9;
   const total = amount + fee;
 
+  const handleRazorpaySuccess = async (response: RazorpaySuccessResponse) => {
+    if (!form) return;
+
+    paymentCompletedRef.current = true;
+
+    try {
+      const result = await paymentApi.verifyPayment({
+        event_slug: event.slug,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature,
+        payment_method: selectedMethod,
+      });
+
+      const dateStr = new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      onSuccess({ transactionId: result.transaction_id, amount: total, method: selectedMethod, date: dateStr });
+    } catch (err: unknown) {
+      paymentCompletedRef.current = false;
+      setError(err instanceof Error ? err.message : 'Payment verification failed. Please contact the host.');
+      setProcessing(false);
+    }
+  };
+
   const handlePay = async () => {
+    if ((form.gift_type || 'cash') !== 'cash') {
+      setError('Payments are available for cash contributions only. Please edit the gift type or contact the host.');
+      return;
+    }
+    if (amount <= 0) {
+      setError('Contribution amount is required.');
+      return;
+    }
+
+    if (selectedMethod === 'scan') {
+      if (!event.upi_id) {
+        setError('Host has not added a UPI ID for Scan & Pay. Please use Razorpay or contact the host.');
+        return;
+      }
+      if (!scanRef.trim()) {
+        setError('Enter the UPI reference / transaction ID shown after payment.');
+        return;
+      }
+
+      setProcessing(true);
+      setError('');
+      try {
+        const refId = scanRef.trim();
+        const note = [form.note.trim(), `Scan & Pay UPI: ${event.upi_id}`, `UPI Ref: ${refId}`].filter(Boolean).join(' · ');
+        await moiApi.add({
+          slug: event.slug,
+          guest_name: form.guest_name.trim(),
+          city: form.city.trim() || undefined,
+          company: form.company.trim() || undefined,
+          occupation: form.occupation.trim() || undefined,
+          gift_type: (form.gift_type || 'cash') as 'cash' | 'gold' | 'silver' | 'gift',
+          amount,
+          relation: form.relation as 'family' | 'friend' | 'colleague' | 'relative' | 'neighbor' | 'business' | 'other',
+          payment_mode: 'upi',
+          upi_ref_id: refId,
+          other_payment_details: event.upi_id,
+          note,
+        });
+        onSuccess({ transactionId: `SCAN${Date.now()}`, amount: total, method: selectedMethod, date: new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) });
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Scan & Pay confirmation failed. Please try again.');
+      } finally {
+        setProcessing(false);
+      }
+      return;
+    }
+
     setProcessing(true);
     setError('');
+    paymentCompletedRef.current = false;
+
     try {
-      const paymentModeMap: Record<PaymentMethod, 'cash' | 'upi' | 'card' | 'other'> = {
-        upi: 'upi', card: 'card', netbanking: 'other', wallet: 'upi', scan: 'upi',
-      };
-      const giftType = (form.gift_type || 'cash') as 'cash' | 'gold' | 'gift' | 'silver';
-      await moiApi.add({
-        slug: event.slug,
-        guest_name: form.guest_name.trim(),
-        city: form.city.trim() || undefined,
-        company: form.company.trim() || undefined,
-        occupation: form.occupation.trim() || undefined,
-        gift_type: giftType === 'silver' ? 'gift' : giftType,
-        amount: giftType === 'cash' ? amount : 0,
-        gold_weight: giftType === 'gold' ? parseFloat(form.gold_weight || '0') : null,
-        gift_description: giftType === 'gift' ? (form.item_name || form.gift_description || 'Gift') : null,
-        relation: form.relation as 'family' | 'friend' | 'colleague' | 'relative' | 'neighbor' | 'business' | 'other',
-        payment_mode: paymentModeMap[selectedMethod],
-        note: [form.note, `Paid via ${selectedMethod}`].filter(Boolean).join(' · '),
+      await loadRazorpayScript();
+      const RazorpayCtor = window.Razorpay;
+      if (!RazorpayCtor) {
+        throw new Error('Razorpay checkout failed to load.');
+      }
+
+      const order = await paymentApi.createOrder({
+        event_slug: event.slug,
+        payment_method: selectedMethod,
+        guest_data: {
+          guest_name: form.guest_name.trim(),
+          city: form.city.trim() || undefined,
+          company: form.company.trim() || undefined,
+          occupation: form.occupation.trim() || undefined,
+          relation: form.relation as 'family' | 'friend' | 'colleague' | 'relative' | 'neighbor' | 'business' | 'other',
+          gift_type: (form.gift_type || 'cash') as 'cash' | 'gold' | 'silver' | 'gift',
+          amount: amount.toFixed(2),
+          note: form.note.trim(),
+        },
       });
-      const txnId = `TXN${Date.now()}`;
-      const dateStr = new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-      onSuccess({ transactionId: txnId, amount: total, method: selectedMethod, date: dateStr });
+
+      const razorpay = new RazorpayCtor({
+        key: order.razorpay_key_id,
+        amount: order.order.amount,
+        currency: order.order.currency,
+        name: 'MoiApp',
+        description: `Moi contribution for ${order.event_title}`,
+        order_id: order.order.id,
+        handler: handleRazorpaySuccess,
+        prefill: {
+          name: order.guest_name,
+          email: order.email || '',
+          contact: order.phone || '',
+        },
+        theme: {
+          color: '#FFC107',
+        },
+        modal: {
+          ondismiss: () => {
+            if (!paymentCompletedRef.current) {
+              setProcessing(false);
+              setError('Payment was not completed. Please try again or contact the host.');
+            }
+          },
+        },
+      });
+
+      razorpay.on('payment.failed', (response: unknown) => {
+        setProcessing(false);
+        const typedResponse = response as RazorpayFailureResponse;
+        const message = typedResponse.error?.description || 'Payment failed. Please try again.';
+        setError(message);
+      });
+
+      razorpay.on('payment.success', () => {
+        paymentCompletedRef.current = true;
+      });
+
+      razorpay.on('checkout.closed', () => {
+        if (!paymentCompletedRef.current) {
+          setProcessing(false);
+        }
+      });
+
+      razorpay.open();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Payment failed. Please try again.');
-    } finally {
+      paymentCompletedRef.current = false;
       setProcessing(false);
+      setError(err instanceof Error ? err.message : 'Payment failed. Please try again.');
     }
   };
 
@@ -770,6 +965,15 @@ function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () 
     { id: 'wallet' as PaymentMethod, label: 'Wallets', sub: 'Paytm, Amazon Pay', badge: 'Instant' },
     { id: 'scan' as PaymentMethod, label: 'Scan & Pay', sub: 'QR based payment', badge: 'Instant' },
   ];
+  const hostUpiId = event.upi_id?.trim() || '';
+  const hostName = event.creator_name || event.custom_title || event.event_type;
+  const upiUrl = hostUpiId ? `upi://pay?pa=${encodeURIComponent(hostUpiId)}&pn=${encodeURIComponent(hostName)}&am=${total.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Moi contribution for ' + hostName)}` : '';
+  const scanQrUrl = upiUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUrl)}` : '';
+  const copyUpiId = async () => {
+    if (!hostUpiId) return;
+    await navigator.clipboard.writeText(hostUpiId);
+    setError('UPI ID copied. Complete the payment in your UPI app, then enter the UPI reference.');
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -813,6 +1017,44 @@ function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () 
           ))}
         </div>
 
+        {selectedMethod === 'scan' && (
+          <div className="bg-white border border-tn-border rounded-xl p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-tn-light flex items-center justify-center text-tn-gold">
+                <Icon name="qr-code" size={20} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-tn-text">Scan & Pay with UPI</p>
+                <p className="text-[10px] text-tn-subtle">Pay directly to the host UPI ID</p>
+              </div>
+            </div>
+            {hostUpiId ? (
+              <>
+                <div className="bg-white border border-tn-border rounded-xl p-3 mb-3 flex justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={scanQrUrl} alt="Scan and pay UPI QR code" className="w-[220px] h-[220px] rounded-lg" />
+                </div>
+                <div className="bg-tn-light rounded-xl p-3 mb-3 break-all text-sm">
+                  <p className="text-[10px] text-tn-subtle mb-1">Host UPI ID</p>
+                  <p className="font-semibold text-tn-text">{hostUpiId}</p>
+                </div>
+                <button type="button" onClick={copyUpiId} className="w-full h-10 rounded-xl border border-tn-yellow text-tn-gold font-semibold text-sm mb-3">
+                  Copy UPI ID
+                </button>
+                <label className="block text-[10px] font-semibold text-tn-text mb-1">UPI Reference / Transaction ID</label>
+                <input value={scanRef} onChange={(e) => setScanRef(e.target.value)} className="w-full border border-tn-border rounded-xl px-3 py-2.5 text-sm text-tn-text focus:outline-none focus:border-tn-yellow mb-3" placeholder="e.g. 409123456789" />
+                <p className="text-[11px] text-tn-subtle leading-relaxed">
+                  Scan this QR, pay <strong>₹ {total.toLocaleString('en-IN')}</strong>, then enter the UPI reference ID shown in your UPI app. The host will verify this reference.
+                </p>
+              </>
+            ) : (
+              <div className="bg-tn-yellow-bg border border-tn-gold-border rounded-xl p-3 text-[11px] text-tn-gold leading-relaxed">
+                Host has not added a UPI ID in Settings yet. Please use Razorpay or contact the host.
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="bg-tn-yellow-bg rounded-xl p-3 flex gap-2 text-[11px] text-tn-gold border border-tn-gold-border">
           <Icon name="shield" size={16} />
           <p>100% Secure Payments. Your payment details are encrypted and safe with us.</p>
@@ -821,10 +1063,10 @@ function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () 
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-tn-border px-4 py-4">
         <div className="max-w-lg mx-auto">
-          <button type="button" onClick={handlePay} disabled={processing || total <= 0} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-tn-yellow-2 transition-colors">
-            <Icon name="lock" size={16} /> {processing ? 'Processing…' : `Pay ₹ ${total.toLocaleString('en-IN')}`}
+          <button type="button" onClick={handlePay} disabled={processing || total <= 0 || (form.gift_type || 'cash') !== 'cash' || (selectedMethod === 'scan' && (!hostUpiId || !scanRef.trim()))} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-tn-yellow-2 transition-colors">
+            <Icon name="lock" size={16} /> {processing ? 'Processing…' : selectedMethod === 'scan' ? `Confirm Scan & Pay ₹ ${total.toLocaleString('en-IN')}` : `Pay ₹ ${total.toLocaleString('en-IN')}`}
           </button>
-                    <p className="text-center text-[10px] text-tn-subtle mt-2">Secured by MoiApp Payments</p>
+          <p className="text-center text-[10px] text-tn-subtle mt-2">{selectedMethod === 'scan' ? 'Direct UPI payment to host' : 'Secured by Razorpay'}</p>
         </div>
       </div>
     </div>

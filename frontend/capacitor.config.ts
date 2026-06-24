@@ -3,10 +3,13 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.moiapp.weddinggift',
   appName: 'MoiApp',
-  webDir: 'www',
+  webDir: 'out',
   server: {
+    // Load webapp from server directly - simplest and most reliable solution
+    url: 'https://dsitesai.com/moiapp',
+    // Allow navigation to the same origin
+    allowNavigation: ['dsitesai.com'],
     androidScheme: 'https',
-    url: 'https://moiapp.com',
     cleartext: false,
   },
   plugins: {

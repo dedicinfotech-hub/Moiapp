@@ -134,7 +134,7 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
             </div>
             <p className="text-xs text-[#999] mb-4 leading-relaxed">
               Add your UPI ID or bank account so guests know where to transfer moi.
-              These details are shown on your event page when guests choose to pay offline.
+              The UPI ID is used for Scan & Pay on guest payment pages.
             </p>
 
             <div className="space-y-3">

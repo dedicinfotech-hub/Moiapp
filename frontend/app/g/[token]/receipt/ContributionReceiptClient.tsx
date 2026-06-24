@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { eventsApi, Event } from '@/lib/api';
+import { eventsApi, Event, paymentApi } from '@/lib/api';
 import Icon, { IconName } from '@/components/ui/Icon';
 import { useSlug } from '@/lib/useSlug';
 
@@ -17,6 +17,15 @@ export default function ContributionReceiptScreen() {
     amount?: string;
     gift_type?: string;
     transaction_id?: string;
+    razorpay_order_id?: string;
+  } | null>(null);
+  const [receiptData, setReceiptData] = useState<{
+    guest_name?: string;
+    amount?: number;
+    gift_type?: string;
+    transaction_id?: string;
+    created_at?: string;
+    event_title?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -24,7 +33,15 @@ export default function ContributionReceiptScreen() {
     eventsApi.getByGuestToken(token).then(setEvent).catch(() => setEvent(null)).finally(() => setLoading(false));
     const stored = sessionStorage.getItem(`guest_contribution_${token}`);
     if (stored) {
-      try { setGuestData(JSON.parse(stored)); } catch { /* ignore */ }
+      try {
+        const parsed = JSON.parse(stored);
+        setGuestData(parsed);
+        if (parsed.razorpay_order_id) {
+          paymentApi.getReceipt(token, parsed.razorpay_order_id)
+            .then((data) => setReceiptData(data.receipt))
+            .catch(() => setReceiptData(null));
+        }
+      } catch { /* ignore */ }
     }
   }, [token]);
 
@@ -32,11 +49,14 @@ export default function ContributionReceiptScreen() {
     return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-gray-200 border-t-[#7C3AED] rounded-full animate-spin" /></div>;
   }
 
-  const guestName = guestData?.guest_name || 'Guest';
-  const amount = Number(guestData?.amount || 0);
-  const giftType = guestData?.gift_type || 'cash';
-  const transactionId = guestData?.transaction_id || `TXN${Date.now()}`;
-  const hostNames = event?.custom_title || (event?.bride_name && event?.groom_name ? `${event.bride_name} & ${event.groom_name}` : 'The Host');
+  const guestName = receiptData?.guest_name || guestData?.guest_name || 'Guest';
+  const amount = receiptData?.amount ?? Number(guestData?.amount || 0);
+  const giftType = receiptData?.gift_type || guestData?.gift_type || 'cash';
+  const transactionId = receiptData?.transaction_id || guestData?.transaction_id || `TXN${Date.now()}`;
+  const hostNames = receiptData?.event_title || event?.custom_title || (event?.bride_name && event?.groom_name ? `${event.bride_name} & ${event.groom_name}` : 'The Host');
+  const receiptDate = receiptData?.created_at
+    ? new Date(receiptData.created_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="min-h-screen bg-[#FFFBF5] px-4 py-8">
@@ -61,7 +81,7 @@ export default function ContributionReceiptScreen() {
             { icon: 'gift' as IconName, label: 'Gift Type', value: giftType.charAt(0).toUpperCase() + giftType.slice(1) },
             { icon: 'wallet' as IconName, label: 'Amount', value: `₹ ${amount.toLocaleString('en-IN')}`, highlight: true },
             { icon: 'list' as IconName, label: 'Transaction ID', value: transactionId },
-            { icon: 'calendar' as IconName, label: 'Date & Time', value: new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) },
+            { icon: 'calendar' as IconName, label: 'Date & Time', value: receiptDate },
           ].map((row) => (
             <div key={row.label} className="flex items-center justify-between py-2 border-b border-[#F3F4F6] last:border-0">
               <div className="flex items-center gap-2 text-xs text-[#6B7280]"><Icon name={row.icon} size={14} />{row.label}</div>

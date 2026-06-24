@@ -14,5 +14,7 @@ frontend/out/
 # ── Scripts output ────────────────────────────────────────────────────────────
 scripts/*.sql
 
-# ── OS ────────────────────────────────────────────────────────────────────────
-.DS_Store
+# ── Android signing ───────────────────────────────────────────────────────────
+frontend/android/app/*.keystore
+frontend/android/app/*.jks
+frontend/android/local.properties

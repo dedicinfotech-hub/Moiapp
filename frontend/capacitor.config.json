@@ -1,10 +1,9 @@
 {
   "appId": "com.moiapp.weddinggift",
   "appName": "MoiApp",
-  "webDir": "www",
+  "webDir": "out",
   "server": {
     "androidScheme": "https",
-    "url": "https://moiapp.com",
     "cleartext": false
   },
   "plugins": {

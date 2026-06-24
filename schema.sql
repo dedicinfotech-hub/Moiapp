@@ -88,6 +88,41 @@ CREATE TABLE IF NOT EXISTS moi_entries (
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
 );
 
+-- Razorpay payment orders for guest cash contributions
+CREATE TABLE IF NOT EXISTS payment_orders (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    guest_token VARCHAR(64) NOT NULL,
+    event_slug VARCHAR(100) NULL,
+    event_id INT NOT NULL,
+    guest_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NULL,
+    email VARCHAR(150) NULL,
+    city VARCHAR(150) NULL,
+    company VARCHAR(100) NULL,
+    occupation VARCHAR(100) NULL,
+    relation ENUM('family','friend','colleague','relative','neighbor','business','other') NOT NULL DEFAULT 'friend',
+    gift_type ENUM('cash','gold','silver','gift') NOT NULL DEFAULT 'cash',
+    amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    convenience_fee DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    total_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    razorpay_order_id VARCHAR(100) NOT NULL UNIQUE,
+    receipt VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('pending','paid','failed','cancelled','expired') NOT NULL DEFAULT 'pending',
+    payment_id VARCHAR(100) NULL,
+    payment_method ENUM('upi','card','netbanking','wallet','scan','other') NOT NULL DEFAULT 'upi',
+    upi_ref_id VARCHAR(100) NULL,
+    other_payment_details VARCHAR(255) NULL,
+    note TEXT NULL,
+    payload JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NULL,
+    paid_at TIMESTAMP NULL,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    KEY idx_payment_orders_guest_status (guest_token, status),
+    KEY idx_payment_orders_payment_id (payment_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Photos
 CREATE TABLE IF NOT EXISTS photos (
     id INT AUTO_INCREMENT PRIMARY KEY,

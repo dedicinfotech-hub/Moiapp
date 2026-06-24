@@ -5,10 +5,18 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "npx serve@latest out",
+    "start:next": "next start",
+    "lint": "next lint",
+    "cap:add:android": "npx cap add android",
+    "build:apk": "APK_BUILD=true npm run build && node scripts/apk-postbuild.mjs && npx cap sync android",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
     "@next/swc-darwin-arm64": "^16.2.6",
     "next": "14.2.35",
     "react": "^18",
@@ -16,9 +24,6 @@
     "react-hot-toast": "^2.6.0"
   },
   "devDependencies": {
-    "@capacitor/android": "^8.4.0",
-    "@capacitor/cli": "^6.2.1",
-    "@capacitor/core": "^8.4.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

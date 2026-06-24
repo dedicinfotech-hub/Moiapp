@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/bootstrap.php';
+require_once __DIR__ . '/../config/cors.php';
 $method = $_SERVER['REQUEST_METHOD'];
 
 // GET endpoint is public (no auth required)

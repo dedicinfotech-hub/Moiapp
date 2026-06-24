@@ -83,6 +83,7 @@ $requiredTables = [
     'users',
     'events',
     'moi_entries',
+    'payment_orders',
     'login_logs',
     'photos',
     'event_organizers',

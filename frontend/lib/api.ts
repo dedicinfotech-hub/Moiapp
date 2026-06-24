@@ -30,11 +30,37 @@ async function request<T>(
   // Use X-Auth-Token — MAMP's Apache strips the Authorization header
   if (token) headers['X-Auth-Token'] = `Bearer ${token}`;
 
-  // Add cache-busting timestamp to prevent stale cached responses in dev
-  const url = new URL(`${BASE}${path}`, 'http://localhost:3000');
+  // Build the URL. BASE is always an absolute URL in APK/production
+  // (NEXT_PUBLIC_API_URL = https://dsitesai.com/moiapp/api).
+  // In local dev BASE = '/api' (relative), so we fall back to window.location.origin.
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+  const url = new URL(`${BASE}${path}`, origin);
   url.searchParams.set('_t', Date.now().toString());
 
-  const res = await fetch(url.toString(), { ...options, headers, cache: 'no-store' });
+  // Debug logging for mobile API troubleshooting
+  console.log('[API_REQUEST]', {
+    url: url.toString(),
+    method: options.method || 'GET',
+    headers: { ...headers, 'X-Auth-Token': token ? 'Bearer ***' : 'none' },
+    base: BASE,
+    path,
+  });
+
+  let res: Response;
+  try {
+    res = await fetch(url.toString(), { ...options, headers, cache: 'no-store' });
+  } catch (networkError) {
+    console.error('[API_NETWORK_ERROR]', {
+      url: url.toString(),
+      error: networkError instanceof Error ? networkError.message : String(networkError),
+      base: BASE,
+    });
+    if (typeof window !== 'undefined') {
+      toast.error('Network error. Check your internet connection.');
+    }
+    throw networkError;
+  }
+
   const contentType = res.headers.get('content-type') || '';
   const isJson = contentType.includes('application/json');
 
@@ -43,16 +69,27 @@ async function request<T>(
     data = isJson ? await res.json() : await res.text();
   } catch {
     const errorMsg = 'Invalid response from server';
+    console.error('[API_PARSE_ERROR]', { url: url.toString(), status: res.status, contentType });
     if (typeof window !== 'undefined') {
       toast.error(errorMsg);
     }
     throw new Error(errorMsg);
   }
 
+  console.log('[API_RESPONSE]', {
+    url: url.toString(),
+    status: res.status,
+    statusText: res.statusText,
+    contentType,
+    isJson,
+    data: isJson ? JSON.stringify(data).slice(0, 500) : String(data).slice(0, 500),
+  });
+
   if (!res.ok) {
     const errorMsg = (isJson && typeof data === 'object' && data !== null && 'error' in data)
       ? (data as { error?: string }).error || 'Request failed'
       : (typeof data === 'string' ? data : 'Request failed');
+    console.error('[API_ERROR]', { url: url.toString(), status: res.status, error: errorMsg, data });
     if (typeof window !== 'undefined') {
       toast.error(errorMsg);
     }
@@ -309,6 +346,124 @@ export const moiApi = {
 
   delete: (id: number) =>
     request<{ success: boolean }>(`/moi.php?id=${id}`, { method: 'DELETE' }),
+};
+
+// ── Razorpay Payments ────────────────────────────────────────────────────────
+export type RazorpayPaymentMethod = 'upi' | 'card' | 'netbanking' | 'wallet' | 'scan' | 'other';
+
+export interface RazorpayCreateOrderRequest {
+  guest_token?: string;
+  event_slug?: string;
+  payment_method: RazorpayPaymentMethod;
+  guest_data: {
+    guest_name: string;
+    phone?: string;
+    email?: string;
+    city?: string;
+    company?: string;
+    occupation?: string;
+    relation: 'family' | 'friend' | 'colleague' | 'relative' | 'neighbor' | 'business' | 'other';
+    gift_type: 'cash' | 'gold' | 'silver' | 'gift';
+    amount: string | number;
+    note?: string;
+  };
+}
+
+export interface RazorpayOrderResponse {
+  success: true;
+  order_id: number;
+  razorpay_key_id: string;
+  order: {
+    id: string;
+    amount: number;
+    currency: string;
+    receipt: string;
+  };
+  guest_name: string;
+  email?: string | null;
+  phone?: string | null;
+  amount: number;
+  fee: number;
+  total_amount: number;
+  payment_method: RazorpayPaymentMethod;
+  event_title: string;
+}
+
+export interface RazorpayVerifyPaymentRequest {
+  guest_token?: string;
+  event_slug?: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+  payment_method: RazorpayPaymentMethod;
+}
+
+export interface RazorpayPaymentResult {
+  success: true;
+  already_paid?: boolean;
+  id: number;
+  order_id: string;
+  payment_id: string;
+  transaction_id: string;
+  status: 'paid';
+  payment_method: RazorpayPaymentMethod;
+  amount: number;
+  fee: number;
+  total_amount: number;
+  moi_entry_id?: number | null;
+}
+
+export interface RazorpayOrderStatus {
+  id: number;
+  order_id: string;
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'expired';
+  payment_id?: string | null;
+  transaction_id?: string | null;
+  payment_method?: RazorpayPaymentMethod | null;
+  guest_name?: string;
+  amount?: number;
+  fee?: number;
+  total_amount?: number;
+  created_at?: string;
+  expires_at?: string | null;
+  paid_at?: string | null;
+  event_title?: string;
+}
+
+export interface RazorpayReceipt {
+  guest_name: string;
+  amount: number;
+  fee: number;
+  total_amount: number;
+  gift_type: 'cash' | 'gold' | 'silver' | 'gift';
+  payment_method: RazorpayPaymentMethod;
+  transaction_id: string;
+  created_at: string;
+  event_title: string;
+}
+
+export const paymentApi = {
+  createOrder: (body: RazorpayCreateOrderRequest) =>
+    request<RazorpayOrderResponse>('/payment.php?action=create-order', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  verifyPayment: (body: RazorpayVerifyPaymentRequest) =>
+    request<RazorpayPaymentResult>('/payment.php?action=verify-payment', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  getStatus: (guestToken: string, razorpayOrderId: string) =>
+    request<{ success: true; order: RazorpayOrderStatus }>(
+      `/payment.php?action=status&guest_token=${encodeURIComponent(guestToken)}&razorpay_order_id=${encodeURIComponent(razorpayOrderId)}`
+    ),
+
+  getReceipt: (guestToken: string, razorpayOrderId: string) =>
+    request<{ success: true; receipt: RazorpayReceipt }>(
+      `/payment.php?action=receipt&guest_token=${encodeURIComponent(guestToken)}&razorpay_order_id=${encodeURIComponent(razorpayOrderId)}`
+    ),
 };
 
 // ── Photos ────────────────────────────────────────────────────────────────────
