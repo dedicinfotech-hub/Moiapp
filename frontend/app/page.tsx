@@ -215,12 +215,20 @@ export default function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: 'check' as IconName, title: '100% Free', desc: 'No hidden charges' },
-              { icon: 'lock' as IconName, title: 'Secure Data', desc: 'Your data is safe' },
-              { icon: 'wallet' as IconName, title: 'UPI Supported', desc: 'Direct payments' },
-              { icon: 'wedding' as IconName, title: 'Made for Tamil Weddings', desc: 'Cultural touch' },
+              { icon: 'check' as IconName, title: '100% Free', desc: 'No hidden charges', image: '/feature-1.webp' },
+              { icon: 'lock' as IconName, title: 'Secure Data', desc: 'Your data is safe', image: '/feature-2.webp' },
+              { icon: 'wallet' as IconName, title: 'UPI Supported', desc: 'Direct payments', image: '/feature-3.webp' },
+              { icon: 'wedding' as IconName, title: 'Made for Tamil Weddings', desc: 'Cultural touch', image: '/feature-4.webp' },
             ].map((item) => (
-              <div key={item.title} className="bg-[#FFFCF5] border border-[#FFE082] rounded-xl p-5 text-center hover:shadow-md transition-all">
+              <div key={item.title} className="bg-[#FFFCF5] border border-[#FFE082] rounded-xl p-5 text-center hover:shadow-md transition-all overflow-hidden">
+                <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <div className="text-[#FFC107] mb-3 flex justify-center">
                   <Icon name={item.icon} size={32} />
                 </div>

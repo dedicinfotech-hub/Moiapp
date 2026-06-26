@@ -12,6 +12,7 @@ export default function Navbar() {
   const router = useRouter();
   const [dropOpen, setDropOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,16 +25,41 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  useEffect(() => {
+    function handleScroll() {
+      setScrolled(window.scrollY > 10);
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const closeMobile = () => setMobileOpen(false);
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-[#E8E8E8] overflow-visible">
-        <div className="flex items-center justify-between px-4 lg:px-6 h-16 lg:h-20 max-w-7xl mx-auto">
-
+      {/* Floating navbar wrapper — full width but not sticky bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center px-2 pt-3 pointer-events-none">
+        {/* The floating glass pill */}
+        <nav
+          className={`
+            pointer-events-auto
+            flex items-center justify-between
+            w-full max-w-7xl
+            px-4 py-2.5
+            rounded-2xl
+            border border-[#FFC107]/30
+            transition-all duration-300
+            overflow-visible
+            shadow-[0_0_20px_rgba(255,193,7,0.15)]
+            ${scrolled
+              ? 'bg-white/70 backdrop-blur-xl shadow-2xl border-[#FFC107]/40'
+              : 'bg-white/50 backdrop-blur-lg shadow-lg border-[#FFC107]/25'
+            }
+          `}
+        >
           {/* Logo */}
-          <Link href="/" onClick={closeMobile} className="flex items-center justify-center self-center group">
-            <div className="relative w-40 h-30 lg:w-30 lg:h-20 transition-transform group-hover:scale-105">
+          <Link href="/" onClick={closeMobile} className="flex items-center group flex-shrink-0">
+            <div className="relative w-[120px] h-[24px] lg:w-[140px] lg:h-[28px] transition-transform duration-200 group-hover:scale-105">
               <Image
                 src="/logo.png"
                 alt="MoiApp Logo"
@@ -44,27 +70,41 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Desktop nav links — center */}
+          <div className="hidden md:flex items-center gap-0.5">
             <Link
               href="/events"
-              className="relative px-4 py-2 text-sm font-medium text-[#444444] hover:text-[#101010] transition-colors rounded-lg hover:bg-[#F9FAFB]"
+              className="px-4 py-2 text-sm font-medium text-[#333] hover:text-[#101010] rounded-xl hover:bg-white/60 transition-all duration-200"
             >
               Browse Events
             </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2 text-sm font-medium text-[#333] hover:text-[#101010] rounded-xl hover:bg-white/60 transition-all duration-200"
+            >
+              List Event
+            </Link>
+          </div>
 
+          {/* Right side */}
+          <div className="flex items-center gap-2">
+
+            {/* Desktop: user menu or auth buttons */}
             {user ? (
-              <div className="relative ml-2" ref={dropRef}>
+              <div className="hidden md:block relative" ref={dropRef}>
                 <button
                   onClick={() => setDropOpen((v) => !v)}
-                  className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full hover:bg-[#F9FAFB] transition-colors"
+                  className="flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-xl hover:bg-white/60 transition-all duration-200"
                   aria-label="User menu"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4B218B] to-[#6B3FA0] flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FFC107] to-[#E6AC00] flex items-center justify-center text-black font-bold text-xs shadow-sm">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
+                  <span className="text-sm font-medium text-[#333] max-w-[80px] truncate">
+                    {user.name.split(' ')[0]}
+                  </span>
                   <svg
-                    className={`w-3.5 h-3.5 text-[#666666] transition-transform duration-200 ${dropOpen ? 'rotate-180' : ''}`}
+                    className={`w-3.5 h-3.5 text-[#888] transition-transform duration-200 ${dropOpen ? 'rotate-180' : ''}`}
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                   >
                     <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -72,35 +112,23 @@ export default function Navbar() {
                 </button>
 
                 {dropOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-[#E8E8E8] rounded-2xl shadow-xl py-2 z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[#F5F5F5] bg-gradient-to-r from-[#F9FAFB] to-white">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-2xl shadow-black/10 py-2 z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-[#F5F5F5]">
                       <p className="font-semibold text-[#101010] text-sm truncate">{user.name}</p>
                       <p className="text-xs text-[#999] truncate mt-0.5">{user.email}</p>
                     </div>
                     <div className="py-1">
-                      <Link
-                        href="/dashboard"
-                        onClick={() => setDropOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#444444] hover:bg-[#F9FAFB] hover:text-[#101010] transition-colors"
-                      >
-                        <Icon name="dashboard" size={16} />
-                        Dashboard
+                      <Link href="/dashboard" onClick={() => setDropOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#444] hover:bg-[#FFF8E1] hover:text-[#101010] transition-colors">
+                        <Icon name="dashboard" size={15} /> Dashboard
                       </Link>
-                      <Link
-                        href="/dashboard?module=settings"
-                        onClick={() => setDropOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#444444] hover:bg-[#F9FAFB] hover:text-[#101010] transition-colors"
-                      >
-                        <Icon name="users" size={16} />
-                        My Profile
+                      <Link href="/dashboard?module=settings" onClick={() => setDropOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#444] hover:bg-[#FFF8E1] hover:text-[#101010] transition-colors">
+                        <Icon name="users" size={15} /> My Profile
                       </Link>
-                      <Link
-                        href="/events/new"
-                        onClick={() => setDropOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#444444] hover:bg-[#F9FAFB] hover:text-[#101010] transition-colors"
-                      >
-                        <Icon name="plus" size={16} />
-                        New Event
+                      <Link href="/events/new" onClick={() => setDropOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#444] hover:bg-[#FFF8E1] hover:text-[#101010] transition-colors">
+                        <Icon name="plus" size={15} /> New Event
                       </Link>
                     </div>
                     <div className="border-t border-[#F5F5F5] pt-1">
@@ -108,107 +136,86 @@ export default function Navbar() {
                         onClick={() => { setDropOpen(false); logout(); router.push('/'); }}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
                       >
-                        <Icon name="lock" size={16} />
-                        Sign Out
+                        <Icon name="lock" size={15} /> Sign Out
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2 ml-2">
-                <Link
-                  href="/register"
-                  className="text-sm font-medium px-4 py-2 text-[#444444] hover:text-[#101010] transition-colors rounded-lg hover:bg-[#F9FAFB]"
-                >
-                  List Event
-                </Link>
-                <button
-                  className="text-sm font-semibold bg-[#FFC107] hover:bg-[#E6AC00] text-[#000000] rounded-lg px-4 py-2 transition-colors shadow-sm hover:shadow"
-                  onClick={() => router.push('/login')}
-                >
-                  Sign In
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile: Sign In + Hamburger */}
-          <div className="flex md:hidden items-center gap-2">
-            {!user && (
               <button
-                className="text-sm font-semibold bg-[#FFC107] hover:bg-[#E6AC00] text-[#000000] rounded-lg px-3 py-1.5 transition-colors"
+                className="hidden md:flex text-sm font-semibold bg-[#FFC107] hover:bg-[#E6AC00] text-black rounded-xl px-4 py-2 transition-all duration-200 shadow-sm shadow-[#FFC107]/30 hover:shadow-md hover:shadow-[#FFC107]/30"
                 onClick={() => router.push('/login')}
               >
                 Sign In
               </button>
             )}
+
+            {/* Mobile: user avatar */}
             {user && (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4B218B] to-[#6B3FA0] flex items-center justify-center text-white font-bold text-sm">
+              <div className="flex md:hidden w-7 h-7 rounded-full bg-gradient-to-br from-[#FFC107] to-[#E6AC00] items-center justify-center text-black font-bold text-xs shadow-sm">
                 {user.name.charAt(0).toUpperCase()}
               </div>
             )}
+
+            {/* Mobile: Sign In */}
+            {!user && (
+              <button
+                className="flex md:hidden text-xs font-semibold bg-[#FFC107] hover:bg-[#E6AC00] text-black rounded-xl px-3 py-1.5 transition-colors shadow-sm"
+                onClick={() => router.push('/login')}
+              >
+                Sign In
+              </button>
+            )}
+
+            {/* Hamburger */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className="p-2 rounded-lg text-[#444444] hover:bg-[#F5F5F5] transition-colors"
+              className="flex md:hidden p-2 rounded-xl text-[#444] hover:bg-white/60 transition-all duration-200"
               aria-label="Toggle menu"
             >
               {mobileOpen ? (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>
               ) : (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
               )}
             </button>
           </div>
+        </nav>
+      </div>
 
-        </div>
-      </header>
+      {/* Spacer so page content doesn't hide under the floating nav */}
+      <div className="h-[68px] lg:h-[64px]" />
 
-      {/* Mobile menu drawer */}
+      {/* Mobile drawer — glass style */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-40 bg-white border-t border-[#E8E8E8] flex flex-col">
-          <nav className="flex flex-col px-4 py-4 gap-1">
-            <Link
-              href="/events"
-              onClick={closeMobile}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors"
-            >
-              <Icon name="events" size={18} />
-              Browse Events
+        <div className="md:hidden fixed inset-x-4 top-[76px] lg:top-[72px] z-40 bg-white/80 backdrop-blur-xl border border-white/50 rounded-2xl shadow-2xl shadow-black/10 overflow-hidden">
+          <nav className="flex flex-col px-3 py-3 gap-1">
+            <Link href="/events" onClick={closeMobile}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#333] hover:bg-[#FFF8E1] hover:text-[#101010] transition-colors">
+              <Icon name="events" size={17} /> Browse Events
             </Link>
 
             {user ? (
               <>
-                <Link
-                  href="/dashboard"
-                  onClick={closeMobile}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors"
-                >
-                  <Icon name="dashboard" size={18} />
-                  Dashboard
+                <Link href="/dashboard" onClick={closeMobile}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#333] hover:bg-[#FFF8E1] hover:text-[#101010] transition-colors">
+                  <Icon name="dashboard" size={17} /> Dashboard
                 </Link>
-                <Link
-                  href="/events/new"
-                  onClick={closeMobile}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors"
-                >
-                  <Icon name="plus" size={18} />
-                  List Event
+                <Link href="/events/new" onClick={closeMobile}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#333] hover:bg-[#FFF8E1] hover:text-[#101010] transition-colors">
+                  <Icon name="plus" size={17} /> List Event
                 </Link>
-                <Link
-                  href="/dashboard?module=events"
-                  onClick={closeMobile}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors"
-                >
-                  <Icon name="upload" size={18} />
-                  Import
+                <Link href="/dashboard?module=events" onClick={closeMobile}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#333] hover:bg-[#FFF8E1] hover:text-[#101010] transition-colors">
+                  <Icon name="upload" size={17} /> Import
                 </Link>
-                <div className="border-t border-[#F5F5F5] mt-2 pt-2">
-                  <div className="px-4 py-3 mb-1">
+                <div className="border-t border-[#F5F5F5] mt-1 pt-1">
+                  <div className="px-4 py-2.5">
                     <p className="font-semibold text-[#101010] text-sm">{user.name}</p>
                     <p className="text-xs text-[#999]">{user.email}</p>
                   </div>
@@ -216,24 +223,19 @@ export default function Navbar() {
                     onClick={() => { closeMobile(); logout(); router.push('/'); }}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
                   >
-                    <Icon name="lock" size={18} />
-                    Sign Out
+                    <Icon name="lock" size={17} /> Sign Out
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <Link
-                  href="/register"
-                  onClick={closeMobile}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#444444] hover:bg-[#F5F5F5] hover:text-[#101010] transition-colors"
-                >
-                  <Icon name="wedding" size={18} />
-                  List Your Wedding
+                <Link href="/register" onClick={closeMobile}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#333] hover:bg-[#FFF8E1] hover:text-[#101010] transition-colors">
+                  <Icon name="wedding" size={17} /> List Your Wedding
                 </Link>
-                <div className="mt-3 px-4">
+                <div className="px-3 pb-2 pt-1">
                   <button
-                    className="w-full text-sm font-semibold bg-[#FFC107] hover:bg-[#E6AC00] rounded-xl px-4 py-3 text-[#000000] transition-colors"
+                    className="w-full text-sm font-semibold bg-[#FFC107] hover:bg-[#E6AC00] rounded-xl px-4 py-3 text-black transition-colors shadow-sm"
                     onClick={() => { closeMobile(); router.push('/login'); }}
                   >
                     Sign In
