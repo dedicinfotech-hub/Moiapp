@@ -28,6 +28,9 @@ export default function GuestPaymentClient() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [upiReference, setUpiReference] = useState('');
+  const [awaitingPayment, setAwaitingPayment] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'gpay' | 'phonepe' | 'upi' | null>(null);
 
   const [form, setForm] = useState({
     guest_name: '',
@@ -38,6 +41,7 @@ export default function GuestPaymentClient() {
     method: 'gpay' as GiftMethod,
     amount: '',
     gold_weight: '',
+    item_name: '',
     gift_description: '',
     note: '',
   });
@@ -69,9 +73,99 @@ export default function GuestPaymentClient() {
 
   const inp = 'w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow bg-white';
 
+  const openUpiLink = (app: 'gpay' | 'phonepe' | 'upi') => {
+    if (!event || !form.amount) return;
+    const amount = parseFloat(form.amount);
+    if (amount <= 0) {
+      setError('Please enter a valid amount');
+      return;
+    }
+    const hostName = event.creator_name || event.custom_title || event.event_type;
+    const upiId = event.upi_id || '';
+    if (!upiId) {
+      setError('Host has not added a UPI ID. Please use Razorpay or contact the host.');
+      return;
+    }
+    const note = encodeURIComponent(`Moi contribution for ${hostName}`);
+    let url: string;
+    if (app === 'gpay') {
+      url = `gpay://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(hostName)}&am=${amount.toFixed(2)}&cu=INR&tn=${note}`;
+    } else if (app === 'phonepe') {
+      url = `phonepe://upi/pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(hostName)}&am=${amount.toFixed(2)}&cu=INR&tn=${note}`;
+    } else {
+      url = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(hostName)}&am=${amount.toFixed(2)}&cu=INR&tn=${note}`;
+    }
+    setPaymentMethod(app);
+    setAwaitingPayment(true);
+    setUpiReference('');
+    setError('');
+    window.open(url, '_blank');
+  };
+
+  const handleUpiConfirm = async () => {
+    if (!event || !token) return;
+    if (!upiReference.trim()) {
+      setError('Please enter the UPI reference / transaction ID');
+      return;
+    }
+    setSubmitting(true);
+    setError('');
+    try {
+      const amount = parseFloat(form.amount || '0');
+      let gift_type: 'cash' | 'gold' | 'silver' | 'gift' = 'cash';
+      let gold_weight: number | null = null;
+      let gift_description: string | null = null;
+
+      if (form.method === 'gold') {
+        gift_type = 'gold';
+        gold_weight = form.gold_weight.trim() ? parseFloat(form.gold_weight) : null;
+        gift_description = form.item_name.trim() || 'Gold gift';
+      } else if (form.method === 'silver') {
+        gift_type = 'gift';
+        gold_weight = form.gold_weight.trim() ? parseFloat(form.gold_weight) : null;
+        gift_description = form.item_name.trim() ? `Silver: ${form.item_name.trim()}` : 'Silver gift';
+      } else if (form.method === 'gift') {
+        gift_type = 'gift';
+        gift_description = form.item_name.trim() || 'Gift';
+      }
+
+      const noteParts = [form.note.trim(), `${paymentMethod === 'gpay' ? 'GPay' : paymentMethod === 'phonepe' ? 'PhonePe' : 'UPI'}: ${upiReference.trim()}`].filter(Boolean).join(' · ');
+      await moiApi.add({
+        guest_token: token,
+        guest_name: form.guest_name.trim(),
+        city: form.city.trim() || undefined,
+        company: form.company.trim() || undefined,
+        occupation: form.occupation.trim() || undefined,
+        gift_type,
+        amount: amount > 0 ? amount : undefined,
+        gold_weight,
+        gift_description,
+        relation: form.relation as 'family' | 'friend' | 'colleague' | 'relative' | 'neighbor' | 'business' | 'other',
+        payment_mode: 'upi',
+        upi_ref_id: upiReference.trim(),
+        other_payment_details: event.upi_id,
+        note: noteParts,
+      });
+      setSubmitted(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Could not save your moi');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!event || !token) return;
+
+    if (!form.guest_name.trim()) {
+      setError('Please enter your full name');
+      return;
+    }
+    if (!form.city.trim()) {
+      setError('Please enter your city');
+      return;
+    }
 
     let gift_type: 'cash' | 'gold' | 'silver' | 'gift' = 'cash';
     let amount = 0;
@@ -80,10 +174,8 @@ export default function GuestPaymentClient() {
     let payment_mode: 'cash' | 'upi' | 'card' | 'cheque' = 'cash';
 
     if (form.method === 'gpay' || form.method === 'phonepe') {
-      gift_type = 'cash';
-      amount = parseFloat(form.amount || '0');
-      if (amount <= 0) { setError('Amount is required'); return; }
-      payment_mode = 'upi';
+      openUpiLink(form.method);
+      return;
     } else if (form.method === 'cash') {
       gift_type = 'cash';
       amount = parseFloat(form.amount || '0');
@@ -91,22 +183,21 @@ export default function GuestPaymentClient() {
       payment_mode = 'cash';
     } else if (form.method === 'gold') {
       gift_type = 'gold';
-      gold_weight = parseFloat(form.gold_weight || '0');
-      if (!gold_weight || gold_weight <= 0) { setError('Gold weight (grams) is required'); return; }
+      gold_weight = form.gold_weight.trim() ? parseFloat(form.gold_weight) : null;
+      gift_description = form.item_name.trim() || 'Gold gift';
     } else if (form.method === 'silver') {
       gift_type = 'gift';
-      gift_description = form.gift_description.trim() ? `Silver: ${form.gift_description.trim()}` : 'Silver gift';
+      gold_weight = form.gold_weight.trim() ? parseFloat(form.gold_weight) : null;
+      gift_description = form.item_name.trim() ? `Silver: ${form.item_name.trim()}` : 'Silver gift';
     } else {
       gift_type = 'gift';
-      gift_description = form.gift_description.trim() || 'Gift';
+      gift_description = form.item_name.trim() || 'Gift';
     }
 
     setError('');
     setSubmitting(true);
     try {
       const noteParts = [form.note.trim()];
-      if (form.method === 'gpay') noteParts.unshift('GPay');
-      if (form.method === 'phonepe') noteParts.unshift('PhonePe');
       await moiApi.add({
         guest_token: token,
         guest_name: form.guest_name.trim(),
@@ -114,7 +205,7 @@ export default function GuestPaymentClient() {
         company: form.company.trim() || undefined,
         occupation: form.occupation.trim() || undefined,
         gift_type,
-        amount,
+        amount: amount > 0 ? amount : undefined,
         gold_weight,
         gift_description,
         relation: form.relation as 'family' | 'friend' | 'colleague' | 'relative' | 'neighbor' | 'business' | 'other',
@@ -171,17 +262,28 @@ export default function GuestPaymentClient() {
     );
   }
 
-  const methods: { id: GiftMethod; label: string; icon: IconName }[] = [
-    { id: 'gpay', label: 'GPay', icon: 'wallet' },
-    { id: 'phonepe', label: 'PhonePe', icon: 'wallet' },
+  const giftMethods: { id: GiftMethod; label: string; icon: IconName }[] = [
     { id: 'cash', label: 'Cash', icon: 'wallet' },
     { id: 'gold', label: 'Gold', icon: 'sparkle' },
     { id: 'silver', label: 'Silver', icon: 'sparkle' },
     { id: 'gift', label: 'Gift', icon: 'gift' },
   ];
 
-  const needsAmount = ['gpay', 'phonepe', 'cash'].includes(form.method);
-  const needsGold = form.method === 'gold';
+  const upiMethods = [
+    { id: 'gpay' as const, label: 'GPay', icon: 'wallet' as IconName },
+    { id: 'phonepe' as const, label: 'PhonePe', icon: 'wallet' as IconName },
+    { id: 'upi' as const, label: 'Any UPI App', icon: 'wallet' as IconName },
+  ];
+
+  const razorpayMethods = [
+    { id: 'card' as const, label: 'Debit / Credit Card', icon: 'credit-card' as IconName },
+    { id: 'netbanking' as const, label: 'Net Banking', icon: 'building' as IconName },
+    { id: 'wallet' as const, label: 'Wallets', icon: 'wallet' as IconName },
+  ];
+
+  const needsAmount = form.method === 'cash';
+  const needsItemName = ['gold', 'silver', 'gift'].includes(form.method);
+  const needsWeight = ['gold', 'silver'].includes(form.method);
   const needsGiftDesc = form.method === 'silver' || form.method === 'gift';
 
   const hostFirstName = (event.creator_name || '').split(' ')[0];
@@ -201,14 +303,14 @@ export default function GuestPaymentClient() {
         {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">{error}</div>}
 
         <div>
-          <label className="block text-xs font-semibold text-tn-muted mb-1">Your Name</label>
-          <input className={inp} value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} placeholder="Optional" />
+          <label className="block text-xs font-semibold text-tn-muted mb-1">Your Name <span className="text-red-500">*</span></label>
+          <input required className={inp} value={form.guest_name} onChange={(e) => setForm({ ...form, guest_name: e.target.value })} placeholder="Enter your full name" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-tn-muted mb-1">City</label>
-            <input className={inp} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Optional" />
+            <label className="block text-xs font-semibold text-tn-muted mb-1">City <span className="text-red-500">*</span></label>
+            <input required className={inp} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Enter your city" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-tn-muted mb-1">Relationship</label>
@@ -236,13 +338,51 @@ export default function GuestPaymentClient() {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-tn-muted mb-2">Payment / Gift Type</label>
-          <div className="grid grid-cols-3 gap-2">
-            {methods.map((m) => (
+          <label className="block text-xs font-semibold text-tn-muted mb-2">Gift Type</label>
+          <div className="grid grid-cols-4 gap-2">
+            {giftMethods.map((m) => (
               <button
                 key={m.id}
                 type="button"
-                onClick={() => setForm({ ...form, method: m.id })}
+                onClick={() => { setForm({ ...form, method: m.id }); setAwaitingPayment(false); setPaymentMethod(null); }}
+                className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                  form.method === m.id ? 'border-tn-yellow bg-tn-yellow-light' : 'border-tn-border bg-white'
+                }`}
+              >
+                <Icon name={m.icon} size={18} className="mx-auto mb-0.5" />
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-tn-muted mb-2">Pay Online via</label>
+          <div className="grid grid-cols-3 gap-2">
+            {upiMethods.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => openUpiLink(m.id)}
+                className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                  paymentMethod === m.id ? 'border-tn-yellow bg-tn-yellow-light' : 'border-tn-border bg-white'
+                }`}
+              >
+                <Icon name={m.icon} size={18} className="mx-auto mb-0.5" />
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-tn-muted mb-2">More Payment Options</label>
+          <div className="grid grid-cols-3 gap-2">
+            {razorpayMethods.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => router.push(`/g/${token}/payment`)}
                 className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
                   form.method === m.id ? 'border-tn-yellow bg-tn-yellow-light' : 'border-tn-border bg-white'
                 }`}
@@ -261,32 +401,67 @@ export default function GuestPaymentClient() {
           </div>
         )}
 
-        {needsGold && (
+        {needsItemName && (
           <div>
-            <label className="block text-xs font-semibold text-tn-muted mb-1">Gold weight (grams)</label>
-            <input type="number" step="0.01" min="0" className={inp} value={form.gold_weight} onChange={(e) => setForm({ ...form, gold_weight: e.target.value })} />
+            <label className="block text-xs font-semibold text-tn-muted mb-1">Item Name <span className="text-red-500">*</span></label>
+            <input required className={inp} value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} placeholder={form.method === 'gold' ? 'e.g. Gold chain, Ring' : form.method === 'silver' ? 'e.g. Silver plate, Coin' : 'e.g. Watch, Bag'} />
+          </div>
+        )}
+
+        {needsWeight && (
+          <div>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">{form.method === 'gold' ? 'Gold weight (grams)' : 'Silver weight (grams)'} <span className="text-tn-subtle">(Optional)</span></label>
+            <input type="number" step="0.01" min="0" className={inp} value={form.gold_weight} onChange={(e) => setForm({ ...form, gold_weight: e.target.value })} placeholder="e.g. 10" />
           </div>
         )}
 
         {needsGiftDesc && (
           <div>
-            <label className="block text-xs font-semibold text-tn-muted mb-1">{form.method === 'silver' ? 'Silver details' : 'Gift description'}</label>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">Additional details</label>
             <input className={inp} value={form.gift_description} onChange={(e) => setForm({ ...form, gift_description: e.target.value })} placeholder="Optional" />
           </div>
         )}
 
-        <div>
-          <label className="block text-xs font-semibold text-tn-muted mb-1">Note</label>
-          <input className={inp} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Optional" />
-        </div>
+        {awaitingPayment && paymentMethod && (
+          <div className="bg-[#F5F3FF] border border-[#EDE9FE] rounded-xl p-4">
+            <p className="text-xs font-semibold text-[#4B218B] mb-2">
+              {paymentMethod === 'gpay' ? 'GPay' : paymentMethod === 'phonepe' ? 'PhonePe' : 'UPI'} payment link opened. Complete the payment in your app, then enter the UPI reference below.
+            </p>
+            <label className="block text-xs font-semibold text-tn-muted mb-1">UPI Reference / Transaction ID <span className="text-red-500">*</span></label>
+            <input
+              required
+              className={inp}
+              value={upiReference}
+              onChange={(e) => setUpiReference(e.target.value)}
+              placeholder="e.g. 409123456789"
+            />
+            <button
+              type="button"
+              onClick={handleUpiConfirm}
+              disabled={submitting}
+              className="w-full mt-3 h-12 bg-[#4B218B] text-white rounded-xl font-semibold text-sm disabled:opacity-50"
+            >
+              {submitting ? 'Saving…' : 'Confirm Payment'}
+            </button>
+          </div>
+        )}
 
-        <button
-          type="submit"
-          disabled={submitting || submitted}
-          className="w-full bg-tn-yellow text-white font-bold py-3.5 rounded-xl hover:bg-tn-yellow-2 disabled:opacity-50 transition-colors"
-        >
-          {submitted ? 'Submitted ✓' : submitting ? 'Saving…' : 'Submit Moi'}
-        </button>
+        {!awaitingPayment && (
+          <>
+            <div>
+              <label className="block text-xs font-semibold text-tn-muted mb-1">Note</label>
+              <input className={inp} value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Optional" />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting || submitted}
+              className="w-full bg-tn-yellow text-white font-bold py-3.5 rounded-xl hover:bg-tn-yellow-2 disabled:opacity-50 transition-colors"
+            >
+              {submitted ? 'Submitted ✓' : submitting ? 'Saving…' : 'Submit Moi'}
+            </button>
+          </>
+        )}
       </form>
     </div>
   );

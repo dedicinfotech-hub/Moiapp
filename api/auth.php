@@ -45,10 +45,43 @@ function generateOTP(): string {
 }
 
 function sendOTP($phone, $otp) {
-    // In production, integrate with SMS gateway (Twilio, MSG91, etc.)
-    // For now, we'll log it and return success
-    error_log("OTP for $phone: $otp");
-    return true;
+    // Get Twilio credentials from environment
+    $accountSid = env('TWILIO_ACCOUNT_SID', '');
+    $authToken = env('TWILIO_AUTH_TOKEN', '');
+    $fromNumber = env('TWILIO_FROM_NUMBER', '');
+    
+    // If Twilio credentials are not configured, fall back to logging (for development)
+    if (!$accountSid || !$authToken || !$fromNumber) {
+        error_log("OTP for $phone: $otp (Twilio not configured)");
+        return true;
+    }
+    
+    // Send SMS via Twilio API using file_get_contents
+    $url = "https://api.twilio.com/2010-04-01/Accounts/$accountSid/Messages.json";
+    $data = http_build_query([
+        'From' => $fromNumber,
+        'To' => '+91' . $phone,
+        'Body' => "Your MoiApp verification code is: $otp"
+    ]);
+    
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'POST',
+            'header' => [
+                'Authorization: Basic ' . base64_encode("$accountSid:$authToken"),
+                'Content-Type: application/x-www-form-urlencoded'
+            ],
+            'content' => $data
+        ]
+    ]);
+    
+    try {
+        $response = file_get_contents($url, false, $context);
+        return true;
+    } catch (Exception $e) {
+        error_log("Twilio SMS failed: " . $e->getMessage());
+        return false;
+    }
 }
 
 // ── Send OTP ──────────────────────────────────────────────────────────────────

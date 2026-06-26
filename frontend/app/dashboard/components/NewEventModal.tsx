@@ -51,6 +51,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
+  const [functionNameManualEdit, setFunctionNameManualEdit] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const inp = 'w-full border border-tn-border rounded-lg px-3 py-2.5 text-sm text-tn-text placeholder-tn-text-secondary focus:outline-none focus:border-tn-yellow transition-colors bg-white';
@@ -80,13 +81,14 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
     // Pre-populate function name based on event type and existing name fields
     setForm((prev) => {
       let fn = prev.function_name;
-      if (!fn) {
+      // Only auto-populate if not in manual edit mode
+      if (!functionNameManualEdit && !fn) {
         if (prev.event_type === 'wedding' && prev.bride_name && prev.groom_name) {
           fn = `${prev.bride_name} & ${prev.groom_name} Wedding`;
         } else if (prev.event_type === 'birthday' && prev.birthday_person_name) {
           fn = `${prev.birthday_person_name}'s Birthday Celebration`;
-        } else if (prev.event_type === 'engagement' && prev.bride_name && prev.groom_name) {
-          fn = `${prev.bride_name} & ${prev.groom_name} Engagement`;
+        } else if (prev.event_type === 'engagement' && prev.mother_name && prev.father_name) {
+          fn = `${prev.mother_name} & ${prev.father_name} Engagement`;
         } else if (prev.event_type === 'valakaappu' && prev.mother_name && prev.father_name) {
           fn = `${prev.mother_name} & ${prev.father_name} Valakaappu`;
         } else if (prev.event_type === 'housewarming' && prev.host_name) {
@@ -128,13 +130,13 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
       } else if (form.event_type === 'custom') {
         submitData.custom_title = form.function_name || form.custom_title;
       } else if (form.event_type === 'engagement') {
-        submitData.bride_name = form.bride_name;
-        submitData.groom_name = form.groom_name;
-        submitData.parent1_name = form.parent1_name;
-        submitData.parent2_name = form.parent2_name;
-        submitData.mother_name = form.mother_name;
-        submitData.father_name = form.father_name;
-      } else if (form.event_type === 'valakaappu') {
+         submitData.bride_name = form.mother_name;
+         submitData.groom_name = form.father_name;
+         submitData.parent1_name = form.parent1_name;
+         submitData.parent2_name = form.parent2_name;
+         submitData.mother_name = form.mother_name;
+         submitData.father_name = form.father_name;
+       } else if (form.event_type === 'valakaappu') {
         submitData.bride_name = form.bride_name;
         submitData.groom_name = form.groom_name;
       } else if (form.event_type === 'housewarming') {
@@ -182,8 +184,6 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
   const getNameFieldLabels = () => {
     if (form.event_type === 'wedding') {
       return { name1: 'Bride Name', name2: 'Groom Name', placeholder1: 'Priya', placeholder2: 'Ravi' };
-    } else if (form.event_type === 'engagement') {
-      return { name1: 'Partner 1 Name', name2: 'Partner 2 Name', placeholder1: 'Priya', placeholder2: 'Ravi' };
     } else if (form.event_type === 'valakaappu') {
       return { name1: 'Mother Name', name2: 'Father Name', placeholder1: 'Lakshmi', placeholder2: 'Ravi' };
     } else if (form.event_type === 'housewarming') {
@@ -344,152 +344,197 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
           )}
 
           {/* ── Step 2: Function Details ── */}
-          {step === 2 && (
-            <form onSubmit={handleStep2Submit} className="space-y-4">
-              {/* Function Name */}
-              <div>
-                <label className={lbl}>Function Name <span className="text-tn-yellow">*</span></label>
-                <input
-                  required
-                  value={form.function_name}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setForm((prev) => {
-                      const updates: Record<string, string> = { function_name: val };
-                      if (form.event_type === 'wedding' || form.event_type === 'engagement' || form.event_type === 'valakaappu') {
-                        const parts = val.split(' & ');
-                        updates.bride_name = parts[0] || '';
-                        updates.groom_name = parts[1] || '';
-                      } else if (form.event_type === 'birthday') {
-                        updates.birthday_person_name = val;
-                      } else if (form.event_type === 'housewarming') {
-                        const parts = val.split(' & ');
-                        updates.host_name = parts[0] || '';
-                        updates.spouse_name = parts[1] || '';
-                      } else if (form.event_type === 'graduation') {
-                        updates.graduate_name = val;
-                      } else if (form.event_type === 'custom') {
-                        updates.custom_title = val;
-                      }
-                      return { ...prev, ...updates };
-                    });
-                  }}
-                  className={inp}
-                  placeholder={
-                    form.event_type === 'wedding' ? 'Arun & Priya Wedding' :
-                    form.event_type === 'birthday' ? 'Birthday Celebration' :
-                    form.event_type === 'custom' ? 'e.g., Anniversary' :
-                    form.event_type === 'engagement' ? 'Partner 1 & Partner 2' :
-                    form.event_type === 'valakaappu' ? 'Mother & Father Name' :
-                    form.event_type === 'housewarming' ? 'Host & Spouse Name' :
-                    form.event_type === 'graduation' ? 'Graduate Name' :
-                    ''
-                  }
-                />
-                <p className="text-[10px] text-tn-text-secondary mt-1">This name will be shown to guests. It syncs with the details you enter below.</p>
-              </div>
+           {step === 2 && (
+             <form onSubmit={handleStep2Submit} className="space-y-4">
+               {/* Function Name */}
+               <div>
+                 <div className="flex items-center justify-between mb-1.5">
+                   <label className={lbl}>Function Name <span className="text-tn-yellow">*</span></label>
+                   <label className="relative inline-flex items-center cursor-pointer">
+                     <input
+                       type="checkbox"
+                       checked={functionNameManualEdit}
+                       onChange={(e) => setFunctionNameManualEdit(e.target.checked)}
+                       className="sr-only"
+                     />
+                     <span className={`text-[10px] mr-1.5 ${functionNameManualEdit ? 'text-tn-yellow' : 'text-tn-text-secondary'}`}>
+                       Manual Edit
+                     </span>
+                     <span className={`inline-block h-4 w-7 rounded-full transition-colors ${
+                       functionNameManualEdit ? 'bg-tn-yellow' : 'bg-tn-border'
+                     }`}>
+                       <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${
+                         functionNameManualEdit ? 'translate-x-3' : ''
+                       }`} />
+                     </span>
+                   </label>
+                 </div>
+                 <input
+                   required
+                   value={form.function_name}
+                   onChange={(e) => setForm({ ...form, function_name: e.target.value })}
+                   className={inp}
+                   placeholder={
+                     form.event_type === 'wedding' ? 'Arun & Priya Wedding' :
+                     form.event_type === 'birthday' ? 'Birthday Celebration' :
+                     form.event_type === 'custom' ? 'e.g., Anniversary' :
+                     form.event_type === 'engagement' ? 'Mother & Father Engagement' :
+                     form.event_type === 'valakaappu' ? 'Mother & Father Name' :
+                     form.event_type === 'housewarming' ? 'Host & Spouse Name' :
+                     form.event_type === 'graduation' ? 'Graduate Name' :
+                     ''
+                   }
+                   disabled={!functionNameManualEdit}
+                   readOnly={!functionNameManualEdit}
+                 />
+                 <p className="text-[10px] text-tn-text-secondary mt-1">
+                   {functionNameManualEdit 
+                     ? 'Edit function name manually. It will not sync with partner names.'
+                     : 'This name will be shown to guests. It syncs with the details you enter below.'}
+                 </p>
+               </div>
 
               {/* Name fields for specific event types */}
-              {(form.event_type === 'wedding' || form.event_type === 'engagement' || form.event_type === 'valakaappu') && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={lbl}>{nameLabels.name1} <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.bride_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${val} & ${prev.groom_name} ${prev.event_type === 'wedding' ? 'Wedding' : prev.event_type === 'engagement' ? 'Engagement' : 'Valakaappu'}`;
-                        return { ...prev, bride_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder={nameLabels.placeholder1} />
+                {(form.event_type === 'wedding' || form.event_type === 'valakaappu') && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={lbl}>{nameLabels.name1} <span className="text-tn-yellow">*</span></label>
+                      <input required value={form.bride_name} onChange={(e) => {
+                        const val = e.target.value;
+                        setForm((prev) => {
+                          if (functionNameManualEdit) {
+                            return { ...prev, bride_name: val };
+                          }
+                          const fn = `${val} & ${prev.groom_name} ${prev.event_type === 'wedding' ? 'Wedding' : 'Valakaappu'}`;
+                          return { ...prev, bride_name: val, function_name: fn };
+                        });
+                      }} className={inp} placeholder={nameLabels.placeholder1} />
+                    </div>
+                    <div>
+                      <label className={lbl}>{nameLabels.name2} <span className="text-tn-yellow">*</span></label>
+                      <input required value={form.groom_name} onChange={(e) => {
+                        const val = e.target.value;
+                        setForm((prev) => {
+                          if (functionNameManualEdit) {
+                            return { ...prev, groom_name: val };
+                          }
+                          const fn = `${prev.bride_name} & ${val} ${prev.event_type === 'wedding' ? 'Wedding' : 'Valakaappu'}`;
+                          return { ...prev, groom_name: val, function_name: fn };
+                        });
+                      }} className={inp} placeholder={nameLabels.placeholder2} />
+                    </div>
                   </div>
-                  <div>
-                    <label className={lbl}>{nameLabels.name2} <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.groom_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${prev.bride_name} & ${val} ${prev.event_type === 'wedding' ? 'Wedding' : prev.event_type === 'engagement' ? 'Engagement' : 'Valakaappu'}`;
-                        return { ...prev, groom_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder={nameLabels.placeholder2} />
-                  </div>
-                </div>
-              )}
+                )}
 
               {form.event_type === 'birthday' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={lbl}>Person Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.birthday_person_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => ({ ...prev, birthday_person_name: val, function_name: `${val}'s Birthday Celebration` }));
-                    }} className={inp} placeholder="Arun" />
-                  </div>
-                  <div>
-                    <label className={lbl}>Age</label>
-                    <input type="number" min="1" max="120" value={form.birthday_person_age} onChange={(e) => setForm({ ...form, birthday_person_age: e.target.value })} className={inp} placeholder="25" />
-                  </div>
-                </div>
-              )}
+                 <div className="grid grid-cols-2 gap-3">
+                   <div>
+                     <label className={lbl}>Person Name <span className="text-tn-yellow">*</span></label>
+                     <input required value={form.birthday_person_name} onChange={(e) => {
+                       const val = e.target.value;
+                       setForm((prev) => {
+                         if (functionNameManualEdit) {
+                           return { ...prev, birthday_person_name: val };
+                         }
+                         return { ...prev, birthday_person_name: val, function_name: `${val}'s Birthday Celebration` };
+                       });
+                     }} className={inp} placeholder="Arun" />
+                   </div>
+                   <div>
+                     <label className={lbl}>Age</label>
+                     <input type="number" min="1" max="120" value={form.birthday_person_age} onChange={(e) => setForm({ ...form, birthday_person_age: e.target.value })} className={inp} placeholder="25" />
+                   </div>
+                 </div>
+               )}
 
               {form.event_type === 'engagement' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={lbl}>Mother Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.mother_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${val} & ${prev.father_name} Engagement`;
-                        return { ...prev, mother_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder="Lakshmi" />
-                  </div>
-                  <div>
-                    <label className={lbl}>Father Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.father_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${prev.mother_name} & ${val} Engagement`;
-                        return { ...prev, father_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder="Ravi" />
-                  </div>
-                </div>
-              )}
+                 <div className="space-y-3">
+                   <div className="grid grid-cols-2 gap-3">
+                     <div>
+                       <label className={lbl}>Parent 1 Name <span className="text-tn-yellow">*</span></label>
+                       <input required value={form.parent1_name} onChange={(e) => setForm({ ...form, parent1_name: e.target.value })} className={inp} placeholder="Parent 1" />
+                     </div>
+                     <div>
+                       <label className={lbl}>Parent 2 Name <span className="text-tn-yellow">*</span></label>
+                       <input required value={form.parent2_name} onChange={(e) => setForm({ ...form, parent2_name: e.target.value })} className={inp} placeholder="Parent 2" />
+                     </div>
+                   </div>
+                   <div className="grid grid-cols-2 gap-3">
+                     <div>
+                       <label className={lbl}>Mother Name <span className="text-tn-yellow">*</span></label>
+                       <input required value={form.mother_name} onChange={(e) => {
+                         const val = e.target.value;
+                         setForm((prev) => {
+                           if (functionNameManualEdit) {
+                             return { ...prev, mother_name: val };
+                           }
+                           const fn = `${val} & ${prev.father_name} Engagement`;
+                           return { ...prev, mother_name: val, function_name: fn };
+                         });
+                       }} className={inp} placeholder="Lakshmi" />
+                     </div>
+                     <div>
+                       <label className={lbl}>Father Name <span className="text-tn-yellow">*</span></label>
+                       <input required value={form.father_name} onChange={(e) => {
+                         const val = e.target.value;
+                         setForm((prev) => {
+                           if (functionNameManualEdit) {
+                             return { ...prev, father_name: val };
+                           }
+                           const fn = `${prev.mother_name} & ${val} Engagement`;
+                           return { ...prev, father_name: val, function_name: fn };
+                         });
+                       }} className={inp} placeholder="Ravi" />
+                     </div>
+                   </div>
+                 </div>
+               )}
 
               {form.event_type === 'housewarming' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={lbl}>Host Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.host_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${val}${prev.spouse_name ? ' & ' + prev.spouse_name : ''} Housewarming`;
-                        return { ...prev, host_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder="Arun" />
-                  </div>
-                  <div>
-                    <label className={lbl}>Spouse Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.spouse_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${prev.host_name}${val ? ' & ' + val : ''} Housewarming`;
-                        return { ...prev, spouse_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder="Priya" />
-                  </div>
-                </div>
-              )}
+                 <div className="grid grid-cols-2 gap-3">
+                   <div>
+                     <label className={lbl}>Host Name <span className="text-tn-yellow">*</span></label>
+                     <input required value={form.host_name} onChange={(e) => {
+                       const val = e.target.value;
+                       setForm((prev) => {
+                         if (functionNameManualEdit) {
+                           return { ...prev, host_name: val };
+                         }
+                         const fn = `${val}${prev.spouse_name ? ' & ' + prev.spouse_name : ''} Housewarming`;
+                         return { ...prev, host_name: val, function_name: fn };
+                       });
+                     }} className={inp} placeholder="Arun" />
+                   </div>
+                   <div>
+                     <label className={lbl}>Spouse Name <span className="text-tn-yellow">*</span></label>
+                     <input required value={form.spouse_name} onChange={(e) => {
+                       const val = e.target.value;
+                       setForm((prev) => {
+                         if (functionNameManualEdit) {
+                           return { ...prev, spouse_name: val };
+                         }
+                         const fn = `${prev.host_name}${val ? ' & ' + val : ''} Housewarming`;
+                         return { ...prev, spouse_name: val, function_name: fn };
+                       });
+                     }} className={inp} placeholder="Priya" />
+                   </div>
+                 </div>
+               )}
 
-              {form.event_type === 'graduation' && (
-                <div>
-                  <label className={lbl}>Graduate Name <span className="text-tn-yellow">*</span></label>
-                  <input required value={form.graduate_name} onChange={(e) => {
-                    const val = e.target.value;
-                    setForm((prev) => ({ ...prev, graduate_name: val, function_name: `${val}'s Graduation` }));
-                  }} className={inp} placeholder="Arun" />
-                </div>
-              )}
+               {form.event_type === 'graduation' && (
+                 <div>
+                   <label className={lbl}>Graduate Name <span className="text-tn-yellow">*</span></label>
+                   <input required value={form.graduate_name} onChange={(e) => {
+                     const val = e.target.value;
+                     setForm((prev) => {
+                       if (functionNameManualEdit) {
+                         return { ...prev, graduate_name: val };
+                       }
+                       return { ...prev, graduate_name: val, function_name: `${val}'s Graduation` };
+                     });
+                   }} className={inp} placeholder="Arun" />
+                 </div>
+               )}
 
               {/* Date & Time */}
               <div className="grid grid-cols-2 gap-3">
