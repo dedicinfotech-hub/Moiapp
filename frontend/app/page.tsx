@@ -213,7 +213,7 @@ export default function HomePage() {
             <h2 className="text-2xl lg:text-3xl font-extrabold text-[#101010]">Why MoiApp</h2>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
               { icon: 'check' as IconName, title: '100% Free', desc: 'No hidden charges', image: '/feature-1.webp' },
               { icon: 'lock' as IconName, title: 'Secure Data', desc: 'Your data is safe', image: '/feature-2.webp' },
@@ -247,7 +247,7 @@ export default function HomePage() {
             <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-2">Everything you need</p>
             <h2 className="text-2xl lg:text-3xl font-extrabold text-[#101010]">Built for Tamil weddings</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               { icon: 'list' as IconName, title: 'Moi Register',    desc: 'Record every guest gift with name, amount and payment mode instantly.' },
               { icon: 'wallet' as IconName, title: 'UPI Payments',    desc: 'Guests pay directly to your UPI — QR code shown after submission.' },
