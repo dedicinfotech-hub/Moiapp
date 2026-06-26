@@ -41,24 +41,21 @@ export default function HomePage() {
 
           {/* Left copy */}
           <div className="flex-1 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 bg-[#FFC107]/15 border border-[#FFC107]/40 text-[#B8860B] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-6">
+            <div className="inline-flex items-center gap-2 bg-[#FFC107]/15 border border-[#FFC107]/40 text-[#B8860B] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-10">
               <Icon name="wedding" size={16} /> Tamil Wedding Gift Tracker
             </div>
 
-            <h1 className="text-4xl lg:text-6xl font-extrabold text-[#101010] leading-[1.1] mb-5">
+            <h1 className="text-4xl lg:text-6xl font-extrabold text-[#101010] leading-[1.1] mb-8">
               Create your wedding page.<br />
               Track every <span className="text-[#FFC107]">moi</span> gift.<br />
               Share with family.
             </h1>
 
-            <p className="text-[#555] text-lg leading-relaxed mb-3 max-w-lg mx-auto lg:mx-0">
-              Create a wedding page, collect moi online or offline, and keep a clear gift record for the couple and family.
-            </p>
-            <p className="text-[#888] text-sm mb-8 max-w-md mx-auto lg:mx-0">
-              மணமக்கள், குடும்பத்தினர், நண்பர்கள் — எல்லோருக்கும் எளிமையான மொய் பதிவு.
+            <p className="text-[#555] text-lg leading-relaxed mb-12 max-w-lg mx-auto lg:mx-0">
+              இணையவழி மொய் பதிவு செய்ய ஒரு எளிய தளம்.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-16">
               <Link href="/events"
                 className="bg-[#FFC107] text-black px-8 py-3.5 rounded-xl font-bold text-base hover:bg-[#E6AC00] transition-colors shadow-lg shadow-[#FFC107]/30 text-center inline-flex items-center justify-center gap-2">
                 Browse Weddings <Icon name="arrow-right" size={18} />
@@ -71,7 +68,7 @@ export default function HomePage() {
 
             {/* Live stats */}
             {loaded && events.length > 0 && (
-              <div className="flex items-center gap-6 mt-8 justify-center lg:justify-start">
+              <div className="flex items-center gap-8 mt-16 justify-center lg:justify-start">
                 <div className="text-center lg:text-left">
                   <p className="text-2xl font-extrabold text-[#101010]">{events.length}</p>
                   <p className="text-xs text-[#888]">Weddings listed</p>
@@ -131,13 +128,12 @@ export default function HomePage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-[#F0E8C8] animate-pulse">
-                <div className="h-44 bg-[#FFF8E1]" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-[#FFE082] rounded w-3/4" />
-                  <div className="h-3 bg-[#FFE082] rounded w-1/2" />
-                  <div className="h-10 bg-[#FFC107]/40 rounded-xl" />
-                </div>
+              <div className="bg-white rounded-2xl shadow-2xl shadow-black/10 overflow-hidden border border-[#F0E8C8]">
+                <img 
+                  src="/hero-image.webp" 
+                  alt="MoiApp Hero" 
+                  className="w-full h-auto object-cover" 
+                />
               </div>
             )}
 
@@ -152,18 +148,18 @@ export default function HomePage() {
       </section>
 
       {/* ── How it works ── */}
-      <section className="py-16 px-4 border-b border-[#F0F0F0] bg-white">
+      <section className="py-20 px-4 border-b border-[#F0F0F0] bg-white">
         <div className="max-w-[88%] mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-2">Simple Process</p>
+          <div className="text-center mb-16">
+            <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-3">Simple Process</p>
             <h2 className="text-2xl lg:text-3xl font-extrabold text-[#101010]">How MoiApp works</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Guest flow */}
-            <div className="bg-[#FFFCF5] border border-[#FFE082] rounded-2xl p-7">
-              <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-5 flex items-center gap-2"><Icon name="users" size={16} /> For Guests</p>
-              <div className="space-y-5">
+            <div className="bg-[#FFFCF5] border border-[#FFE082] rounded-2xl p-8">
+              <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-7 flex items-center gap-2"><Icon name="users" size={16} /> For Guests</p>
+              <div className="space-y-7">
                 {[
                   { n: '1', t: 'Browse Events',  d: 'Find the wedding from the events listing page.' },
                   { n: '2', t: 'View Details',   d: 'See date, venue, couple details, photos and map.' },
@@ -172,21 +168,21 @@ export default function HomePage() {
                   <div key={s.n} className="flex items-start gap-4">
                     <div className="w-9 h-9 rounded-full bg-[#FFC107] flex items-center justify-center text-black font-extrabold text-sm shrink-0">{s.n}</div>
                     <div>
-                      <p className="font-bold text-[#101010]">{s.t}</p>
-                      <p className="text-[#666] text-sm mt-0.5">{s.d}</p>
+                      <p className="font-bold text-[#101010] mb-1">{s.t}</p>
+                      <p className="text-[#666] text-sm">{s.d}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <Link href="/events" className="mt-6 inline-flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#E6AC00] transition-colors">
+              <Link href="/events" className="mt-8 inline-flex items-center gap-2 bg-[#FFC107] text-black px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#E6AC00] transition-colors">
                 Browse Events <Icon name="arrow-right" size={16} />
               </Link>
             </div>
 
             {/* Organizer flow */}
-            <div className="bg-[#fafafa] border border-[#E8E8E8] rounded-2xl p-7">
-              <p className="text-xs font-bold text-[#666] uppercase tracking-widest mb-5 flex items-center gap-2"><Icon name="venue" size={16} /> For Couples / Organizers</p>
-              <div className="space-y-5">
+            <div className="bg-[#fafafa] border border-[#E8E8E8] rounded-2xl p-8">
+              <p className="text-xs font-bold text-[#666] uppercase tracking-widest mb-7 flex items-center gap-2"><Icon name="venue" size={16} /> For Couples / Organizers</p>
+              <div className="space-y-7">
                 {[
                   { n: '1', t: 'Create Account',  d: 'Register and create your wedding event in minutes.' },
                   { n: '2', t: 'Upload & Share',  d: 'Add cover photo, share the link — no login needed for guests.' },
@@ -195,16 +191,43 @@ export default function HomePage() {
                   <div key={s.n} className="flex items-start gap-4">
                     <div className="w-9 h-9 rounded-full bg-[#F5F5F5] border-2 border-[#E8E8E8] flex items-center justify-center text-[#444] font-extrabold text-sm shrink-0">{s.n}</div>
                     <div>
-                      <p className="font-bold text-[#101010]">{s.t}</p>
-                      <p className="text-[#666] text-sm mt-0.5">{s.d}</p>
+                      <p className="font-bold text-[#101010] mb-1">{s.t}</p>
+                      <p className="text-[#666] text-sm">{s.d}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <Link href="/register" className="mt-6 inline-flex items-center gap-2 border-2 border-[#E8E8E8] text-[#333] px-5 py-2.5 rounded-xl font-bold text-sm hover:border-[#FFC107] transition-colors">
+              <Link href="/register" className="mt-8 inline-flex items-center gap-2 border-2 border-[#E8E8E8] text-[#333] px-5 py-2.5 rounded-xl font-bold text-sm hover:border-[#FFC107] transition-colors">
                 List Your Wedding <Icon name="arrow-right" size={16} />
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Why MoiApp ── */}
+      <section className="py-16 px-4 border-b border-[#F0F0F0] bg-white">
+        <div className="max-w-[88%] mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-3">Why Choose Us</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#101010]">Why MoiApp</h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: 'check' as IconName, title: '100% Free', desc: 'No hidden charges' },
+              { icon: 'lock' as IconName, title: 'Secure Data', desc: 'Your data is safe' },
+              { icon: 'wallet' as IconName, title: 'UPI Supported', desc: 'Direct payments' },
+              { icon: 'wedding' as IconName, title: 'Made for Tamil Weddings', desc: 'Cultural touch' },
+            ].map((item) => (
+              <div key={item.title} className="bg-[#FFFCF5] border border-[#FFE082] rounded-xl p-5 text-center hover:shadow-md transition-all">
+                <div className="text-[#FFC107] mb-3 flex justify-center">
+                  <Icon name={item.icon} size={32} />
+                </div>
+                <h3 className="font-bold text-[#101010] text-sm mb-1">{item.title}</h3>
+                <p className="text-[#666] text-xs">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -231,6 +254,61 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-bold text-[#101010] text-sm mb-1">{f.title}</h3>
                 <p className="text-[#666] text-xs leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="py-16 px-4 border-b border-[#F0F0F0] bg-white">
+        <div className="max-w-[88%] mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-3">What people say</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#101010]">Testimonials</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Arumugam',
+                role: 'Event Organizer',
+                testimonial: 'MoiApp made tracking wedding gifts incredibly easy. The dashboard is simple and the CSV export feature saved us hours of manual work. Highly recommended!',
+                rating: 5
+              },
+              {
+                name: 'Esakkiammal',
+                role: 'Bride',
+                testimonial: 'We were worried about managing moi records during our wedding. MoiApp handled everything perfectly. Our guests found it easy to use and we could track everything in real-time.',
+                rating: 5
+              },
+              {
+                name: 'Pugazh Venthan',
+                role: 'Event Organizer',
+                testimonial: 'The UPI integration is brilliant! Guests could pay directly and we received all payments instantly. The platform is secure and made for Tamil weddings. Perfect solution!',
+                rating: 5
+              },
+            ].map((testimonial) => (
+              <div key={testimonial.name} className="bg-[#FFFCF5] border border-[#FFE082] rounded-2xl p-6 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-1 mb-4 text-[#FFC107]">
+                  {Array.from({ length: testimonial.rating }).map((_, i) => (
+                    <Icon key={i} name="star" size={16} />
+                  ))}
+                </div>
+                
+                <p className="text-[#333] text-sm leading-relaxed mb-6 italic">
+                  &quot;{testimonial.testimonial}&quot;
+                </p>
+
+                <div className="flex items-center gap-3 pt-4 border-t border-[#FFE082]">
+                  <div className="w-12 h-12 rounded-full bg-[#FFC107]/20 flex items-center justify-center text-[#B8860B] font-bold text-lg">
+                    {testimonial.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#101010] text-sm">{testimonial.name}</p>
+                    <p className="text-[#666] text-xs">{testimonial.role}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -287,7 +365,7 @@ export default function HomePage() {
             <Icon name="venue" size={44} />
           </div>
           <h2 className="text-2xl lg:text-3xl font-extrabold text-[#101010] mb-3">
-            உங்கள் திருமணத்தை இப்போதே பதிவு செய்யுங்கள்
+            உங்கள் திருமணத்தை டிஜிட்டலாக நிர்வகிக்க இன்று தொடங்குங்கள்
           </h2>
           <p className="text-[#666] text-sm mb-8">Free · Simple · No technical knowledge needed</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -303,24 +381,129 @@ export default function HomePage() {
 
       {/* ── Footer ── */}
       <footer className="bg-[#101010] text-white">
-        <div className="max-w-[88%] mx-auto py-10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <span className="font-extrabold text-xl">Moi<span className="text-[#FFC107]">App</span></span>
-            <p className="text-[#888] text-xs mt-1">Track wedding gifts easily. Share with family.</p>
+        <div className="max-w-[88%] mx-auto py-12">
+          {/* Main footer content */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand column */}
+            <div className="md:col-span-1">
+              <div className="mb-4">
+                <span className="font-extrabold text-2xl">Moi<span className="text-[#FFC107]">App</span></span>
+              </div>
+              <p className="text-[#888] text-sm leading-relaxed mb-4">
+                Track wedding gifts easily. Share with family. Made for Tamil weddings with love.
+              </p>
+              <div className="flex items-center gap-2 text-xs text-[#666]">
+                <Icon name="wedding" size={16} />
+                <span>இணையவழி மொய் பதிவு</span>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-bold text-white text-sm mb-4 uppercase tracking-wider">Quick Links</h3>
+              <ul className="space-y-2 text-sm text-[#888]">
+                <li>
+                  <Link href="/events" className="hover:text-[#FFC107] transition-colors inline-flex items-center gap-1">
+                    <Icon name="calendar" size={14} /> Browse Events
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/register" className="hover:text-[#FFC107] transition-colors inline-flex items-center gap-1">
+                    <Icon name="plus" size={14} /> List Your Wedding
+                  </Link>
+                </li>
+                {!authLoading && !user && (
+                  <>
+                    <li>
+                      <button onClick={() => router.push('/login')} className="hover:text-[#FFC107] transition-colors inline-flex items-center gap-1">
+                        <Icon name="login" size={14} /> Sign In
+                      </button>
+                    </li>
+                    <li>
+                      <button onClick={() => router.push('/register')} className="hover:text-[#FFC107] transition-colors inline-flex items-center gap-1">
+                        <Icon name="user" size={14} /> Create Account
+                      </button>
+                    </li>
+                  </>
+                )}
+                {!authLoading && user && (
+                  <li>
+                    <button onClick={() => router.push('/dashboard')} className="hover:text-[#FFC107] transition-colors inline-flex items-center gap-1">
+                      <Icon name="dashboard" size={14} /> Dashboard
+                    </button>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Features */}
+            <div>
+              <h3 className="font-bold text-white text-sm mb-4 uppercase tracking-wider">Features</h3>
+              <ul className="space-y-2 text-sm text-[#888]">
+                <li className="flex items-center gap-2">
+                  <Icon name="check" size={14} className="text-[#FFC107]" />
+                  <span>Moi Gift Tracking</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Icon name="check" size={14} className="text-[#FFC107]" />
+                  <span>UPI Payments</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Icon name="check" size={14} className="text-[#FFC107]" />
+                  <span>Live Dashboard</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Icon name="check" size={14} className="text-[#FFC107]" />
+                  <span>Export to CSV</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Icon name="check" size={14} className="text-[#FFC107]" />
+                  <span>Venue Maps</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Support & Info */}
+            <div>
+              <h3 className="font-bold text-white text-sm mb-4 uppercase tracking-wider">Support</h3>
+              <ul className="space-y-2 text-sm text-[#888]">
+                <li>
+                  <a href="/help-center" className="hover:text-[#FFC107] transition-colors">Help Center</a>
+                </li>
+                <li>
+                  <a href="/privacy-policy" className="hover:text-[#FFC107] transition-colors">Privacy Policy</a>
+                </li>
+                <li>
+                  <a href="/terms-of-service" className="hover:text-[#FFC107] transition-colors">Terms of Service</a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-[#FFC107] transition-colors">Contact Us</a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-[#FFC107] transition-colors">FAQs</a>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div className="flex gap-6 text-sm text-[#888]">
-            <Link href="/events" className="hover:text-white transition-colors">Browse Events</Link>
-            {!authLoading && !user && (
-              <>
-                <button onClick={() => router.push('/register')} className="hover:text-white transition-colors">List Event</button>
-                <button onClick={() => router.push('/login')} className="hover:text-white transition-colors">Sign In</button>
-              </>
-            )}
-            {!authLoading && user && (
-              <button onClick={() => router.push('/dashboard')} className="hover:text-white transition-colors">Dashboard</button>
-            )}
+
+          {/* Bottom bar */}
+          <div className="pt-8 border-t border-[#222] flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-[#666] text-xs text-center md:text-left">
+              © {new Date().getFullYear()} MoiApp · Made with <span className="text-red-500">❤️</span> for Tamil weddings
+            </p>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-xs text-[#666]">
+                <Icon name="lock" size={14} className="text-[#FFC107]" />
+                <span>Secure & Free</span>
+              </div>
+              <div className="w-px h-4 bg-[#333]" />
+              <div className="flex items-center gap-2 text-xs text-[#666]">
+                <Icon name="check" size={14} className="text-[#FFC107]" />
+                <span>100% Free Forever</span>
+              </div>
+            </div>
           </div>
-          <p className="text-[#555] text-xs">© {new Date().getFullYear()} MoiApp · Made with ❤️ for Tamil weddings</p>
         </div>
       </footer>
     </div>

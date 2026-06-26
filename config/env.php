@@ -37,7 +37,14 @@ loadEnv();
  * Helper: get an env value with optional default.
  */
 function env(string $key, string $default = ''): string {
-    return $_ENV[$key] ?? getenv($key) ?: $default;
+    if (isset($_ENV[$key])) {
+        return $_ENV[$key];
+    }
+    $val = getenv($key);
+    if ($val !== false) {
+        return $val;
+    }
+    return $default;
 }
 
 /**

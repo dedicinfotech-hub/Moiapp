@@ -17,7 +17,6 @@
     "@capacitor/android": "^6.0.0",
     "@capacitor/cli": "^6.0.0",
     "@capacitor/core": "^6.0.0",
-    "@next/swc-darwin-arm64": "^16.2.6",
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",

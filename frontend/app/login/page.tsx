@@ -123,8 +123,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF0] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-[#FFFDF8] flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md">
         <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-6">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -249,7 +249,6 @@ export default function LoginPage() {
             <Link href="/register" className="text-[#B8860B] font-semibold hover:underline">Register</Link>
           </p>
         </div>
-        <p className="text-center text-xs text-gray-300 mt-4">Powered by <span className="text-[#FFC107]">MoiApp</span></p>
       </div>
     </div>
   );

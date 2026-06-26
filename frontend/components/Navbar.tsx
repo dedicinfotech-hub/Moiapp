@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
@@ -27,17 +28,20 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-[#E8E8E8]">
-        <div className="flex items-center justify-between px-4 lg:px-6 h-14 lg:h-16 max-w-7xl mx-auto">
+      <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-[#E8E8E8] overflow-visible">
+        <div className="flex items-center justify-between px-4 lg:px-6 h-16 lg:h-20 max-w-7xl mx-auto">
 
           {/* Logo */}
-          <Link href="/" onClick={closeMobile} className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FFC107] to-[#FFA000] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-              <span className="font-extrabold text-white text-sm">M</span>
+          <Link href="/" onClick={closeMobile} className="flex items-center justify-center self-center group">
+            <div className="relative w-40 h-30 lg:w-30 lg:h-20 transition-transform group-hover:scale-105">
+              <Image
+                src="/logo.png"
+                alt="MoiApp Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
-            <span className="font-extrabold text-lg text-[#101010] tracking-tight">
-              Moi<span className="text-[#FFC107]">App</span>
-            </span>
           </Link>
 
           {/* Desktop nav */}
@@ -166,7 +170,7 @@ export default function Navbar() {
 
       {/* Mobile menu drawer */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 top-14 z-40 bg-white border-t border-[#E8E8E8] flex flex-col">
+        <div className="md:hidden fixed inset-0 top-16 z-40 bg-white border-t border-[#E8E8E8] flex flex-col">
           <nav className="flex flex-col px-4 py-4 gap-1">
             <Link
               href="/events"
