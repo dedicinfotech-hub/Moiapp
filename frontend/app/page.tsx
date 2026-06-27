@@ -51,7 +51,7 @@ export default function HomePage() {
               Share with family.
             </h1>
 
-            <p className="text-[#555] text-lg leading-relaxed mb-12 max-w-lg mx-auto lg:mx-0">
+            <p className="text-[#555] text-lg leading-relaxed mb-12 max-w-lg mx-auto lg:mx-0 font-tamil">
               இணையவழி மொய் பதிவு செய்ய ஒரு எளிய தளம்.
             </p>
 
@@ -372,7 +372,7 @@ export default function HomePage() {
           <div className="mb-5 text-[#B8860B]">
             <Icon name="venue" size={44} />
           </div>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#101010] mb-3">
+          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#101010] mb-3 font-tamil">
             உங்கள் திருமணத்தை டிஜிட்டலாக நிர்வகிக்க இன்று தொடங்குங்கள்
           </h2>
           <p className="text-[#666] text-sm mb-8">Free · Simple · No technical knowledge needed</p>
@@ -402,7 +402,7 @@ export default function HomePage() {
               </p>
               <div className="flex items-center gap-2 text-xs text-[#666]">
                 <Icon name="wedding" size={16} />
-                <span>இணையவழி மொய் பதிவு</span>
+                <span className="font-tamil">இணையவழி மொய் பதிவு</span>
               </div>
             </div>
 

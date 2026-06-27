@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
+import Image from 'next/image';
 import Icon from '@/components/ui/Icon';
 
 export default function ForgotPasswordPage() {
@@ -35,13 +36,27 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF0] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFFDF5] via-white to-[#FFF8E1] relative overflow-hidden flex items-center justify-center px-4 py-8">
+      {/* Decorative background rings */}
+      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#FFC107]/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-[#FFC107]/8 blur-2xl pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="bg-white border border-[#FFC107]/45 rounded-2xl shadow-[0_0_12px_rgba(255,193,7,0.15)] p-8 transition-all duration-300 hover:shadow-[0_0_18px_rgba(255,193,7,0.25)]">
           <div className="text-center mb-8">
-            <Icon name="lock" size={44} className="mb-3 text-[#B8860B]" />
-            <h1 className="text-2xl font-bold text-gray-900">Forgot Password</h1>
-            <p className="text-gray-400 text-sm mt-1">Enter your email to reset your password</p>
+            <div className="flex justify-center mb-4">
+              <div className="relative w-[110px] h-[24px]">
+                <Image
+                  src="/logo.png"
+                  alt="MoiApp Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-[#101010]">Forgot Password</h1>
+            <p className="text-gray-500 text-sm mt-1">Enter your email to reset your password</p>
           </div>
 
           {error && (

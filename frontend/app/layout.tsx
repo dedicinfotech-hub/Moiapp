@@ -11,10 +11,16 @@ export const metadata: Metadata = {
   title: 'Moi App – Wedding Gift Tracker',
   description: 'Track wedding moi (gift money) easily. Share with family.',
   // manifest href is injected manually in <head> below with basePath prefix
+  icons: {
+    icon: '/favicon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'MoiApp',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
   },
 };
 
@@ -35,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Use BASE_PATH prefix so manifest resolves correctly on subpath deployments */}
         <link rel="manifest" href={`${BASE_PATH}/manifest.json`} />
         <meta name="theme-color" content="#FFC107" />
-        <link rel="apple-touch-icon" href={`${BASE_PATH}/icons/icon-192x192.png`} />
+        <link rel="apple-touch-icon" href={`${BASE_PATH}/favicon.png`} />
       </head>
       <body className="min-h-screen bg-tn-light" suppressHydrationWarning>
         <AuthProvider>

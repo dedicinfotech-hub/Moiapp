@@ -64,7 +64,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost/moiapp/api/:path*',
+        destination: 'http://localhost/Moiapp/api/:path*',
       },
     ];
   },

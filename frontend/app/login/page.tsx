@@ -2,10 +2,10 @@
 
 import { useState, type FormEvent, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import MoiLogo from '@/components/ui/MoiLogo';
 
 type LoginMode = 'email' | 'phone';
 type OtpStep = 'phone' | 'otp';
@@ -123,29 +123,39 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF8] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFFDF5] via-white to-[#FFF8E1] relative overflow-hidden flex items-center justify-center px-4 py-8">
+      {/* Decorative background rings */}
+      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#FFC107]/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-[#FFC107]/8 blur-2xl pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="bg-white border border-[#FFC107]/45 rounded-2xl shadow-[0_0_12px_rgba(255,193,7,0.15)] p-8 transition-all duration-300 hover:shadow-[0_0_18px_rgba(255,193,7,0.25)]">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <MoiLogo variant="dark" size="md" />
+              <div className="relative w-[110px] h-[24px]">
+                <Image
+                  src="/logo.png"
+                  alt="MoiApp Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-            <p className="text-gray-400 text-sm mt-1">Sign in to your MoiApp account</p>
+            <h1 className="text-2xl font-bold text-[#101010]">Welcome back</h1>
+            <p className="text-gray-500 text-sm mt-1">Sign in to your MoiApp account</p>
           </div>
-
           {/* Login Mode Toggle */}
-          <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+          <div className="flex border-b-2 border-gray-100 mb-6">
             <button type="button" onClick={() => { setMode('phone'); setError(''); setOtpStep('phone'); }}
-              className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${mode === 'phone' ? 'bg-[#FFC107] text-gray-900' : 'text-gray-600'}`}>
-              Phone
+              className={`flex-1 pb-3 text-center font-bold text-sm border-b-[3px] transition-all duration-200 focus:outline-none ${mode === 'phone' ? 'border-[#FFC107] text-[#101010]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
+              Phone Login
             </button>
             <button type="button" onClick={() => { setMode('email'); setError(''); }}
-              className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${mode === 'email' ? 'bg-[#FFC107] text-gray-900' : 'text-gray-600'}`}>
-              Email
+              className={`flex-1 pb-3 text-center font-bold text-sm border-b-[3px] transition-all duration-200 focus:outline-none ${mode === 'email' ? 'border-[#FFC107] text-[#101010]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
+              Email Login
             </button>
           </div>
-
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm mb-5">
               {error}
