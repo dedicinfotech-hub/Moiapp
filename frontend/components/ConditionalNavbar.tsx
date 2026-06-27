@@ -62,10 +62,11 @@ export function ConditionalBottomNav() {
   // Public event/guest pages
   if (pathname.startsWith('/e/') || pathname.startsWith('/g/')) return null;
 
-  // Auth & onboarding
+  // Auth, onboarding & contact
   if (
     pathname === '/login' ||
     pathname === '/register' ||
+    pathname === '/contact' ||
     pathname.startsWith('/forgot-password') ||
     pathname.startsWith('/reset-password') ||
     pathname.startsWith('/otp-verification') ||

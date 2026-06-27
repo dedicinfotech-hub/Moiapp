@@ -485,7 +485,9 @@ export default function HomePage() {
                   <a href="/terms-of-service" className="hover:text-[#FFC107] transition-colors">Terms of Service</a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#FFC107] transition-colors">Contact Us</a>
+                  <Link href="/contact" className="hover:text-[#FFC107] transition-colors">
+                    Contact Us
+                  </Link>
                 </li>
                 <li>
                   <a href="#" className="hover:text-[#FFC107] transition-colors">FAQs</a>
