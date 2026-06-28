@@ -171,7 +171,7 @@ export default function ModulePayments({ entries, events }: ModulePaymentsProps)
                             <div>
                               <p className="font-semibold text-tn-text">{e.guest_name}</p>
                               <p className="text-xs text-tn-subtle flex flex-wrap gap-1.5 items-center mt-0.5">
-                                {e.city && <span className="bg-gray-100 text-tn-muted px-1.5 py-0.5 rounded text-[10px]">📍 {e.city}</span>}
+                                {e.city && <span className="bg-tn-light text-tn-muted px-1.5 py-0.5 rounded text-[10px]">📍 {e.city}</span>}
                                 {e.note && <span className="text-tn-muted font-medium">({e.note})</span>}
                               </p>
                             </div>
@@ -189,20 +189,20 @@ export default function ModulePayments({ entries, events }: ModulePaymentsProps)
                               <Icon name="sparkle" size={12} /> Gold
                             </span>
                           ) : e.gift_type === 'gift' ? (
-                            <span className="text-xs bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1">
-                              <Icon name="gift" size={12} /> Gift
-                            </span>
-                          ) : (
-                            <span className="text-xs capitalize bg-tn-light text-tn-muted px-2 py-0.5 rounded-full font-medium">
-                              <Icon name={payIcon[e.payment_mode] || 'wallet'} size={12} /> {e.payment_mode}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-3 py-3 text-right font-bold text-tn-text">
-                          {e.gift_type === 'gold' ? (
-                            <span className="text-tn-gold">{e.gold_weight}g Gold</span>
-                          ) : e.gift_type === 'gift' ? (
-                            <span className="text-red-600 truncate max-w-[150px] inline-block">{e.gift_description}</span>
+                            <span className="text-xs bg-tn-error-bg text-tn-error border border-tn-error/20 px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1">
+                               <Icon name="gift" size={12} /> Gift
+                             </span>
+                           ) : (
+                             <span className="text-xs capitalize bg-tn-light text-tn-muted px-2 py-0.5 rounded-full font-medium">
+                               <Icon name={payIcon[e.payment_mode] || 'wallet'} size={12} /> {e.payment_mode}
+                             </span>
+                           )}
+                         </td>
+                         <td className="px-3 py-3 text-right font-bold text-tn-text">
+                           {e.gift_type === 'gold' ? (
+                             <span className="text-tn-gold">{e.gold_weight}g Gold</span>
+                           ) : e.gift_type === 'gift' ? (
+                             <span className="text-tn-error truncate max-w-[150px] inline-block">{e.gift_description}</span>
                           ) : (
                             <span>₹{Number(e.amount).toLocaleString('en-IN')}</span>
                           )}
@@ -265,22 +265,22 @@ export default function ModulePayments({ entries, events }: ModulePaymentsProps)
                             <Icon name="sparkle" size={12} /> Gold · {e.gold_weight}g
                           </span>
                       ) : e.gift_type === 'gift' ? (
-                          <span className="inline-flex items-center gap-1 text-xs bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-full font-medium">
-                            <Icon name="gift" size={12} /> Gift
-                          </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs capitalize bg-tn-light text-tn-muted px-2 py-0.5 rounded-full font-medium">
-                            <Icon name={payIcon[e.payment_mode] || 'wallet'} size={12} /> {e.payment_mode}
-                        </span>
-                      )}
-                    </div>
+                          <span className="inline-flex items-center gap-1 text-xs bg-tn-error-bg text-tn-error border border-tn-error/20 px-2 py-0.5 rounded-full font-medium">
+                             <Icon name="gift" size={12} /> Gift
+                           </span>
+                       ) : (
+                         <span className="inline-flex items-center gap-1 text-xs capitalize bg-tn-light text-tn-muted px-2 py-0.5 rounded-full font-medium">
+                             <Icon name={payIcon[e.payment_mode] || 'wallet'} size={12} /> {e.payment_mode}
+                         </span>
+                       )}
+                     </div>
 
-                    {/* Amount */}
-                    <div className="pt-2 border-t border-tn-border">
-                      {e.gift_type === 'gold' ? (
-                        <p className="text-sm font-bold text-tn-gold">{e.gold_weight}g Gold</p>
-                      ) : e.gift_type === 'gift' ? (
-                        <p className="text-sm font-bold text-red-600 truncate">{e.gift_description}</p>
+                     {/* Amount */}
+                     <div className="pt-2 border-t border-tn-border">
+                       {e.gift_type === 'gold' ? (
+                         <p className="text-sm font-bold text-tn-gold">{e.gold_weight}g Gold</p>
+                       ) : e.gift_type === 'gift' ? (
+                         <p className="text-sm font-bold text-tn-error truncate">{e.gift_description}</p>
                       ) : (
                         <p className="text-sm font-bold text-tn-text">₹{Number(e.amount).toLocaleString('en-IN')}</p>
                       )}

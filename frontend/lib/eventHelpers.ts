@@ -2,18 +2,18 @@ import { Event } from './api';
 
 export function getEventModeBadge(ev: Event) {
   if (ev.event_mode === 'past') {
-    return { label: 'Past Event', sublabel: 'நடந்த நிகழ்வு', className: 'bg-amber-100 text-amber-800' };
+    return { label: 'Past Event', sublabel: 'நடந்த நிகழ்வு', className: 'bg-tn-warning/20 text-tn-warning' };
   }
-  return { label: 'New Event', sublabel: 'இனி நடக்கப்போகிறது', className: 'bg-blue-100 text-blue-700' };
+  return { label: 'New Event', sublabel: 'இனி நடக்கப்போகிறது', className: 'bg-tn-blue-bg text-tn-blue-soft' };
 }
 
 export function getApprovalBadge(ev: Event) {
   if (ev.event_mode === 'past') return null;
   if (ev.approval_status === 'pending') {
-    return { label: 'Pending Approval', className: 'bg-yellow-100 text-yellow-800' };
+    return { label: 'Pending Approval', className: 'bg-tn-warning/20 text-tn-warning' };
   }
   if (ev.approval_status === 'rejected') {
-    return { label: 'Rejected', className: 'bg-red-100 text-red-700' };
+    return { label: 'Rejected', className: 'bg-tn-error-bg text-tn-error' };
   }
   return null;
 }

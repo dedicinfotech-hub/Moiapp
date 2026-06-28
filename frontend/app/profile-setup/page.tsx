@@ -51,29 +51,29 @@ export default function ProfileSetupPage() {
     }
   };
 
-  const inputCls = "w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#FFC107] transition-colors";
+  const inputCls = "w-full bg-white border-2 border-tn-border rounded-xl px-4 py-3 text-sm text-tn-text placeholder-tn-muted focus:outline-none focus:border-tn-yellow transition-colors";
 
   return (
-    <div className="min-h-screen bg-[#FFFDF0] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-tn-yellow-bg flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-card p-8">
+        <div className="bg-white border border-tn-border rounded-2xl shadow-sm p-8">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
               <MoiLogo variant="dark" size="md" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Complete Your Profile</h1>
-            <p className="text-gray-400 text-sm mt-1">Please provide your details to continue</p>
+            <h1 className="text-2xl font-bold text-tn-text">Complete Your Profile</h1>
+            <p className="text-tn-muted text-sm mt-1">Please provide your details to continue</p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm mb-5">
+            <div className="bg-tn-red-bg border border-tn-red-bg text-tn-error rounded-xl px-4 py-3 text-sm mb-5">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Full Name *</label>
+              <label className="block text-sm font-semibold text-tn-muted mb-1.5">Full Name *</label>
               <input 
                 type="text" 
                 required 
@@ -85,7 +85,7 @@ export default function ProfileSetupPage() {
             </div>
             
             <div>
-              <label className="block text-sm font-semibold text-gray-600 mb-1.5">Email (Optional)</label>
+              <label className="block text-sm font-semibold text-tn-muted mb-1.5">Email (Optional)</label>
               <input 
                 type="email" 
                 value={form.email} 
@@ -96,7 +96,7 @@ export default function ProfileSetupPage() {
             </div>
             
             <div>
-              <label className="block text-sm font-semibold text-gray-600 mb-1.5">City</label>
+              <label className="block text-sm font-semibold text-tn-muted mb-1.5">City</label>
               <input 
                 type="text" 
                 value={form.city} 
@@ -109,13 +109,13 @@ export default function ProfileSetupPage() {
             <button 
               type="submit" 
               disabled={loading} 
-              className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50 mt-2"
+              className="w-full bg-tn-yellow text-tn-text py-3 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50 mt-2"
             >
               {loading ? 'Saving…' : 'Save Profile'}
             </button>
           </form>
         </div>
-        <p className="text-center text-xs text-gray-300 mt-4">Powered by <span className="text-[#FFC107]">MoiApp</span></p>
+        <p className="text-center text-xs text-tn-subtle mt-4">Powered by <span className="text-tn-yellow">MoiApp</span></p>
       </div>
     </div>
   );

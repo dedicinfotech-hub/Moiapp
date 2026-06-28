@@ -141,28 +141,28 @@ const sections = [
 
 export default function TermsOfServicePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#FFFDF5] via-white to-[#FFF8E1]">
+    <main className="min-h-screen bg-gradient-to-br from-tn-yellow-bg via-white to-tn-yellow-bg">
 
       {/* Decorative blobs */}
-      <div className="fixed -top-32 -right-32 w-96 h-96 rounded-full bg-[#FFC107]/10 blur-3xl pointer-events-none" />
-      <div className="fixed -bottom-20 -left-20 w-72 h-72 rounded-full bg-[#FFC107]/8 blur-2xl pointer-events-none" />
+      <div className="fixed -top-32 -right-32 w-96 h-96 rounded-full bg-tn-yellow/10 blur-3xl pointer-events-none" />
+      <div className="fixed -bottom-20 -left-20 w-72 h-72 rounded-full bg-tn-yellow/8 blur-2xl pointer-events-none" />
 
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#FFFDF5] via-[#FFF8E1] to-[#FFFCF5] border-b border-[#F0E8C8] py-14 px-4">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#FFC107]/10 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-tn-yellow-bg via-tn-yellow-light to-tn-yellow-bg border-b border-tn-gold-border py-14 px-4">
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-tn-yellow/10 blur-3xl pointer-events-none" />
         <div className="max-w-3xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 bg-[#FFC107]/15 border border-[#FFC107]/40 text-[#B8860B] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5">
+          <div className="inline-flex items-center gap-2 bg-tn-yellow/15 border border-tn-gold-border/40 text-tn-gold px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5">
             Moi App · Legal
           </div>
-          <h1 className="text-3xl lg:text-4xl font-extrabold text-[#101010] mb-3">
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-tn-text mb-3">
             Terms of Service
           </h1>
-          <p className="text-[#888] text-xs font-medium mb-4">Effective Date: DD/MM/YYYY</p>
-          <p className="text-[#555] text-sm lg:text-base leading-relaxed max-w-2xl mx-auto">
+          <p className="text-tn-subtle text-xs font-medium mb-4">Effective Date: DD/MM/YYYY</p>
+          <p className="text-tn-muted text-sm lg:text-base leading-relaxed max-w-2xl mx-auto">
             Welcome to Moi App. These Terms of Service govern your use of the Moi App mobile
             application and related services.
           </p>
-          <p className="text-[#888] text-xs mt-3">
+          <p className="text-tn-subtle text-xs mt-3">
             By using Moi App, you agree to comply with these Terms.
           </p>
         </div>
@@ -170,29 +170,29 @@ export default function TermsOfServicePage() {
 
       {/* Content */}
       <div className="relative max-w-3xl mx-auto px-4 py-12">
-        <div className="bg-white border border-[#FFE082] rounded-2xl shadow-sm divide-y divide-[#FFF3CD]">
+        <div className="bg-white border border-tn-gold-border rounded-2xl shadow-sm divide-y divide-tn-yellow-light">
 
           {sections.map((section, i) => (
             <div key={section.title} className="px-6 lg:px-8 py-6">
               {/* Number badge + title */}
               <div className="flex items-start gap-3 mb-3">
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#FFC107] text-black text-xs font-extrabold flex items-center justify-center shadow-sm">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-tn-yellow text-tn-text text-xs font-extrabold flex items-center justify-center shadow-sm">
                   {i + 1}
                 </span>
-                <h2 className="text-base lg:text-lg font-bold text-[#101010] leading-snug pt-0.5">
+                <h2 className="text-base lg:text-lg font-bold text-tn-text leading-snug pt-0.5">
                   {section.title.replace(/^\d+\.\s/, '')}
                 </h2>
               </div>
 
               <div className="pl-10 space-y-3">
-                <p className="text-sm text-[#444] leading-relaxed">{section.content}</p>
+                <p className="text-sm text-tn-text leading-relaxed">{section.content}</p>
 
                 {/* You agree to list */}
                 {'list' in section && section.list && !('listPrefix' in section) && (
                   <ul className="space-y-1.5">
                     {section.list.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-sm text-[#444]">
-                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#FFC107] flex-shrink-0" />
+                      <li key={item} className="flex items-start gap-2 text-sm text-tn-text">
+                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-tn-yellow flex-shrink-0" />
                         {item}
                       </li>
                     ))}
@@ -202,11 +202,11 @@ export default function TermsOfServicePage() {
                 {/* List with prefix */}
                 {'listPrefix' in section && section.list && (
                   <>
-                    <p className="text-sm text-[#444]">{(section as any).listPrefix}</p>
+                    <p className="text-sm text-tn-text">{(section as any).listPrefix}</p>
                     <ul className="space-y-1.5">
                       {section.list.map((item) => (
-                        <li key={item} className="flex items-start gap-2 text-sm text-[#444]">
-                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#FFC107] flex-shrink-0" />
+                        <li key={item} className="flex items-start gap-2 text-sm text-tn-text">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-tn-yellow flex-shrink-0" />
                           {item}
                         </li>
                       ))}
@@ -216,14 +216,14 @@ export default function TermsOfServicePage() {
 
                 {/* You must NOT list */}
                 {'doNotList' in section && (section as any).doNotList && (
-                  <div className="bg-[#FFFCF5] border border-[#FFE082] rounded-xl px-4 py-3">
-                    <p className="text-xs font-bold text-[#B8860B] uppercase tracking-wide mb-2">
+                  <div className="bg-tn-yellow-bg border border-tn-gold-border rounded-xl px-4 py-3">
+                    <p className="text-xs font-bold text-tn-gold uppercase tracking-wide mb-2">
                       You must not:
                     </p>
                     <ul className="space-y-1.5">
                       {(section as any).doNotList.map((item: string) => (
-                        <li key={item} className="flex items-start gap-2 text-sm text-[#444]">
-                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                        <li key={item} className="flex items-start gap-2 text-sm text-tn-text">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-tn-error flex-shrink-0" />
                           {item}
                         </li>
                       ))}
@@ -235,7 +235,7 @@ export default function TermsOfServicePage() {
                 {'privacyLink' in section && (
                   <Link
                     href="/privacy-policy"
-                    className="inline-flex items-center gap-1.5 text-sm text-[#B8860B] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1.5 text-sm text-tn-gold font-semibold hover:underline"
                   >
                     Read our Privacy Policy →
                   </Link>
@@ -243,13 +243,13 @@ export default function TermsOfServicePage() {
 
                 {/* Note */}
                 {'note' in section && section.note && (
-                  <div className="flex items-start gap-2 bg-[#FFFCF5] border border-[#FFE082] rounded-lg px-3 py-2">
-                    <svg className="flex-shrink-0 mt-0.5" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2.5" strokeLinecap="round">
+                  <div className="flex items-start gap-2 bg-tn-yellow-bg border border-tn-gold-border rounded-lg px-3 py-2">
+                    <svg className="flex-shrink-0 mt-0.5" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <circle cx="12" cy="12" r="10"/>
                       <line x1="12" y1="16" x2="12" y2="12"/>
                       <line x1="12" y1="8" x2="12.01" y2="8"/>
                     </svg>
-                    <p className="text-xs text-[#B8860B] leading-relaxed">{section.note}</p>
+                    <p className="text-xs text-tn-gold leading-relaxed">{section.note}</p>
                   </div>
                 )}
               </div>
@@ -259,34 +259,34 @@ export default function TermsOfServicePage() {
           {/* Section 14 — Contact */}
           <div className="px-6 lg:px-8 py-6">
             <div className="flex items-start gap-3 mb-3">
-              <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#FFC107] text-black text-xs font-extrabold flex items-center justify-center shadow-sm">
+              <span className="flex-shrink-0 w-7 h-7 rounded-full bg-tn-yellow text-tn-text text-xs font-extrabold flex items-center justify-center shadow-sm">
                 14
               </span>
-              <h2 className="text-base lg:text-lg font-bold text-[#101010] leading-snug pt-0.5">
+              <h2 className="text-base lg:text-lg font-bold text-tn-text leading-snug pt-0.5">
                 Contact Us
               </h2>
             </div>
             <div className="pl-10">
-              <p className="text-sm text-[#444] leading-relaxed mb-4">
+              <p className="text-sm text-tn-text leading-relaxed mb-4">
                 For questions about these Terms of Service, please contact:
               </p>
-              <div className="bg-[#FFFCF5] border border-[#FFE082] rounded-xl px-5 py-4 space-y-3">
-                <p className="text-sm font-bold text-[#101010]">Moi App Support</p>
+              <div className="bg-tn-yellow-bg border border-tn-gold-border rounded-xl px-5 py-4 space-y-3">
+                <p className="text-sm font-bold text-tn-text">Moi App Support</p>
                 <div className="flex items-center gap-2.5">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-tn-gold">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                     <polyline points="22,6 12,13 2,6"/>
                   </svg>
-                  <a href="mailto:support@moiapp.com" className="text-sm text-[#B8860B] font-semibold hover:underline">
+                  <a href="mailto:support@moiapp.com" className="text-sm text-tn-gold font-semibold hover:underline">
                     support@moiapp.com
                   </a>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-tn-gold">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                   </svg>
-                  <a href="https://www.moiapp.com" target="_blank" rel="noopener noreferrer" className="text-sm text-[#B8860B] font-semibold hover:underline">
+                  <a href="https://www.moiapp.com" target="_blank" rel="noopener noreferrer" className="text-sm text-tn-gold font-semibold hover:underline">
                     www.moiapp.com
                   </a>
                 </div>
@@ -296,16 +296,16 @@ export default function TermsOfServicePage() {
         </div>
 
         {/* Footer note */}
-        <p className="text-center text-sm text-[#888] mt-8">
+        <p className="text-center text-sm text-tn-subtle mt-8">
           Thank you for trusting{' '}
-          <span className="font-bold text-[#B8860B]">Moi App</span>.
+          <span className="font-bold text-tn-gold">Moi App</span>.
         </p>
 
         {/* Back to Home */}
         <div className="text-center mt-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold bg-[#FFC107] hover:bg-[#E6AC00] text-black px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-[#FFC107]/30"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold bg-tn-yellow hover:bg-tn-yellow-2 text-tn-text px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-tn-yellow/30"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M19 12H5M12 5l-7 7 7 7" />

@@ -61,13 +61,13 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold text-lg text-[#101010]">Admin Analytics</h2>
+          <h2 className="font-bold text-lg text-tn-text">Admin Analytics</h2>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {[1, 2].map((i) => (
-            <div key={i} className="bg-white border border-[#EBEBEB] rounded-xl p-5 animate-pulse">
-              <div className="h-5 bg-gray-200 rounded mb-4 w-1/2"></div>
-              <div className="h-40 bg-gray-200 rounded"></div>
+            <div key={i} className="bg-white border border-tn-border rounded-xl p-5 animate-pulse">
+              <div className="h-5 bg-tn-border rounded mb-4 w-1/2"></div>
+              <div className="h-40 bg-tn-border rounded"></div>
             </div>
           ))}
         </div>
@@ -77,8 +77,8 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-5">
-        <p className="text-red-600">Error: {error}</p>
+      <div className="bg-tn-error-bg border-tn-error rounded-xl p-5">
+        <p className="text-tn-error">Error: {error}</p>
       </div>
     );
   }
@@ -86,17 +86,17 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg text-[#101010]">Admin Analytics</h2>
+        <h2 className="font-bold text-lg text-tn-text">Admin Analytics</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={exportCSV}
-            className="text-xs bg-white border border-[#E8E8E8] text-[#666] px-3 py-1.5 rounded-lg hover:border-[#FFC107] transition-colors"
+            className="text-xs bg-white border border-tn-border text-tn-muted px-3 py-1.5 rounded-xl hover:border-tn-yellow transition-colors"
           >
             <Icon name="download" size={14} className="inline mr-1" /> Export CSV
           </button>
           <button
             onClick={() => onNavigate('admin-dashboard')}
-            className="text-sm text-[#FFC107] font-semibold hover:underline"
+            className="text-sm text-tn-yellow font-semibold hover:underline"
           >
             ← Back to Admin
           </button>
@@ -110,10 +110,10 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
             key={p}
             onClick={() => setPeriod(p)}
             className={[
-              'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+              'px-3 py-1.5 rounded-xl text-xs font-medium transition-colors',
               period === p
-                ? 'bg-[#FFC107] text-black'
-                : 'bg-white border border-[#E8E8E8] text-[#666] hover:border-[#FFC107]',
+                ? 'bg-tn-yellow text-black'
+                : 'bg-white border border-tn-border text-tn-muted hover:border-tn-yellow',
             ].join(' ')}
           >
             {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -123,8 +123,8 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* User Growth Chart */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">User Growth</h3>
+        <div className="bg-white border border-tn-border rounded-xl p-5">
+          <h3 className="font-semibold text-tn-text text-sm mb-4">User Growth</h3>
           {analytics?.userGrowth && analytics.userGrowth.length > 0 ? (
             <div className="h-48 flex items-end gap-1 overflow-x-auto">
               {analytics.userGrowth.map((item, i) => {
@@ -132,84 +132,84 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
                 const height = max > 0 ? (item.count / max) * 100 : 0;
                 return (
                   <div key={i} className="flex-1 flex flex-col items-center">
-                    <div className="w-full bg-[#FFC107] rounded-t" style={{ height: `${height}%` }}></div>
-                    <span className="text-[10px] text-[#999] mt-1 truncate">{item.date}</span>
+                    <div className="w-full bg-tn-yellow rounded-t" style={{ height: `${height}%` }}></div>
+                    <span className="text-[10px] text-tn-muted mt-1 truncate">{item.date}</span>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-[#bbb] text-sm">No data available</p>
+            <p className="text-tn-subtle text-sm">No data available</p>
           )}
         </div>
 
         {/* Top Cities */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Guest Cities</h3>
+        <div className="bg-white border border-tn-border rounded-xl p-5">
+          <h3 className="font-semibold text-tn-text text-sm mb-4">Guest Cities</h3>
           {analytics?.topCities && analytics.topCities.length > 0 ? (
             <div className="space-y-3">
               {analytics.topCities.map((item, i) => (
                 <div key={i} className="flex items-center justify-between">
-                  <span className="text-sm text-[#444]">{i + 1}. {item.city}</span>
-                  <span className="text-sm font-semibold text-[#101010]">{item.count} users</span>
+                  <span className="text-sm text-tn-muted">{i + 1}. {item.city}</span>
+                  <span className="text-sm font-semibold text-tn-text">{item.count} users</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[#bbb] text-sm">No data available</p>
+            <p className="text-tn-subtle text-sm">No data available</p>
           )}
         </div>
 
         {/* Peak Function Months */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Peak Event Months</h3>
+        <div className="bg-white border border-tn-border rounded-xl p-5">
+          <h3 className="font-semibold text-tn-text text-sm mb-4">Peak Event Months</h3>
           {analytics?.peakMonths && analytics.peakMonths.length > 0 ? (
             <div className="space-y-3">
               {analytics.peakMonths.map((item, i) => (
                 <div key={i} className="flex items-center justify-between">
-                  <span className="text-sm text-[#444]">{item.month}</span>
-                  <span className="text-sm font-semibold text-[#101010]">{item.count} events</span>
+                  <span className="text-sm text-tn-muted">{item.month}</span>
+                  <span className="text-sm font-semibold text-tn-text">{item.count} events</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[#bbb] text-sm">No data available</p>
+            <p className="text-tn-subtle text-sm">No data available</p>
           )}
         </div>
 
         {/* Feature Usage */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Event Type Distribution</h3>
+        <div className="bg-white border border-tn-border rounded-xl p-5">
+          <h3 className="font-semibold text-tn-text text-sm mb-4">Event Type Distribution</h3>
           {analytics?.featureUsage && analytics.featureUsage.length > 0 ? (
             <div className="space-y-3">
               {analytics.featureUsage.map((item, i) => (
                 <div key={i} className="flex items-center justify-between">
-                  <span className="text-sm text-[#444] capitalize">{item.event_type}</span>
-                  <span className="text-sm font-semibold text-[#101010]">{item.count} events</span>
+                  <span className="text-sm text-tn-muted capitalize">{item.event_type}</span>
+                  <span className="text-sm font-semibold text-tn-text">{item.count} events</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[#bbb] text-sm">No data available</p>
+            <p className="text-tn-subtle text-sm">No data available</p>
           )}
         </div>
 
         {/* Free vs Premium Ratio */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Organizer Plan Mix</h3>
+        <div className="bg-white border border-tn-border rounded-xl p-5">
+          <h3 className="font-semibold text-tn-text text-sm mb-4">Organizer Plan Mix</h3>
           {analytics?.premiumRatio ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#444]">Free Users</span>
-                <span className="text-sm font-semibold text-[#101010]">{analytics.premiumRatio.free}</span>
+                <span className="text-sm text-tn-muted">Free Users</span>
+                <span className="text-sm font-semibold text-tn-text">{analytics.premiumRatio.free}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-[#444]">Premium Users</span>
-                <span className="text-sm font-semibold text-[#101010]">{analytics.premiumRatio.premium}</span>
+                <span className="text-sm text-tn-muted">Premium Users</span>
+                <span className="text-sm font-semibold text-tn-text">{analytics.premiumRatio.premium}</span>
               </div>
-              <div className="w-full bg-gray-100 rounded-full h-2.5 mt-2">
+              <div className="w-full bg-tn-light rounded-full h-2.5 mt-2">
                 <div
-                  className="bg-[#FFC107] h-2.5 rounded-full"
+                  className="bg-tn-yellow h-2.5 rounded-full"
                   style={{
                     width: analytics.premiumRatio.premium + analytics.premiumRatio.free > 0
                       ? `${(analytics.premiumRatio.premium / (analytics.premiumRatio.premium + analytics.premiumRatio.free)) * 100}%`
@@ -217,14 +217,14 @@ export default function ModuleAdminAnalytics({ onNavigate }: ModuleAdminAnalytic
                   }}
                 ></div>
               </div>
-              <p className="text-[10px] text-[#999]">
+              <p className="text-[10px] text-tn-muted">
                 {analytics.premiumRatio.premium + analytics.premiumRatio.free > 0
                   ? `${Math.round((analytics.premiumRatio.premium / (analytics.premiumRatio.premium + analytics.premiumRatio.free)) * 100)}% premium`
                   : 'No users'}
               </p>
             </div>
           ) : (
-            <p className="text-[#bbb] text-sm">No data available</p>
+            <p className="text-tn-subtle text-sm">No data available</p>
           )}
         </div>
       </div>

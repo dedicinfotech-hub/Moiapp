@@ -19,14 +19,14 @@ export default function SplashScreen() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#4B218B] flex items-center justify-center">
+      <div className="min-h-screen bg-tn-purple flex items-center justify-center">
         <MoiLogo size="md" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#5B21B6] via-[#4B218B] to-[#3B1570] flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-tn-purple via-tn-purple to-tn-purple-2 flex flex-col relative overflow-hidden">
       <MandalaBackground />
 
       <div className="flex-1 flex flex-col items-center px-6 pt-16 pb-8 relative z-10">
@@ -50,7 +50,7 @@ export default function SplashScreen() {
         <FamilyIllustration />
 
         {/* Feature bar */}
-        <div className="w-full max-w-sm mt-6 mb-8 bg-[#3B1570]/60 backdrop-blur-sm rounded-2xl px-4 py-4 border border-white/10">
+        <div className="w-full max-w-sm mt-6 mb-8 bg-tn-purple-2/60 backdrop-blur-sm rounded-2xl px-4 py-4 border border-white/10">
           <div className="grid grid-cols-3 gap-2 text-center">
             <div className="flex flex-col items-center gap-1.5">
               <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
@@ -85,13 +85,13 @@ export default function SplashScreen() {
       <div className="px-6 pb-10 relative z-10 w-full max-w-sm mx-auto space-y-3">
         <Link
           href="/login"
-          className="block w-full h-14 bg-white text-[#4B218B] rounded-2xl font-bold text-base hover:bg-gray-50 transition-all active:scale-[0.98] shadow-lg text-center leading-[56px]"
+          className="block w-full h-14 bg-white text-tn-purple rounded-2xl font-bold text-base hover:bg-tn-light transition-all active:scale-[0.98] shadow-lg text-center leading-[56px]"
         >
           Get Started
         </Link>
         <p className="text-center text-sm text-white/80">
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-[#FFC107]">Login</Link>
+          <Link href="/login" className="font-semibold text-tn-yellow">Login</Link>
         </p>
       </div>
     </div>

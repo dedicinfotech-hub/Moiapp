@@ -89,12 +89,12 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="font-bold text-lg text-[#101010]">Function Approvals</h2>
-          <p className="text-xs text-[#999] mt-0.5">Review new events before moi collection begins</p>
+          <h2 className="font-bold text-lg text-tn-text">Function Approvals</h2>
+          <p className="text-xs text-tn-muted mt-0.5">Review new events before moi collection begins</p>
         </div>
         <button
           onClick={() => onNavigate('admin-dashboard')}
-          className="text-sm text-[#FFC107] font-semibold hover:underline text-left"
+          className="text-sm text-tn-yellow font-semibold hover:underline text-left"
         >
           ← Back to Admin
         </button>
@@ -106,10 +106,10 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
             key={s}
             onClick={() => setFilter(s)}
             className={[
-              'px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors',
+              'px-3 py-1.5 rounded-xl text-xs font-medium capitalize transition-colors',
               filter === s
-                ? 'bg-[#FFC107] text-black'
-                : 'bg-white border border-[#E8E8E8] text-[#666] hover:border-[#FFC107]',
+                ? 'bg-tn-yellow text-black'
+                : 'bg-white border border-tn-border text-tn-muted hover:border-tn-yellow',
             ].join(' ')}
           >
             {s === 'all' ? 'All Queue' : s}
@@ -120,36 +120,36 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
       {loading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white border border-[#EBEBEB] rounded-xl p-4 animate-pulse h-24" />
+            <div key={i} className="bg-white border border-tn-border rounded-xl p-4 animate-pulse h-24" />
           ))}
         </div>
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-5 text-red-600 text-sm">{error}</div>
+        <div className="bg-tn-error-bg border-tn-error rounded-xl p-5 text-tn-error text-sm">{error}</div>
       ) : events.length === 0 ? (
-        <div className="bg-white border border-[#EBEBEB] rounded-xl py-16 text-center text-[#bbb] text-sm">
+        <div className="bg-white border border-tn-border rounded-xl py-16 text-center text-tn-subtle text-sm">
           No functions in this queue
         </div>
       ) : (
         <div className="space-y-3">
           {events.map((ev) => (
-            <div key={ev.id} className="bg-white border border-[#EBEBEB] rounded-xl p-4 sm:p-5">
+            <div key={ev.id} className="bg-white border border-tn-border rounded-xl p-4 sm:p-5">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <p className="font-semibold text-[#101010]">{getEventLabel(ev)}</p>
+                    <p className="font-semibold text-tn-text">{getEventLabel(ev)}</p>
                     <EventStatusBadges event={ev} />
                   </div>
-                  <p className="text-xs text-[#666] capitalize">
+                  <p className="text-xs text-tn-muted capitalize">
                     {ev.event_type} · {new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     {ev.venue && ` · ${ev.venue}`}
                     {ev.city && ` · ${ev.city}`}
                   </p>
-                  <p className="text-xs text-[#999] mt-1">
+                  <p className="text-xs text-tn-muted mt-1">
                     Host: {ev.creator_name || '—'}
                     {ev.creator_phone && ` · ${ev.creator_phone}`}
                   </p>
                   {ev.approval_reason && (
-                    <p className="text-xs text-red-600 mt-2 bg-red-50 rounded-lg px-2 py-1.5">
+                    <p className="text-xs text-tn-error mt-2 bg-tn-red-bg rounded-lg px-2 py-1.5">
                       Rejection reason: {ev.approval_reason}
                     </p>
                   )}
@@ -159,14 +159,14 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
                     <button
                       onClick={() => handleApprove(ev.id)}
                       disabled={actionLoading === ev.id}
-                      className="px-4 py-2 rounded-lg text-xs font-bold bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-tn-green-bg text-white hover:bg-green-700 disabled:opacity-50"
                     >
                       {actionLoading === ev.id ? '…' : 'Approve'}
                     </button>
                     <button
                       onClick={() => { setRejectingId(ev.id); setRejectReason(''); }}
                       disabled={actionLoading === ev.id}
-                      className="px-4 py-2 rounded-lg text-xs font-bold border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      className="px-4 py-2 rounded-xl text-xs font-bold border border-tn-error text-tn-error hover:bg-tn-red-bg disabled:opacity-50"
                     >
                       Reject
                     </button>
@@ -181,8 +181,8 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
       {rejectingId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <h3 className="font-bold text-[#101010] mb-1">Reject Function</h3>
-            <p className="text-xs text-[#666] mb-4">
+            <h3 className="font-bold text-tn-text mb-1">Reject Function</h3>
+            <p className="text-xs text-tn-muted mb-4">
               Provide a reason in English or Tamil. The host will see this and can resubmit.
             </p>
             <textarea
@@ -190,13 +190,13 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="e.g., Invalid venue details / தவறான இட விவரங்கள்"
-              className="w-full border border-[#E8E8E8] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#FFC107] resize-none"
+              className="w-full border border-tn-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-tn-yellow resize-none"
             />
             <div className="flex gap-3 mt-4">
               <button
                 type="button"
                 onClick={() => { setRejectingId(null); setRejectReason(''); }}
-                className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold"
+                className="flex-1 border border-tn-border text-tn-muted py-2.5 rounded-xl text-sm font-semibold"
               >
                 Cancel
               </button>
@@ -204,7 +204,7 @@ export default function ModuleAdminApprovals({ onNavigate, onRefresh }: ModuleAd
                 type="button"
                 onClick={handleReject}
                 disabled={!rejectReason.trim() || actionLoading === rejectingId}
-                className="flex-1 bg-red-600 text-white py-2.5 rounded-lg text-sm font-bold disabled:opacity-50"
+                className="flex-1 bg-tn-red-bg text-white py-2.5 rounded-xl text-sm font-bold disabled:opacity-50"
               >
                 Reject Function
               </button>

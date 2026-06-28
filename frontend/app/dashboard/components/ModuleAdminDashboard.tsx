@@ -18,12 +18,12 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value }: StatCardProps) {
   return (
-    <div className="bg-white border border-[#EBEBEB] rounded-xl p-4">
+    <div className="bg-white border border-tn-border rounded-xl p-4">
       <span className="text-2xl text-tn-gold">
         <Icon name={icon} size={24} />
       </span>
-      <p className="text-xl font-bold text-[#101010] mt-2">{value}</p>
-      <p className="text-xs text-[#999] mt-0.5">{label}</p>
+      <p className="text-xl font-bold text-tn-text mt-2">{value}</p>
+      <p className="text-xs text-tn-muted mt-0.5">{label}</p>
     </div>
   );
 }
@@ -66,10 +66,10 @@ export default function ModuleAdminDashboard({ onNavigate }: ModuleAdminDashboar
       <div className="space-y-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white border border-[#EBEBEB] rounded-xl p-4 animate-pulse">
-              <div className="w-8 h-8 bg-gray-200 rounded mb-2"></div>
-              <div className="h-6 bg-gray-200 rounded mb-1 w-3/4"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+            <div key={i} className="bg-white border border-tn-border rounded-xl p-4 animate-pulse">
+              <div className="w-8 h-8 bg-tn-border rounded mb-2"></div>
+              <div className="h-6 bg-tn-border rounded mb-1 w-3/4"></div>
+              <div className="h-3 bg-tn-border rounded w-1/2"></div>
             </div>
           ))}
         </div>
@@ -79,8 +79,8 @@ export default function ModuleAdminDashboard({ onNavigate }: ModuleAdminDashboar
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-5">
-        <p className="text-red-600">Error: {error}</p>
+      <div className="bg-tn-error-bg border-tn-error rounded-xl p-5">
+        <p className="text-tn-error">Error: {error}</p>
       </div>
     );
   }
@@ -107,103 +107,103 @@ export default function ModuleAdminDashboard({ onNavigate }: ModuleAdminDashboar
       {/* Quick navigation cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Function Approvals */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
+        <div className="bg-white border border-tn-border rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-2xl text-tn-gold"><Icon name="approval" size={24} /></span>
-              <h3 className="font-semibold text-[#101010]">Event Review Queue</h3>
+              <h3 className="font-semibold text-tn-text">Event Review Queue</h3>
             </div>
-          <p className="text-sm text-[#666] mb-2">
+          <p className="text-sm text-tn-muted mb-2">
             {stats?.pendingApprovals ?? 0} event{(stats?.pendingApprovals ?? 0) !== 1 ? 's' : ''} pending admin review.
           </p>
-          <p className="text-xs text-[#999] mb-4">Prioritize newly submitted events and approval follow-ups.</p>
+          <p className="text-xs text-tn-muted mb-4">Prioritize newly submitted events and approval follow-ups.</p>
           <button
             onClick={() => onNavigate('admin-approvals')}
-            className="w-full bg-[#FFC107] text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#E6AC00] transition-colors"
+            className="w-full bg-tn-yellow text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors"
           >
             Open Review Queue
           </button>
         </div>
 
         {/* User Management */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
+        <div className="bg-white border border-tn-border rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-2xl text-tn-gold"><Icon name="users" size={24} /></span>
-              <h3 className="font-semibold text-[#101010]">Organizer Accounts</h3>
+              <h3 className="font-semibold text-tn-text">Organizer Accounts</h3>
             </div>
-          <p className="text-sm text-[#666] mb-4">
+          <p className="text-sm text-tn-muted mb-4">
             Review organizer accounts, access status, and event activity.
           </p>
           <button
             onClick={() => onNavigate('admin-users')}
-            className="w-full bg-[#FFC107] text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#E6AC00] transition-colors"
+            className="w-full bg-tn-yellow text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors"
           >
             Manage Organizers
           </button>
         </div>
 
         {/* Analytics */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
+        <div className="bg-white border border-tn-border rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-2xl text-tn-gold"><Icon name="trend" size={24} /></span>
-              <h3 className="font-semibold text-[#101010]">Platform Analytics</h3>
+              <h3 className="font-semibold text-tn-text">Platform Analytics</h3>
             </div>
-          <p className="text-sm text-[#666] mb-4">
+          <p className="text-sm text-tn-muted mb-4">
             Track registrations, event growth, guest cities, and event-type usage.
           </p>
           <button
             onClick={() => onNavigate('admin-analytics')}
-            className="w-full bg-[#FFC107] text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#E6AC00] transition-colors"
+            className="w-full bg-tn-yellow text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors"
           >
             View Analytics
           </button>
         </div>
 
         {/* Revenue */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
+        <div className="bg-white border border-tn-border rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-2xl text-tn-gold"><Icon name="wallet" size={24} /></span>
-              <h3 className="font-semibold text-[#101010]">Moi Collection</h3>
+              <h3 className="font-semibold text-tn-text">Moi Collection</h3>
             </div>
-          <p className="text-sm text-[#666] mb-4">
+          <p className="text-sm text-tn-muted mb-4">
             Monitor cash moi collected across all events for this month and lifetime.
           </p>
           <button
             onClick={() => onNavigate('admin-revenue')}
-            className="w-full bg-[#FFC107] text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#E6AC00] transition-colors"
+            className="w-full bg-tn-yellow text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors"
           >
             View Collection Report
           </button>
         </div>
 
         {/* Settings */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
+        <div className="bg-white border border-tn-border rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-2xl text-tn-gold"><Icon name="settings" size={24} /></span>
-              <h3 className="font-semibold text-[#101010]">Platform Settings</h3>
+              <h3 className="font-semibold text-tn-text">Platform Settings</h3>
             </div>
-          <p className="text-sm text-[#666] mb-4">
+          <p className="text-sm text-tn-muted mb-4">
             Manage feature toggles, payment options, and platform configuration.
           </p>
           <button
             onClick={() => onNavigate('settings')}
-            className="w-full bg-[#FFC107] text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#E6AC00] transition-colors"
+            className="w-full bg-tn-yellow text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors"
           >
             Open Platform Settings
           </button>
         </div>
 
         {/* Support & Complaints */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
+        <div className="bg-white border border-tn-border rounded-xl p-5">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-2xl text-tn-gold"><Icon name="ticket" size={24} /></span>
-              <h3 className="font-semibold text-[#101010]">Support Tickets</h3>
+              <h3 className="font-semibold text-tn-text">Support Tickets</h3>
             </div>
-          <p className="text-sm text-[#666] mb-4">
+          <p className="text-sm text-tn-muted mb-4">
             Review open and in-progress support requests from organizers.
           </p>
           <button
             onClick={() => onNavigate('admin-support')}
-            className="w-full bg-[#FFC107] text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#E6AC00] transition-colors"
+            className="w-full bg-tn-yellow text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors"
           >
             View Support Tickets
           </button>
@@ -211,20 +211,20 @@ export default function ModuleAdminDashboard({ onNavigate }: ModuleAdminDashboar
       </div>
 
       {/* Revenue Overview */}
-      <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-        <h3 className="font-semibold text-[#101010] text-sm mb-4">Moi Collection Overview</h3>
+      <div className="bg-white border border-tn-border rounded-xl p-5">
+        <h3 className="font-semibold text-tn-text text-sm mb-4">Moi Collection Overview</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-[#F8F8F8] rounded-lg">
-            <p className="text-2xl font-bold text-[#101010]">{formatCurrency(stats?.monthlyRevenue ?? 0)}</p>
-            <p className="text-xs text-[#666] mt-1">Collected This Month</p>
+          <div className="text-center p-4 bg-tn-light rounded-lg">
+            <p className="text-2xl font-bold text-tn-text">{formatCurrency(stats?.monthlyRevenue ?? 0)}</p>
+            <p className="text-xs text-tn-muted mt-1">Collected This Month</p>
           </div>
-          <div className="text-center p-4 bg-[#F8F8F8] rounded-lg">
-            <p className="text-2xl font-bold text-[#101010]">{formatCurrency(stats?.lastMonthRevenue ?? 0)}</p>
-            <p className="text-xs text-[#666] mt-1">Collected Last Month</p>
+          <div className="text-center p-4 bg-tn-light rounded-lg">
+            <p className="text-2xl font-bold text-tn-text">{formatCurrency(stats?.lastMonthRevenue ?? 0)}</p>
+            <p className="text-xs text-tn-muted mt-1">Collected Last Month</p>
           </div>
-          <div className="text-center p-4 bg-[#F8F8F8] rounded-lg">
-            <p className="text-2xl font-bold text-[#101010]">{formatCurrency(stats?.totalRevenue ?? 0)}</p>
-            <p className="text-xs text-[#666] mt-1">Lifetime Collection</p>
+          <div className="text-center p-4 bg-tn-light rounded-lg">
+            <p className="text-2xl font-bold text-tn-text">{formatCurrency(stats?.totalRevenue ?? 0)}</p>
+            <p className="text-xs text-tn-muted mt-1">Lifetime Collection</p>
           </div>
         </div>
       </div>

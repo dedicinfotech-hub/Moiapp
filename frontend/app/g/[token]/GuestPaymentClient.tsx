@@ -67,7 +67,7 @@ export default function GuestPaymentClient() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  const inp = 'w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-base text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow bg-white';
+  const inp = 'w-full border-2 border-tn-border rounded-xl px-4 py-3 text-base text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow bg-white';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -132,7 +132,7 @@ export default function GuestPaymentClient() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-tn-light">
-        <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
       </div>
     );
   }
@@ -198,7 +198,7 @@ export default function GuestPaymentClient() {
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-lg mx-auto px-4 py-6 space-y-4 pb-10">
-        {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">{error}</div>}
+        {error && <div className="bg-tn-error-bg border border-tn-error/20 text-tn-error text-sm rounded-lg px-3 py-2">{error}</div>}
 
         <div>
           <label className="block text-xs font-semibold text-tn-muted mb-1">Your Name</label>

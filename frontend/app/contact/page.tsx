@@ -19,7 +19,7 @@ export default function ContactPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const inputCls = "w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#FFC107] transition-colors";
+  const inputCls = "w-full bg-white border-2 border-tn-border rounded-xl px-4 py-3 text-sm text-tn-text placeholder-tn-muted focus:outline-none focus:border-tn-yellow transition-colors";
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -52,13 +52,13 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFFDF5] via-white to-[#FFF8E1] relative overflow-hidden flex items-center justify-center px-4 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-tn-yellow-bg via-white to-tn-yellow-bg relative overflow-hidden flex items-center justify-center px-4 py-16">
       {/* Decorative background rings */}
-      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#FFC107]/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-[#FFC107]/8 blur-2xl pointer-events-none" />
+      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-tn-yellow/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-tn-yellow/8 blur-2xl pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10 my-8">
-        <div className="bg-white border border-[#FFC107]/45 rounded-2xl shadow-[0_0_12px_rgba(255,193,7,0.15)] p-8 transition-all duration-300 hover:shadow-[0_0_18px_rgba(255,193,7,0.25)]">
+        <div className="bg-white border border-tn-yellow/45 rounded-2xl shadow-[0_0_12px_rgba(255,193,7,0.15)] p-8 transition-all duration-300 hover:shadow-[0_0_18px_rgba(255,193,7,0.25)]">
           
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -74,31 +74,31 @@ export default function ContactPage() {
                 </div>
               </Link>
             </div>
-            <h1 className="text-2xl font-bold text-[#101010]">Contact Us</h1>
-            <p className="text-gray-500 text-sm mt-1">Submit your enquiry and we will get back to you shortly</p>
+            <h1 className="text-2xl font-bold text-tn-text">Contact Us</h1>
+            <p className="text-tn-muted text-sm mt-1">Submit your enquiry and we will get back to you shortly</p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm mb-5 flex items-start gap-2">
-              <Icon name="lock" className="text-red-500 mt-0.5 flex-shrink-0" size={16} />
+            <div className="bg-tn-error-bg border border-tn-error/20 text-tn-error rounded-xl px-4 py-3 text-sm mb-5 flex items-start gap-2">
+              <Icon name="lock" className="text-tn-error mt-0.5 flex-shrink-0" size={16} />
               <span>{error}</span>
             </div>
           )}
 
           {success ? (
             <div className="text-center py-6 space-y-4">
-              <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto border border-green-100 shadow-sm">
+              <div className="w-16 h-16 bg-tn-success-bg text-tn-success rounded-full flex items-center justify-center mx-auto border border-tn-success/20 shadow-sm">
                 <Icon name="check" size={32} />
               </div>
-              <h2 className="text-xl font-bold text-gray-800">Thank You!</h2>
-              <p className="text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">
+              <h2 className="text-xl font-bold text-tn-text">Thank You!</h2>
+              <p className="text-sm text-tn-muted max-w-xs mx-auto leading-relaxed">
                 Your enquiry has been received. Our team will review your details and respond to your email as soon as possible.
               </p>
               <div className="pt-4">
                 <button
                   type="button"
                   onClick={() => setSuccess(false)}
-                  className="bg-[#FFC107] text-gray-900 px-6 py-2.5 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors text-sm shadow-sm"
+                  className="bg-tn-yellow text-tn-text px-6 py-2.5 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors text-sm shadow-sm"
                 >
                   Send Another Message
                 </button>
@@ -107,7 +107,7 @@ export default function ContactPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Full Name</label>
+                <label className="block text-sm font-semibold text-tn-muted mb-1.5">Full Name</label>
                 <input
                   type="text"
                   required
@@ -119,7 +119,7 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Email Address</label>
+                <label className="block text-sm font-semibold text-tn-muted mb-1.5">Email Address</label>
                 <input
                   type="email"
                   required
@@ -131,7 +131,7 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Mobile Number</label>
+                <label className="block text-sm font-semibold text-tn-muted mb-1.5">Mobile Number</label>
                 <input
                   type="tel"
                   required
@@ -145,7 +145,7 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Enquiry Message</label>
+                <label className="block text-sm font-semibold text-tn-muted mb-1.5">Enquiry Message</label>
                 <textarea
                   required
                   value={form.message}
@@ -158,15 +158,15 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50 mt-4 flex items-center justify-center gap-2 shadow-sm"
+                className="w-full bg-tn-yellow text-tn-text py-3 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50 mt-4 flex items-center justify-center gap-2 shadow-sm"
               >
                 {loading ? 'Submitting…' : 'Submit Enquiry'}
               </button>
             </form>
           )}
 
-          <div className="text-center mt-6 pt-6 border-t border-gray-100">
-            <Link href="/" className="text-sm text-[#B8860B] font-semibold hover:underline flex items-center justify-center gap-1.5">
+          <div className="text-center mt-6 pt-6 border-t border-tn-border">
+            <Link href="/" className="text-sm text-tn-gold font-semibold hover:underline flex items-center justify-center gap-1.5">
               <Icon name="arrow-right" size={14} className="rotate-180" /> Back to Home
             </Link>
           </div>

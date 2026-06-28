@@ -132,38 +132,38 @@ const categories = [
 
 export default function HelpCenterPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#FFFDF5] via-white to-[#FFF8E1]">
+    <main className="min-h-screen bg-gradient-to-br from-tn-yellow-bg via-white to-tn-yellow-bg">
 
       {/* Decorative blobs */}
-      <div className="fixed -top-32 -right-32 w-96 h-96 rounded-full bg-[#FFC107]/10 blur-3xl pointer-events-none" />
-      <div className="fixed -bottom-20 -left-20 w-72 h-72 rounded-full bg-[#FFC107]/8 blur-2xl pointer-events-none" />
+      <div className="fixed -top-32 -right-32 w-96 h-96 rounded-full bg-tn-yellow/10 blur-3xl pointer-events-none" />
+      <div className="fixed -bottom-20 -left-20 w-72 h-72 rounded-full bg-tn-yellow/8 blur-2xl pointer-events-none" />
 
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#FFFDF5] via-[#FFF8E1] to-[#FFFCF5] border-b border-[#F0E8C8] py-14 px-4">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[#FFC107]/10 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-tn-yellow-bg via-tn-yellow-light to-tn-yellow-bg border-b border-tn-gold-border py-14 px-4">
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-tn-yellow/10 blur-3xl pointer-events-none" />
         <div className="max-w-3xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 bg-[#FFC107]/15 border border-[#FFC107]/40 text-[#B8860B] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5">
+          <div className="inline-flex items-center gap-2 bg-tn-yellow/15 border border-tn-gold-border/40 text-tn-gold px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5">
             Moi App · Support
           </div>
-          <h1 className="text-3xl lg:text-4xl font-extrabold text-[#101010] mb-4">
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-tn-text mb-4">
             Help Center
           </h1>
-          <p className="text-[#555] text-sm lg:text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-tn-muted text-sm lg:text-base leading-relaxed max-w-xl mx-auto">
             Find answers to the most common questions about Moi App.
           </p>
         </div>
       </div>
 
       {/* Category tabs strip */}
-      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-[#F0E8C8] overflow-x-auto">
+      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-tn-gold-border overflow-x-auto">
         <div className="max-w-3xl mx-auto px-4 flex gap-1 py-2">
           {categories.map((cat) => (
             <a
               key={cat.label}
               href={`#${cat.label.toLowerCase().replace(/\s+/g, '-')}`}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-[#555] hover:bg-[#FFF8E1] hover:text-[#B8860B] transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-tn-muted hover:bg-tn-yellow-light hover:text-tn-gold transition-colors whitespace-nowrap"
             >
-              <span className="text-[#FFC107]">{cat.icon}</span>
+              <span className="text-tn-yellow">{cat.icon}</span>
               {cat.label}
             </a>
           ))}
@@ -181,28 +181,28 @@ export default function HelpCenterPage() {
           >
             {/* Category heading */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-full bg-[#FFC107] text-black flex items-center justify-center shadow-sm flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-tn-yellow text-black flex items-center justify-center shadow-sm flex-shrink-0">
                 {cat.icon}
               </div>
-              <h2 className="text-lg font-bold text-[#101010]">{cat.label}</h2>
+              <h2 className="text-lg font-bold text-tn-text">{cat.label}</h2>
             </div>
 
             {/* FAQ cards */}
-            <div className="bg-white border border-[#FFE082] rounded-2xl divide-y divide-[#FFF3CD] shadow-sm">
+            <div className="bg-white border border-tn-gold-border rounded-2xl divide-y divide-tn-yellow-light shadow-sm">
               {cat.faqs.map((faq, idx) => (
                 <details key={idx} className="group px-6 py-4">
                   <summary className="flex items-center justify-between gap-3 cursor-pointer list-none">
-                    <span className="text-sm font-semibold text-[#101010] group-open:text-[#B8860B] transition-colors">
+                    <span className="text-sm font-semibold text-tn-text group-open:text-tn-gold transition-colors">
                       {faq.q}
                     </span>
                     <svg
-                      className="w-4 h-4 text-[#B8860B] flex-shrink-0 transition-transform group-open:rotate-180"
+                      className="w-4 h-4 text-tn-gold flex-shrink-0 transition-transform group-open:rotate-180"
                       viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
                     >
                       <path d="M6 9l6 6 6-6" />
                     </svg>
                   </summary>
-                  <p className="mt-3 text-sm text-[#555] leading-relaxed border-t border-[#FFF3CD] pt-3">
+                  <p className="mt-3 text-sm text-tn-muted leading-relaxed border-t border-tn-yellow-light pt-3">
                     {faq.a}
                   </p>
                 </details>
@@ -212,20 +212,20 @@ export default function HelpCenterPage() {
         ))}
 
         {/* Still need help */}
-        <div className="bg-[#FFFCF5] border border-[#FFE082] rounded-2xl px-6 py-8 text-center">
-          <div className="w-12 h-12 rounded-full bg-[#FFC107] text-black flex items-center justify-center mx-auto mb-4">
+        <div className="bg-tn-yellow-bg border border-tn-gold-border rounded-2xl px-6 py-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-tn-yellow text-black flex items-center justify-center mx-auto mb-4">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
               <polyline points="22,6 12,13 2,6"/>
             </svg>
           </div>
-          <h3 className="text-base font-bold text-[#101010] mb-2">Still need help?</h3>
-          <p className="text-sm text-[#555] mb-5">
+          <h3 className="text-base font-bold text-tn-text mb-2">Still need help?</h3>
+          <p className="text-sm text-tn-muted mb-5">
             Can't find what you're looking for? Our support team is happy to help.
           </p>
           <a
             href="mailto:support@moiapp.in"
-            className="inline-flex items-center gap-2 bg-[#FFC107] hover:bg-[#E6AC00] text-black text-sm font-bold px-6 py-2.5 rounded-xl transition-colors shadow-sm shadow-[#FFC107]/30"
+            className="inline-flex items-center gap-2 bg-tn-yellow hover:bg-tn-yellow-2 text-tn-text text-sm font-bold px-6 py-2.5 rounded-xl transition-colors shadow-sm shadow-tn-yellow/30"
           >
             Contact Support
           </a>
@@ -235,7 +235,7 @@ export default function HelpCenterPage() {
         <div className="text-center pt-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold bg-[#FFC107] hover:bg-[#E6AC00] text-black px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-[#FFC107]/30"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold bg-tn-yellow hover:bg-tn-yellow-2 text-tn-text px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-tn-yellow/30"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M19 12H5M12 5l-7 7 7 7" />

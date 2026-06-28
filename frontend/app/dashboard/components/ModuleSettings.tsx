@@ -33,7 +33,7 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
   const [language, setLanguage] = useState<'en' | 'ta'>('en');
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
 
-  const inp = 'w-full border border-[#E8E8E8] rounded-lg px-3 py-2.5 text-sm text-[#101010] focus:outline-none focus:border-[#FFC107] transition-colors bg-white placeholder-[#bbb]';
+  const inp = 'w-full border border-tn-border rounded-xl px-4 py-3 text-sm text-tn-text focus:outline-none focus:border-tn-yellow transition-colors bg-white placeholder-tn-subtle';
 
   // Load settings from localStorage
   useEffect(() => {
@@ -91,75 +91,75 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
 
   return (
     <div className="max-w-xl space-y-5">
-      {/* Profile */}
-      <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#F5F5F5]">
-          <h3 className="font-semibold text-[#101010] text-sm">Profile</h3>
-          <p className="text-xs text-[#999] mt-0.5">Your name and contact details</p>
+      {/* Profile - Modern design */}
+      <div className="bg-white border border-tn-border rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-tn-border">
+          <h3 className="font-semibold text-tn-text text-sm sm:text-base">Profile</h3>
+          <p className="text-xs text-tn-muted mt-0.5">Your name and contact details</p>
         </div>
         <form onSubmit={handleSave} className="p-5 space-y-4">
           {saved && (
-            <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-2.5 text-sm">✓ Changes saved</div>
+            <div className="bg-tn-green-bg border border-tn-success text-tn-text rounded-xl px-4 py-2.5 text-sm">✓ Changes saved</div>
           )}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-4 py-2.5 text-sm">{error}</div>
+            <div className="bg-tn-red-bg border border-tn-error text-tn-text rounded-xl px-4 py-2.5 text-sm">{error}</div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-[#555] mb-1.5">Display Name *</label>
+              <label className="block text-xs font-semibold text-tn-muted mb-1.5">Display Name *</label>
               <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inp} placeholder="Your name" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#555] mb-1.5">City</label>
+              <label className="block text-xs font-semibold text-tn-muted mb-1.5">City</label>
               <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inp} placeholder="Your city" />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1.5">Phone</label>
-            <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inp} placeholder="+91 98765 43210" />
+            <label className="block text-xs font-semibold text-tn-muted mb-1.5">Phone</label>
+            <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inp} placeholder="+91 98765 43210" inputMode="tel" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#555] mb-1.5">Email</label>
-            <input value={user?.email ?? ''} disabled className={`${inp} bg-[#fafafa] text-[#bbb] cursor-not-allowed`} />
-            <p className="text-[10px] text-[#ccc] mt-1">Email cannot be changed</p>
+            <label className="block text-xs font-semibold text-tn-muted mb-1.5">Email</label>
+            <input value={user?.email ?? ''} disabled className={`${inp} bg-tn-light text-tn-subtle cursor-not-allowed`} />
+            <p className="text-xs text-tn-subtle mt-1">Email cannot be changed</p>
           </div>
 
           {/* ── Payment Details ── */}
-          <div className="border-t border-[#F5F5F5] pt-4">
+          <div className="border-t border-tn-border pt-4">
             <div className="flex items-center gap-2 mb-3">
-              <h4 className="text-sm font-semibold text-[#101010] flex items-center gap-2"><Icon name="wallet" size={16} /> Payment Details</h4>
+              <h4 className="text-sm font-semibold text-tn-text flex items-center gap-2"><Icon name="wallet" size={16} /> Payment Details</h4>
               {hasPaymentDetails && (
                 <span className="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">Saved</span>
               )}
             </div>
-            <p className="text-xs text-[#999] mb-4 leading-relaxed">
+            <p className="text-xs text-tn-muted mb-4 leading-relaxed">
               Add your UPI ID or bank account so guests know where to transfer moi.
               The UPI ID is used for Scan & Pay on guest payment pages.
             </p>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-[#555] mb-1.5">UPI ID</label>
+                <label className="block text-xs font-semibold text-tn-muted mb-1.5">UPI ID</label>
                 <input value={form.upi_id} onChange={(e) => setForm({ ...form, upi_id: e.target.value })} className={inp} placeholder="yourname@upi" />
               </div>
 
-              <div className="bg-[#fafafa] border border-[#F0F0F0] rounded-lg p-4 space-y-3">
-                <p className="text-xs font-semibold text-[#666]">Bank Account (optional)</p>
+              <div className="bg-tn-light border border-tn-border rounded-xl p-4 space-y-3">
+                <p className="text-xs font-semibold text-tn-muted">Bank Account (optional)</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-[#777] mb-1">Account Holder Name</label>
+                    <label className="block text-xs text-tn-muted mb-1">Account Holder Name</label>
                     <input value={form.account_holder} onChange={(e) => setForm({ ...form, account_holder: e.target.value })} className={inp} placeholder="As per bank records" />
                   </div>
                   <div>
-                    <label className="block text-xs text-[#777] mb-1">Bank Name</label>
+                    <label className="block text-xs text-tn-muted mb-1">Bank Name</label>
                     <input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} className={inp} placeholder="SBI / HDFC / etc." />
                   </div>
                   <div>
-                    <label className="block text-xs text-[#777] mb-1">Account Number</label>
-                    <input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} className={inp} placeholder="XXXXXXXXXXXX" />
+                    <label className="block text-xs text-tn-muted mb-1">Account Number</label>
+                    <input value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} className={inp} placeholder="XXXXXXXXXXXX" inputMode="numeric" />
                   </div>
                   <div>
-                    <label className="block text-xs text-[#777] mb-1">IFSC Code</label>
+                    <label className="block text-xs text-tn-muted mb-1">IFSC Code</label>
                     <input value={form.ifsc_code} onChange={(e) => setForm({ ...form, ifsc_code: e.target.value })} className={inp} placeholder="SBIN0001234" />
                   </div>
                 </div>
@@ -167,9 +167,9 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
             </div>
 
             {/* How transfer works */}
-            <div className="mt-4 bg-[#FFFCF5] border border-[#FFE082] rounded-lg p-4">
-              <p className="text-xs font-semibold text-[#B8860B] mb-2">ℹ️ How moi transfer works</p>
-              <ul className="text-xs text-[#666] space-y-1.5 leading-relaxed">
+            <div className="mt-4 bg-tn-yellow-bg border border-tn-yellow-border rounded-xl p-4">
+              <p className="text-xs font-semibold text-tn-gold mb-2">ℹ️ How moi transfer works</p>
+              <ul className="text-xs text-tn-muted space-y-1.5 leading-relaxed">
                 <li>• Guests who pay <strong>UPI / online</strong> — transfer directly to your UPI ID shown on the event page</li>
                 <li>• Guests who pay <strong>cash</strong> — hand it over in person; you record it manually in the dashboard</li>
                 <li>• Guests who pay <strong>bank transfer</strong> — use the account number above</li>
@@ -179,26 +179,26 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
           </div>
 
           <button type="submit" disabled={saving}
-            className="bg-[#FFC107] text-black px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
+            className="bg-tn-yellow text-black px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50">
             {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </form>
       </div>
 
-      {/* App Settings */}
-      <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#F5F5F5]">
-          <h3 className="font-semibold text-[#101010] text-sm">App Settings</h3>
-          <p className="text-xs text-[#999] mt-0.5">Customize your app experience</p>
+      {/* App Settings - Modern design */}
+      <div className="bg-white border border-tn-border rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-tn-border">
+          <h3 className="font-semibold text-tn-text text-sm sm:text-base">App Settings</h3>
+          <p className="text-xs text-tn-muted mt-0.5">Customize your app experience</p>
         </div>
         <div className="p-5 space-y-4">
           {/* Notifications Master Toggle */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-[#101010]">Notifications</p>
-              <p className="text-xs text-[#999]">Master switch for all notifications</p>
+              <p className="text-sm font-medium text-tn-text">Notifications</p>
+              <p className="text-xs text-tn-muted">Master switch for all notifications</p>
             </div>
-            <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-gray-200 transition-colors">
+            <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-tn-border transition-colors">
               <input
                 type="checkbox"
                 checked={notificationsEnabled}
@@ -220,10 +220,10 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
               {/* Function Reminder (3 days before) */}
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#101010]">Function Reminder</p>
-                  <p className="text-xs text-[#999]">3 days before function date</p>
+                  <p className="text-sm font-medium text-tn-text">Function Reminder</p>
+                  <p className="text-xs text-tn-muted">3 days before function date</p>
                 </div>
-                <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-gray-200 transition-colors">
+                <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-tn-border transition-colors">
                   <input
                     type="checkbox"
                     checked={notifFunctionReminder}
@@ -243,10 +243,10 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
               {/* Function Today */}
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#101010]">Function Day Alert</p>
-                  <p className="text-xs text-[#999]">On the day of function</p>
+                  <p className="text-sm font-medium text-tn-text">Function Day Alert</p>
+                  <p className="text-xs text-tn-muted">On the day of function</p>
                 </div>
-                <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-gray-200 transition-colors">
+                <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-tn-border transition-colors">
                   <input
                     type="checkbox"
                     checked={notifFunctionToday}
@@ -266,10 +266,10 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
               {/* Return Gift Reminder */}
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#101010]">Return Gift Reminder</p>
-                  <p className="text-xs text-[#999]">Weekly reminder for pending returns</p>
+                  <p className="text-sm font-medium text-tn-text">Return Gift Reminder</p>
+                  <p className="text-xs text-tn-muted">Weekly reminder for pending returns</p>
                 </div>
-                <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-gray-200 transition-colors">
+                <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-tn-border transition-colors">
                   <input
                     type="checkbox"
                     checked={notifReturnGift}
@@ -289,10 +289,10 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
               {/* Entry Save Confirmation */}
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#101010]">Entry Save Confirmation</p>
-                  <p className="text-xs text-[#999]">Show notification when moi entry is saved</p>
+                  <p className="text-sm font-medium text-tn-text">Entry Save Confirmation</p>
+                  <p className="text-xs text-tn-muted">Show notification when moi entry is saved</p>
                 </div>
-                <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-gray-200 transition-colors">
+                <label className="relative inline-flex h-5 w-10 cursor-pointer rounded-full bg-tn-border transition-colors">
                   <input
                     type="checkbox"
                     checked={notifEntrySaved}
@@ -312,8 +312,8 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
               {/* Notification Time */}
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#101010]">Default Notification Time</p>
-                  <p className="text-xs text-[#999]">Preferred time to receive reminders</p>
+                  <p className="text-sm font-medium text-tn-text">Default Notification Time</p>
+                  <p className="text-xs text-tn-muted">Preferred time to receive reminders</p>
                 </div>
                 <input
                   type="time"
@@ -323,7 +323,7 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
                     const settings = JSON.parse(localStorage.getItem('moi_settings') || '{}');
                     localStorage.setItem('moi_settings', JSON.stringify({ ...settings, notifTime: e.target.value }));
                   }}
-                  className="border border-[#E8E8E8] rounded-lg px-3 py-1.5 text-sm text-[#101010] focus:outline-none focus:border-[#FFC107]"
+                  className="border border-tn-border rounded-lg px-3 py-1.5 text-sm text-tn-text focus:outline-none focus:border-tn-yellow"
                 />
               </div>
             </>
@@ -332,8 +332,8 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
           {/* Language Toggle */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-[#101010]">Language</p>
-              <p className="text-xs text-[#999]">App language preference</p>
+              <p className="text-sm font-medium text-tn-text">Language</p>
+              <p className="text-xs text-tn-muted">App language preference</p>
             </div>
             <select
               value={language}
@@ -342,7 +342,7 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
                 const settings = JSON.parse(localStorage.getItem('moi_settings') || '{}');
                 localStorage.setItem('moi_settings', JSON.stringify({ ...settings, language: e.target.value }));
               }}
-              className="border border-[#E8E8E8] rounded-lg px-3 py-1.5 text-sm text-[#101010] focus:outline-none focus:border-[#FFC107]"
+              className="border border-tn-border rounded-lg px-3 py-1.5 text-sm text-tn-text focus:outline-none focus:border-tn-yellow"
             >
               <option value="en">English</option>
               <option value="ta">தமிழ் (Tamil)</option>
@@ -352,8 +352,8 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
           {/* Font Size */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-[#101010]">Font Size</p>
-              <p className="text-xs text-[#999]">Adjust text size for better readability</p>
+              <p className="text-sm font-medium text-tn-text">Font Size</p>
+              <p className="text-xs text-tn-muted">Adjust text size for better readability</p>
             </div>
             <select
               value={fontSize}
@@ -362,7 +362,7 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
                 const settings = JSON.parse(localStorage.getItem('moi_settings') || '{}');
                 localStorage.setItem('moi_settings', JSON.stringify({ ...settings, fontSize: e.target.value }));
               }}
-              className="border border-[#E8E8E8] rounded-lg px-3 py-1.5 text-sm text-[#101010] focus:outline-none focus:border-[#FFC107]"
+              className="border border-tn-border rounded-lg px-3 py-1.5 text-sm text-tn-text focus:outline-none focus:border-tn-yellow"
             >
               <option value="small">Small</option>
               <option value="medium">Medium</option>
@@ -373,50 +373,50 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
       </div>
 
       {/* Account info */}
-      <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#F5F5F5]">
-          <h3 className="font-semibold text-[#101010] text-sm">Account</h3>
+      <div className="bg-white border border-tn-border rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-tn-border">
+          <h3 className="font-semibold text-tn-text text-sm">Account</h3>
         </div>
-        <div className="divide-y divide-[#F8F8F8]">
+        <div className="divide-y divide-tn-border">
           {[
             { label: 'User ID',     sub: 'Internal identifier',  value: `#${user?.id}` },
-            { label: 'Plan',        sub: 'Current subscription', value: <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2.5 py-1 rounded-full">Free</span> },
+            { label: 'Plan',        sub: 'Current subscription', value: <span className="text-[10px] font-bold bg-tn-green-bg text-tn-text px-2.5 py-1 rounded-full">Free</span> },
             { label: 'App Version', sub: 'MoiApp dashboard',     value: 'v1.0.0' },
           ].map((row) => (
             <div key={row.label} className="flex items-center justify-between px-5 py-3.5">
               <div>
-                <p className="text-sm font-medium text-[#101010]">{row.label}</p>
-                <p className="text-xs text-[#999]">{row.sub}</p>
+                <p className="text-sm font-medium text-tn-text">{row.label}</p>
+                <p className="text-xs text-tn-muted">{row.sub}</p>
               </div>
-              <span className="text-sm text-[#666] font-mono">{row.value}</span>
+              <span className="text-sm text-tn-muted font-mono">{row.value}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Danger zone */}
-      <div className="bg-white border border-red-100 rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-red-100">
-          <h3 className="font-semibold text-red-500 text-sm">Danger Zone</h3>
+      <div className="bg-white border border-tn-error/20 rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-tn-error/20">
+          <h3 className="font-semibold text-tn-error text-sm">Danger Zone</h3>
         </div>
-        <div className="divide-y divide-[#F8F8F8]">
+        <div className="divide-y divide-tn-border">
           <div className="flex items-center justify-between px-5 py-4">
             <div>
-              <p className="text-sm font-medium text-[#101010]">Sign out</p>
-              <p className="text-xs text-[#999]">Log out of your account on this device</p>
+              <p className="text-sm font-medium text-tn-text">Sign out</p>
+              <p className="text-xs text-tn-muted">Log out of your account on this device</p>
             </div>
             <button onClick={onLogout}
-              className="px-4 py-2 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 transition-colors">
+              className="px-4 py-2 border border-tn-error/20 text-tn-error rounded-lg text-sm font-semibold hover:bg-tn-error-bg transition-colors">
               Sign Out
             </button>
           </div>
           <div className="flex items-center justify-between px-5 py-4">
             <div>
-              <p className="text-sm font-medium text-red-500">Delete Account</p>
-              <p className="text-xs text-[#999]">Account will be deleted after 30-day grace period</p>
+              <p className="text-sm font-medium text-tn-error">Delete Account</p>
+              <p className="text-xs text-tn-muted">Account will be deleted after 30-day grace period</p>
             </div>
             <button onClick={() => setShowDeleteConfirm(true)}
-              className="px-4 py-2 border border-red-200 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-50 transition-colors">
+              className="px-4 py-2 border border-tn-error/20 text-tn-error rounded-lg text-sm font-semibold hover:bg-tn-error-bg transition-colors">
               Delete
             </button>
           </div>
@@ -427,20 +427,20 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-5 max-w-sm w-full">
-            <h3 className="font-semibold text-gray-900 mb-2">Delete Account</h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <h3 className="font-semibold text-tn-text mb-2">Delete Account</h3>
+            <p className="text-sm text-tn-muted mb-4">
               Your account will be scheduled for deletion. After a 30-day grace period, all your data will be permanently removed. You can cancel this anytime within the grace period.
             </p>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                className="px-4 py-2 border border-tn-border text-tn-muted rounded-lg text-sm font-semibold hover:bg-tn-light">
                 Cancel
               </button>
               <button onClick={() => {
                 showSuccess('Account deletion scheduled. You have 30 days to cancel.');
                 setShowDeleteConfirm(false);
               }}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600">
+                className="px-4 py-2 bg-tn-error text-white rounded-lg text-sm font-semibold hover:bg-tn-error/80">
                 Confirm Delete
               </button>
             </div>

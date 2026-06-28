@@ -132,16 +132,17 @@ export default function ModuleDashboard({
   };
 
   const stats = [
-    { label: 'Total Events',   value: String(effectiveSummary.total_events),  icon: 'wedding' as IconName, bg: 'bg-tn-yellow-bg border-tn-yellow-border' },
-    { label: 'Total Cash',     value: `₹${effectiveSummary.total_cash.toLocaleString('en-IN')}`, icon: 'wallet' as IconName, bg: 'bg-green-50 border-green-200' },
-    { label: 'Total Gold',     value: `${effectiveSummary.total_gold}g`,        icon: 'sparkle' as IconName, bg: 'bg-tn-gold-bg border-tn-gold-border' },
-    { label: 'Total Gifts',    value: `${effectiveSummary.total_gifts} items`,  icon: 'gift' as IconName, bg: 'bg-red-50 border-red-200' },
-    { label: 'Total Guests',   value: String(effectiveSummary.total_guests), icon: 'users' as IconName, bg: 'bg-blue-50 border-blue-200' },
+    { label: 'Total Events',   value: String(effectiveSummary.total_events),  icon: 'wedding' as IconName, bg: 'bg-tn-yellow-bg', iconColor: 'text-tn-gold' },
+    { label: 'Total Cash',     value: `₹${effectiveSummary.total_cash.toLocaleString('en-IN')}`, icon: 'wallet' as IconName, bg: 'bg-tn-green-bg', iconColor: 'text-tn-green-soft' },
+    { label: 'Total Gold',     value: `${effectiveSummary.total_gold}g`,        icon: 'sparkle' as IconName, bg: 'bg-tn-gold-bg', iconColor: 'text-tn-gold' },
+    { label: 'Total Gifts',    value: `${effectiveSummary.total_gifts} items`,  icon: 'gift' as IconName, bg: 'bg-tn-red-bg', iconColor: 'text-tn-red-soft' },
+    { label: 'Total Guests',   value: String(effectiveSummary.total_guests), icon: 'users' as IconName, bg: 'bg-tn-blue-bg', iconColor: 'text-tn-blue-soft' },
     {
       label: 'Avg Cash Gift',
       value: `₹${effectiveSummary.avg_cash_gift.toLocaleString('en-IN')}`,
       icon: 'trend' as IconName,
-      bg: 'bg-purple-50 border-purple-200',
+      bg: 'bg-tn-purple-bg',
+      iconColor: 'text-tn-purple-text',
     },
   ];
 
@@ -163,11 +164,11 @@ export default function ModuleDashboard({
           ))
         ) : stats.map((s) => (
           <div key={s.label} className={`rounded-xl border p-4 ${s.bg}`}>
-            <span className="text-2xl text-tn-gold">
+            <span className={`text-2xl ${s.iconColor || 'text-tn-gold'}`}>
               <Icon name={s.icon} size={24} />
             </span>
             <p className="text-lg font-bold text-tn-text mt-2 whitespace-nowrap overflow-hidden text-ellipsis">{s.value}</p>
-            <p className="text-[10px] text-tn-muted mt-0.5 truncate">{s.label}</p>
+            <p className="text-xs text-tn-muted mt-0.5 truncate">{s.label}</p>
           </div>
         ))}
       </div>
@@ -282,47 +283,47 @@ export default function ModuleDashboard({
       </div>
 
       {/* Quick actions */}
-      <div className="bg-white border border-tn-border rounded-xl p-5">
-        <h3 className="font-semibold text-tn-text text-sm mb-4">Quick Actions</h3>
+      <div className="bg-white border border-tn-border rounded-xl p-4 sm:p-5">
+        <h3 className="font-semibold text-tn-text text-sm sm:text-base mb-3 sm:mb-4">Quick Actions</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <button
             onClick={onNewEvent}
-            className="flex flex-col items-center gap-2 bg-tn-yellow text-black px-4 py-4 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors shadow-sm"
+            className="flex flex-col items-center gap-2 bg-tn-yellow text-black px-4 py-4 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-all shadow-sm active:scale-[0.98]"
           >
             <Icon name="plus" size={22} />
             <span>New Event</span>
           </button>
           <button
             onClick={() => onNavigate('moi-notebook')}
-            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-all active:scale-[0.98]"
           >
             <Icon name="list" size={22} />
             <span>Moi Notebook</span>
           </button>
           <button
             onClick={() => onNavigate('analytics')}
-            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-all active:scale-[0.98]"
           >
             <Icon name="trend" size={22} />
             <span>Analytics</span>
           </button>
           <button
             onClick={() => onNavigate('events')}
-            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-all active:scale-[0.98]"
           >
             <Icon name="wedding" size={22} />
             <span>All Events</span>
           </button>
           <button
             onClick={() => onNavigate('users')}
-            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-all active:scale-[0.98]"
           >
             <Icon name="users" size={22} />
             <span>Guests</span>
           </button>
           <button
             onClick={() => onNavigate('settings')}
-            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors"
+            className="flex flex-col items-center gap-2 bg-tn-light border border-tn-border text-tn-text px-4 py-4 rounded-xl text-sm font-medium hover:border-tn-yellow hover:bg-tn-yellow-bg transition-all active:scale-[0.98]"
           >
             <Icon name="settings" size={22} />
             <span>Settings</span>

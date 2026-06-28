@@ -52,20 +52,20 @@ export default function EventsListingPage() {
   const paginatedEvents = filtered.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="bg-[#FAFAFA] text-[#101010] min-h-screen pb-20 lg:pb-0">
+    <div className="bg-tn-light text-tn-text min-h-screen pb-20 lg:pb-0">
 
       {/* ── Header banner ── */}
-      <div className="bg-white border-b border-[#E8E8E8]">
+      <div className="bg-white border-b border-tn-border">
         <div className="max-w-[88%] mx-auto py-10">
           <div className="text-center mb-7">
-            <p className="text-xs font-bold text-[#FFC107] uppercase tracking-widest mb-2">MoiApp</p>
-            <h1 className="text-2xl lg:text-4xl font-extrabold text-[#101010] mb-2">Wedding Events</h1>
-            <p className="text-[#666] text-sm">Browse weddings · Give Moi · Celebrate together</p>
+            <p className="text-xs font-bold text-tn-yellow uppercase tracking-widest mb-2">MoiApp</p>
+            <h1 className="text-2xl lg:text-4xl font-extrabold text-tn-text mb-2">Wedding Events</h1>
+            <p className="text-tn-muted text-sm">Browse weddings · Give Moi · Celebrate together</p>
           </div>
 
           {/* Search */}
           <div className="relative max-w-lg mx-auto mb-5">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999]">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-tn-text-secondary">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11.5" cy="11.5" r="9.5" stroke="currentColor" strokeWidth="2"/><path d="M18.5 18.5L22 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
             </span>
             <input
@@ -73,7 +73,7 @@ export default function EventsListingPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or venue…"
-              className="w-full border-2 border-[#E8E8E8] bg-white rounded-2xl pl-11 pr-4 py-3 text-sm text-[#101010] placeholder-[#bbb] focus:outline-none focus:border-[#FFC107] transition-colors font-medium"
+              className="w-full border-2 border-tn-border bg-white rounded-2xl pl-11 pr-4 py-3 text-sm text-tn-text placeholder-tn-text-secondary focus:outline-none focus:border-tn-yellow transition-colors font-medium"
             />
           </div>
 
@@ -89,8 +89,8 @@ export default function EventsListingPage() {
                 onClick={() => setFilter(t.id)}
                 className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                   filter === t.id
-                    ? 'bg-[#FFC107] text-black'
-                    : 'bg-[#F5F5F5] text-[#666] hover:bg-[#EEEEEE]'
+                    ? 'bg-tn-yellow text-black'
+                    : 'bg-tn-light-alt text-tn-muted hover:bg-tn-border transition-colors'
                 }`}
               >
                 {t.label}
@@ -104,17 +104,17 @@ export default function EventsListingPage() {
       <div className="max-w-[88%] mx-auto py-10">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FFC107] rounded-full animate-spin" />
-            <p className="text-[#666] text-sm">Loading events…</p>
+            <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
+            <p className="text-tn-muted text-sm">Loading events…</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-24">
-            <div className="mb-4 text-[#B8860B]">
+            <div className="mb-4 text-tn-gold">
               <Icon name="wedding" size={44} />
             </div>
-            <h2 className="text-lg font-bold text-[#444] mb-2">No events found</h2>
-            <p className="text-[#666] text-sm mb-6">Be the first to list your wedding!</p>
-            <Link href="/register" className="bg-[#FFC107] text-black px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#E6AC00] transition-colors">
+            <h2 className="text-lg font-bold text-tn-text mb-2">No events found</h2>
+            <p className="text-tn-muted text-sm mb-6">Be the first to list your wedding!</p>
+            <Link href="/register" className="bg-tn-yellow text-black px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-tn-yellow-2 transition-colors">
               List Your Event
             </Link>
           </div>
@@ -128,15 +128,15 @@ export default function EventsListingPage() {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E8E8E8] px-4 py-4 bg-white mt-8 rounded-2xl shadow-sm">
-                <div className="text-xs text-[#999] font-medium">
-                  Showing <span className="font-semibold text-[#101010]">{startIndex + 1}</span> to <span className="font-semibold text-[#101010]">{Math.min(startIndex + itemsPerPage, totalItems)}</span> of <span className="font-semibold text-[#101010]">{totalItems}</span>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-tn-border px-4 py-4 bg-white mt-8 rounded-2xl shadow-sm">
+                <div className="text-xs text-tn-text-secondary font-medium">
+                  Showing <span className="font-semibold text-tn-text">{startIndex + 1}</span> to <span className="font-semibold text-tn-text">{Math.min(startIndex + itemsPerPage, totalItems)}</span> of <span className="font-semibold text-tn-text">{totalItems}</span>
                 </div>
                 <div className="flex flex-wrap justify-center gap-1.5">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-2 rounded-xl border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                    className="px-3 py-2 rounded-xl border border-tn-border text-xs font-semibold hover:bg-tn-light disabled:opacity-40 transition-colors text-tn-text-secondary bg-white disabled:pointer-events-none"
                   >
                     Previous
                   </button>
@@ -148,8 +148,8 @@ export default function EventsListingPage() {
                         onClick={() => setCurrentPage(pageNum)}
                         className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
                           currentPage === pageNum
-                            ? 'bg-[#FFC107] text-black border border-[#FFC107] shadow-sm'
-                            : 'border border-[#E8E8E8] hover:bg-[#fafafa] text-[#555] bg-white'
+                            ? 'bg-tn-yellow text-black border border-tn-yellow shadow-sm'
+                            : 'border border-tn-border hover:bg-tn-light text-tn-text-secondary bg-white'
                         }`}
                       >
                         {pageNum}
@@ -159,7 +159,7 @@ export default function EventsListingPage() {
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-2 rounded-xl border border-[#E8E8E8] text-xs font-semibold hover:bg-[#fafafa] disabled:opacity-40 transition-colors text-[#555] bg-white disabled:pointer-events-none"
+                    className="px-3 py-2 rounded-xl border border-tn-border text-xs font-semibold hover:bg-tn-light disabled:opacity-40 transition-colors text-tn-text-secondary bg-white disabled:pointer-events-none"
                   >
                     Next
                   </button>
@@ -183,10 +183,10 @@ function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
 
   return (
     <Link href={`/e/${event.slug}`} className="group block">
-      <div className={`bg-white rounded-2xl overflow-hidden border transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 ${isPast ? 'border-[#E8E8E8] opacity-80' : 'border-[#E8E8E8] hover:border-[#FFC107]'}`}>
+      <div className={`bg-white rounded-2xl overflow-hidden border transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 ${isPast ? 'border-tn-border opacity-80' : 'border-tn-border hover:border-tn-yellow'}`}>
 
         {/* Cover image */}
-        <div className="relative h-44 bg-gradient-to-br from-[#FFF8E1] to-[#FFFCF5] overflow-hidden">
+        <div className="relative h-44 bg-gradient-to-br from-tn-gold-bg to-tn-yellow-bg overflow-hidden">
           {event.cover_photo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -196,10 +196,10 @@ function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-              <span className="text-5xl text-[#B8860B]">
+              <span className="text-5xl text-tn-gold">
                 <Icon name={event.event_type === 'birthday' ? 'gift' : 'wedding'} size={40} />
               </span>
-              <p className="text-[#B8860B] text-xs font-semibold">
+              <p className="text-tn-gold text-xs font-semibold">
                 {event.event_type === 'birthday' ? 'Birthday Event' : 'Wedding Event'}
               </p>
             </div>
@@ -210,14 +210,14 @@ function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
 
           {/* Date badge */}
           <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm rounded-xl shadow px-2.5 py-1.5 text-center min-w-[46px]">
-            <p className="text-[#FFC107] text-[10px] font-extrabold leading-none">{mon}</p>
-            <p className="text-[#101010] text-lg font-extrabold leading-tight">{day}</p>
-            <p className="text-[#666] text-[10px] leading-none">{year}</p>
+            <p className="text-tn-yellow text-[10px] font-extrabold leading-none">{mon}</p>
+            <p className="text-tn-text text-lg font-extrabold leading-tight">{day}</p>
+            <p className="text-tn-muted text-[10px] leading-none">{year}</p>
           </div>
 
           {/* Status badge */}
           {!isPast && daysLeft >= 0 && daysLeft <= 7 && (
-            <div className="absolute top-3 right-3 bg-[#FFC107] text-black text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow">
+            <div className="absolute top-3 right-3 bg-tn-yellow text-black text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow">
               {daysLeft === 0 ? 'Today!' : `${daysLeft}d left`}
             </div>
           )}
@@ -239,21 +239,21 @@ function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
         {/* Card body */}
         <div className="p-4">
           {event.venue && (
-            <p className="text-[#555] text-xs flex items-center gap-1.5 mb-3 truncate">
+            <p className="text-tn-muted text-xs flex items-center gap-1.5 mb-3 truncate">
               <Icon name="map" size={11} />
               {event.venue}
             </p>
           )}
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs text-[#666]">
+            <div className="flex items-center gap-1.5 text-xs text-tn-muted">
               <Icon name="users" size={14} />
-              <span className="font-medium"><strong className="font-bold text-[#101010]">{event.guest_count || 0}</strong> guests registered</span>
+              <span className="font-medium"><strong className="font-bold text-tn-text">{event.guest_count || 0}</strong> guests registered</span>
             </div>
             <span className={`text-xs font-bold px-3 py-1.5 rounded-full transition-colors ${
               isPast
-                ? 'bg-[#F5F5F5] text-[#666]'
-                : 'bg-[#FFFCF5] text-[#B8860B] border border-[#FFE082] group-hover:bg-[#FFC107] group-hover:text-black group-hover:border-[#FFC107]'
+                ? 'bg-tn-light-alt text-tn-muted'
+                : 'bg-tn-yellow-bg text-tn-gold border border-tn-gold-border group-hover:bg-tn-yellow group-hover:text-black group-hover:border-tn-yellow'
             }`}>
               {isPast ? 'View →' : 'Give Moi →'}
             </span>

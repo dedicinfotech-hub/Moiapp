@@ -37,7 +37,9 @@ export type IconName =
   | 'arrow-right'
   | 'x'
   | 'mic'
-  | 'check';
+  | 'check'
+  | 'receipt'
+  | 'clock';
 
 const paths: Record<IconName, JSX.Element> = {
   wedding: (
@@ -246,6 +248,18 @@ const paths: Record<IconName, JSX.Element> = {
   share: (
     <>
       <path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .17 1L8.91 8.7a3 3 0 1 0 0 6.6L15.17 19A3 3 0 1 0 16 17.3L9.91 13.3a3.1 3.1 0 0 0 0-2.6L16 6.7A3 3 0 0 0 18 8Z" />
+    </>
+  ),
+  receipt: (
+    <>
+      <path d="M4 4v16h16V8l-6-6H4Z" />
+      <path d="M14 2v6h6M8 12h8M8 16h4" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 3" />
     </>
   ),
   'qr-code': (

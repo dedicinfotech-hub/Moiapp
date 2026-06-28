@@ -51,8 +51,8 @@ export default function HostPaymentMethodScreen() {
 
   if (loading || !event) {
     return (
-      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FFC107] rounded-full animate-spin" />
+      <div className="min-h-screen bg-tn-light flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
       </div>
     );
   }
@@ -61,8 +61,8 @@ export default function HostPaymentMethodScreen() {
     <HostEntryShell slug={slug} title="Payment Method" activeTab="entries" onBack={() => router.push(`/events/${slug}/moi-entry`)} sidebarOverride="closed">
       <EventContextCard event={event} icon="gift" detailsHref={`/events/${slug}/dashboard`} />
 
-      <h2 className="text-sm font-bold text-[#1F2937] mb-1">Select Payment Method</h2>
-      <p className="text-xs text-[#6B7280] mb-4">Choose how the contributor made the payment.</p>
+      <h2 className="text-sm font-bold text-tn-text mb-1">Select Payment Method</h2>
+      <p className="text-xs text-tn-muted mb-4">Choose how the contributor made the payment.</p>
 
       <div className="space-y-2 mb-5">
         {METHODS.map((m, i) => {
@@ -72,36 +72,36 @@ export default function HostPaymentMethodScreen() {
               key={`${m.id}-${i}`}
               type="button"
               onClick={() => { setSelected(m.id); setSelectedLabel(m.label); }}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${isSelected ? 'border-[#FFC107] bg-[#F5F3FF]' : 'border-[#E5E7EB] bg-white'}`}
+              className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${isSelected ? 'border-tn-yellow bg-tn-purple-bg' : 'border-tn-border bg-white'}`}
             >
-              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-[#FFC107]' : 'border-[#D1D5DB]'}`}>
-                {isSelected && <div className="w-2 h-2 rounded-full bg-[#FFC107]" />}
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'border-tn-yellow' : 'border-tn-subtle'}`}>
+                {isSelected && <div className="w-2 h-2 rounded-full bg-tn-yellow" />}
               </div>
               <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${m.color}18` }}>
                 <Icon name={m.icon} size={18} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[#1F2937]">{m.label}</p>
-                <p className="text-[11px] text-[#6B7280]">{m.desc}</p>
+                <p className="text-sm font-semibold text-tn-text">{m.label}</p>
+                <p className="text-[11px] text-tn-muted">{m.desc}</p>
               </div>
-              {isSelected && <span className="text-[10px] font-bold text-[#22C55E] bg-[#F0FFF4] px-2 py-0.5 rounded-full">Selected</span>}
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+              {isSelected && <span className="text-[10px] font-bold text-tn-success bg-tn-green-bg px-2 py-0.5 rounded-full">Selected</span>}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-tn-subtle" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           );
         })}
       </div>
 
-      <div className="bg-[#F5F3FF] border border-[#EDE9FE] rounded-xl p-4 mb-6 flex gap-3">
-        <div className="w-8 h-8 rounded-full bg-[#FFC107] text-white flex items-center justify-center text-sm font-bold shrink-0">i</div>
+      <div className="bg-tn-purple-bg border border-tn-yellow/20 rounded-xl p-4 mb-6 flex gap-3">
+        <div className="w-8 h-8 rounded-full bg-tn-yellow text-white flex items-center justify-center text-sm font-bold shrink-0">i</div>
         <div>
-          <p className="text-xs font-bold text-[#FFC107]">Why we collect payment method?</p>
-          <p className="text-[11px] text-[#6B7280] mt-0.5">This helps in better tracking, reporting and reconciliation.</p>
+          <p className="text-xs font-bold text-tn-yellow">Why we collect payment method?</p>
+          <p className="text-[11px] text-tn-muted mt-0.5">This helps in better tracking, reporting and reconciliation.</p>
         </div>
       </div>
 
       <div className="flex gap-3">
-        <button type="button" onClick={() => router.push(`/events/${slug}/moi-entry`)} className="flex-1 h-12 border-2 border-[#FFC107] text-[#FFC107] rounded-xl font-semibold text-sm">Cancel</button>
-        <button type="button" onClick={handleConfirm} className="flex-1 h-12 bg-[#FFC107] text-white rounded-xl font-semibold text-sm">Confirm</button>
+        <button type="button" onClick={() => router.push(`/events/${slug}/moi-entry`)} className="flex-1 h-12 border-2 border-tn-yellow text-tn-yellow rounded-xl font-semibold text-sm">Cancel</button>
+        <button type="button" onClick={handleConfirm} className="flex-1 h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm">Confirm</button>
       </div>
     </HostEntryShell>
   );

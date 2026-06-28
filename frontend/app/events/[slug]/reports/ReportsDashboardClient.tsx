@@ -146,10 +146,10 @@ export default function ReportsDashboardScreen() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-tn-light flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FFC107] rounded-full animate-spin" />
-          <p className="text-[#666] text-sm">Loading…</p>
+          <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
+          <p className="text-tn-muted text-sm">Loading…</p>
         </div>
       </div>
     );
@@ -158,7 +158,7 @@ export default function ReportsDashboardScreen() {
   if (!event) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-400">Event not found</p>
+        <p className="text-tn-subtle">Event not found</p>
       </div>
     );
   }
@@ -169,15 +169,15 @@ export default function ReportsDashboardScreen() {
     <EventLayout slug={slug} activeTab="reports" title="Reports" showNotifications={false}>
       <div className="flex-1 flex flex-col px-6 pt-6">
         {/* Event Summary Card */}
-        <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl p-4 mb-6">
+        <div className="bg-tn-light border border-tn-border rounded-2xl p-4 mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-[#1F2937]">{event.custom_title || event.event_type}</h3>
-              <p className="text-xs text-[#6B7280] mt-1">{eventDate} · {event.venue || event.city || '—'}</p>
+              <h3 className="text-sm font-bold text-tn-text">{event.custom_title || event.event_type}</h3>
+              <p className="text-xs text-tn-muted mt-1">{eventDate} · {event.venue || event.city || '—'}</p>
             </div>
             <button
               onClick={() => router.push(`/events/${slug}`)}
-              className="text-xs text-[#FFC107] font-semibold hover:underline"
+              className="text-xs text-tn-yellow font-semibold hover:underline"
             >
               View Details
             </button>
@@ -199,8 +199,8 @@ export default function ReportsDashboardScreen() {
                 onClick={() => setDateFilter(f.value as DateFilter)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
                   dateFilter === f.value
-                    ? 'bg-[#FFC107] text-white'
-                    : 'bg-[#F9FAFB] border border-[#E5E7EB] text-[#6B7280] hover:border-[#FFC107]'
+                    ? 'bg-tn-yellow text-white'
+                    : 'bg-tn-light border border-tn-border text-tn-muted hover:border-tn-yellow'
                 }`}
               >
                 {f.label}
@@ -221,8 +221,8 @@ export default function ReportsDashboardScreen() {
                 onClick={() => setPaymentFilter(f.value as PaymentFilter)}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap transition-colors ${
                   paymentFilter === f.value
-                    ? 'bg-[#FFC107] text-white'
-                    : 'bg-[#F9FAFB] text-[#6B7280] hover:text-[#FFC107]'
+                    ? 'bg-tn-yellow text-white'
+                    : 'bg-tn-light text-tn-muted hover:text-tn-yellow'
                 }`}
               >
                 {f.label}
@@ -233,39 +233,39 @@ export default function ReportsDashboardScreen() {
 
         {/* Analytics Cards */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-            <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-1">Total Collection</p>
-            <p className="text-lg font-bold text-[#22C55E]">₹{totalCollection.toLocaleString('en-IN')}</p>
+          <div className="bg-white border border-tn-border rounded-xl p-4">
+            <p className="text-[10px] text-tn-muted uppercase tracking-wider mb-1">Total Collection</p>
+            <p className="text-lg font-bold text-tn-success">₹{totalCollection.toLocaleString('en-IN')}</p>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-            <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-1">Total Contributors</p>
-            <p className="text-lg font-bold text-[#1F2937]">{totalContributors}</p>
+          <div className="bg-white border border-tn-border rounded-xl p-4">
+            <p className="text-[10px] text-tn-muted uppercase tracking-wider mb-1">Total Contributors</p>
+            <p className="text-lg font-bold text-tn-text">{totalContributors}</p>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-            <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-1">Average Contribution</p>
-            <p className="text-lg font-bold text-[#1F2937]">₹{Math.round(averageContribution).toLocaleString('en-IN')}</p>
+          <div className="bg-white border border-tn-border rounded-xl p-4">
+            <p className="text-[10px] text-tn-muted uppercase tracking-wider mb-1">Average Contribution</p>
+            <p className="text-lg font-bold text-tn-text">₹{Math.round(averageContribution).toLocaleString('en-IN')}</p>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-            <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-1">Highest Contribution</p>
-            <p className="text-lg font-bold text-[#1F2937]">₹{highestContribution.toLocaleString('en-IN')}</p>
+          <div className="bg-white border border-tn-border rounded-xl p-4">
+            <p className="text-[10px] text-tn-muted uppercase tracking-wider mb-1">Highest Contribution</p>
+            <p className="text-lg font-bold text-tn-text">₹{highestContribution.toLocaleString('en-IN')}</p>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-            <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-1">Cash Total</p>
-            <p className="text-lg font-bold text-[#22C55E]">₹{totalCash.toLocaleString('en-IN')}</p>
-            <p className="text-[10px] text-[#9CA3AF]">{totalCollection > 0 ? ((totalCash / totalCollection) * 100).toFixed(0) : 0}% of total</p>
+          <div className="bg-white border border-tn-border rounded-xl p-4">
+            <p className="text-[10px] text-tn-muted uppercase tracking-wider mb-1">Cash Total</p>
+            <p className="text-lg font-bold text-tn-success">₹{totalCash.toLocaleString('en-IN')}</p>
+            <p className="text-[10px] text-tn-subtle">{totalCollection > 0 ? ((totalCash / totalCollection) * 100).toFixed(0) : 0}% of total</p>
           </div>
-          <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-            <p className="text-[10px] text-[#6B7280] uppercase tracking-wider mb-1">Online Total</p>
-            <p className="text-lg font-bold text-[#FFC107]">₹{(totalCollection - totalCash).toLocaleString('en-IN')}</p>
-            <p className="text-[10px] text-[#9CA3AF]">{totalCollection > 0 ? (((totalCollection - totalCash) / totalCollection) * 100).toFixed(0) : 0}% of total</p>
+          <div className="bg-white border border-tn-border rounded-xl p-4">
+            <p className="text-[10px] text-tn-muted uppercase tracking-wider mb-1">Online Total</p>
+            <p className="text-lg font-bold text-tn-yellow">₹{(totalCollection - totalCash).toLocaleString('en-IN')}</p>
+            <p className="text-[10px] text-tn-subtle">{totalCollection > 0 ? (((totalCollection - totalCash) / totalCollection) * 100).toFixed(0) : 0}% of total</p>
           </div>
         </div>
 
         {/* Charts Section */}
         <div className="space-y-4 mb-6">
           {/* Collection Distribution */}
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-[#1F2937] mb-4">Collection Distribution</h3>
+          <div className="bg-white border border-tn-border rounded-2xl p-5">
+            <h3 className="text-sm font-bold text-tn-text mb-4">Collection Distribution</h3>
             <div className="space-y-2">
               {Object.entries(paymentDistribution).map(([mode, amount]) => {
                 const percentage = totalCollection > 0 ? (amount / totalCollection) * 100 : 0;
@@ -273,79 +273,79 @@ export default function ReportsDashboardScreen() {
                 return (
                   <div key={mode}>
                     <div className="flex justify-between mb-1">
-                      <span className="text-xs text-[#6B7280]">{modeLabel}</span>
-                      <span className="text-xs font-semibold text-[#1F2937]">₹{amount.toLocaleString('en-IN')} ({percentage.toFixed(0)}%)</span>
+                      <span className="text-xs text-tn-muted">{modeLabel}</span>
+                      <span className="text-xs font-semibold text-tn-text">₹{amount.toLocaleString('en-IN')} ({percentage.toFixed(0)}%)</span>
                     </div>
-                    <div className="h-2 bg-[#F9FAFB] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#FFC107] rounded-full" style={{ width: `${percentage}%` }} />
+                    <div className="h-2 bg-tn-light rounded-full overflow-hidden">
+                      <div className="h-full bg-tn-yellow rounded-full" style={{ width: `${percentage}%` }} />
                     </div>
                   </div>
                 );
               })}
               {Object.keys(paymentDistribution).length === 0 && (
-                <p className="text-xs text-[#9CA3AF] text-center py-4">No data available</p>
+                <p className="text-xs text-tn-subtle text-center py-4">No data available</p>
               )}
             </div>
           </div>
 
           {/* Daily Collection Trend */}
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-[#1F2937] mb-4">Daily Collection Trend</h3>
+          <div className="bg-white border border-tn-border rounded-2xl p-5">
+            <h3 className="text-sm font-bold text-tn-text mb-4">Daily Collection Trend</h3>
             <div className="flex items-end gap-2 h-32">
               {Object.entries(dailyTrend).map(([date, amount]) => {
                 const maxAmount = Math.max(...Object.values(dailyTrend), 1);
                 const height = (amount / maxAmount) * 100;
                 return (
                   <div key={date} className="flex-1 flex flex-col items-center gap-1">
-                    <div className="w-full bg-[#FFC107] rounded-t-lg" style={{ height: `${height}%` }} />
-                    <span className="text-[8px] text-[#9CA3AF]">{date.split(' ')[0]}</span>
+                    <div className="w-full bg-tn-yellow rounded-t-lg" style={{ height: `${height}%` }} />
+                    <span className="text-[8px] text-tn-subtle">{date.split(' ')[0]}</span>
                   </div>
                 );
               })}
               {Object.keys(dailyTrend).length === 0 && (
-                <p className="text-xs text-[#9CA3AF] text-center w-full py-10">No data available</p>
+                <p className="text-xs text-tn-subtle text-center w-full py-10">No data available</p>
               )}
             </div>
           </div>
 
           {/* Top Contributors */}
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-[#1F2937] mb-4">Top 3 Contributors</h3>
+          <div className="bg-white border border-tn-border rounded-2xl p-5">
+            <h3 className="text-sm font-bold text-tn-text mb-4">Top 3 Contributors</h3>
             <div className="space-y-3">
               {topContributors.map((entry, index) => (
                 <div key={entry.id} className="flex items-center gap-3">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                    index === 0 ? 'bg-[#FFC107] text-black' : index === 1 ? 'bg-[#E5E7EB] text-[#666]' : 'bg-[#FDE68A] text-[#92400E]'
+                    index === 0 ? 'bg-tn-yellow text-black' : index === 1 ? 'bg-tn-border text-tn-muted' : 'bg-tn-warning/20 text-tn-warning'
                   }`}>
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-[#1F2937]">{entry.guest_name}</p>
-                    <p className="text-[10px] text-[#9CA3AF]">
+                    <p className="text-sm font-semibold text-tn-text">{entry.guest_name}</p>
+                    <p className="text-[10px] text-tn-subtle">
                       {new Date(entry.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                   </div>
-                  <p className="text-sm font-bold text-[#22C55E]">₹{Number(entry.amount).toLocaleString('en-IN')}</p>
+                  <p className="text-sm font-bold text-tn-success">₹{Number(entry.amount).toLocaleString('en-IN')}</p>
                 </div>
               ))}
               {topContributors.length === 0 && (
-                <p className="text-xs text-[#9CA3AF] text-center py-4">No contributors yet</p>
+                <p className="text-xs text-tn-subtle text-center py-4">No contributors yet</p>
               )}
             </div>
           </div>
 
           {/* Non-Cash / Gift Contributions */}
           {nonCashEntries.length > 0 && (
-            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-              <h3 className="text-sm font-bold text-[#1F2937] mb-4">Non-Cash / Gift Contributions</h3>
+            <div className="bg-white border border-tn-border rounded-2xl p-5">
+              <h3 className="text-sm font-bold text-tn-text mb-4">Non-Cash / Gift Contributions</h3>
               <div className="space-y-3">
                 {nonCashEntries.map((entry) => (
                   <div key={entry.id} className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-[#1F2937]">{entry.guest_name}</p>
-                      <p className="text-[10px] text-[#9CA3AF] capitalize">{entry.gift_type} · {entry.payment_mode}</p>
+                      <p className="text-sm font-semibold text-tn-text">{entry.guest_name}</p>
+                      <p className="text-[10px] text-tn-subtle capitalize">{entry.gift_type} · {entry.payment_mode}</p>
                     </div>
-                    <p className="text-sm font-bold text-[#FFC107]">
+                    <p className="text-sm font-bold text-tn-yellow">
                       {entry.gift_type === 'gift' && !entry.amount ? 'Gift' : `₹${Number(entry.amount).toLocaleString('en-IN')}`}
                     </p>
                   </div>
@@ -356,24 +356,24 @@ export default function ReportsDashboardScreen() {
         </div>
 
         {/* Export Options */}
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 mb-6">
-          <h3 className="text-sm font-bold text-[#1F2937] mb-4">Export Options</h3>
+        <div className="bg-white border border-tn-border rounded-2xl p-5 mb-6">
+          <h3 className="text-sm font-bold text-tn-text mb-4">Export Options</h3>
           <div className="grid grid-cols-3 gap-3">
             <button
               onClick={handleExportPDF}
-              className="py-3 border border-[#E5E7EB] rounded-xl text-xs font-semibold text-[#6B7280] hover:bg-[#F9FAFB] transition-colors"
+              className="py-3 border border-tn-border rounded-xl text-xs font-semibold text-tn-muted hover:bg-tn-light transition-colors"
             >
               PDF
             </button>
             <button
               onClick={handleExportExcel}
-              className="py-3 border border-[#E5E7EB] rounded-xl text-xs font-semibold text-[#6B7280] hover:bg-[#F9FAFB] transition-colors"
+              className="py-3 border border-tn-border rounded-xl text-xs font-semibold text-tn-muted hover:bg-tn-light transition-colors"
             >
               Excel
             </button>
             <button
               onClick={handleExportCSV}
-              className="py-3 border border-[#E5E7EB] rounded-xl text-xs font-semibold text-[#6B7280] hover:bg-[#F9FAFB] transition-colors"
+              className="py-3 border border-tn-border rounded-xl text-xs font-semibold text-tn-muted hover:bg-tn-light transition-colors"
             >
               CSV
             </button>
@@ -391,7 +391,7 @@ export default function ReportsDashboardScreen() {
                 showSuccess('Report link copied to clipboard');
               }
             }}
-            className="mt-3 w-full py-3 bg-[#FFC107] text-white rounded-xl text-xs font-semibold"
+            className="mt-3 w-full py-3 bg-tn-yellow text-white rounded-xl text-xs font-semibold"
           >
             Share Report on WhatsApp
           </button>

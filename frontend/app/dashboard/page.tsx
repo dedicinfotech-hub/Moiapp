@@ -127,7 +127,7 @@ function DashboardInner() {
     return (
       <div className="h-screen bg-tn-light flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
           <p className="text-tn-muted text-sm">Loading…</p>
         </div>
       </div>
@@ -163,52 +163,49 @@ function DashboardInner() {
         {/* ── Right panel ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-          {/* Top bar */}
-          <header className="h-14 bg-white border-b border-tn-border flex items-center gap-3 px-4 lg:px-6 shrink-0">
-            {/* Hamburger */}
+          {/* Top bar - Modern mobile design */}
+          <header className="h-14 sm:h-16 bg-white border-b border-tn-border flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 shrink-0 safe-area-top">
+            {/* Hamburger with better touch target */}
             <button
-              className="text-tn-muted hover:text-tn-text p-1"
+              className="w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center text-tn-muted hover:text-tn-text rounded-lg hover:bg-tn-light transition-colors"
               onClick={toggleSidebar}
               aria-label="Toggle menu"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="3" y1="6"  x2="21" y2="6"/>
-                <line x1="3" y1="12" x2="21" y2="12"/>
-                <line x1="3" y1="18" x2="21" y2="18"/>
-              </svg>
+              <Icon name="menu" size={20} />
             </button>
 
             <div className="flex-1 min-w-0">
-              <h1 className="font-bold text-tn-text text-sm capitalize leading-tight">{MODULE_LABELS[module]}</h1>
-              <p className="text-[11px] text-tn-muted hidden sm:block">{MODULE_SUBTITLE[module]}</p>
+              <h1 className="font-bold text-tn-text text-sm sm:text-base capitalize leading-tight">{MODULE_LABELS[module]}</h1>
+              <p className="text-xs text-tn-muted hidden sm:block">{MODULE_SUBTITLE[module]}</p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <NotificationBell />
               {isEnabled('bulk_import') && (
                 <button
                   onClick={() => setShowBulkImport(true)}
-                  className="flex items-center gap-1.5 border border-tn-yellow text-tn-gold px-3 py-2 rounded-lg text-sm font-semibold hover:bg-tn-yellow-bg transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1 sm:gap-1.5 border border-tn-yellow text-tn-gold px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold hover:bg-tn-yellow-bg transition-colors whitespace-nowrap"
+                  aria-label="Import"
                 >
-                  <Icon name="upload" size={16} />
+                  <Icon name="upload" size={14} />
                   <span className="hidden sm:inline">Import</span>
                 </button>
               )}
               <button
                 onClick={() => setShowNew(true)}
-                className="flex items-center gap-1.5 bg-tn-yellow text-black px-3.5 py-2 rounded-lg text-sm font-semibold hover:bg-tn-yellow-2 transition-colors whitespace-nowrap"
+                className="flex items-center gap-1 sm:gap-1.5 bg-tn-yellow text-black px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold hover:bg-tn-yellow-2 transition-colors whitespace-nowrap"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <Icon name="plus" size={14} />
                 <span className="hidden sm:inline">New Event</span>
               </button>
             </div>
           </header>
 
           {/* Scrollable content */}
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6 bg-tn-light">
+          <main className="flex-1 overflow-y-auto p-4 lg:p-6 bg-tn-light pb-20 lg:pb-6">
             {module === 'dashboard' && (
-              <ModuleDashboard events={events} entries={allEntries} onNavigate={setModule} onNewEvent={() => setShowNew(true)} />
-            )}
+               <ModuleDashboard events={events} entries={allEntries} onNavigate={setModule} onNewEvent={() => setShowNew(true)} user={user} />
+             )}
             {module === 'events'     && <ModuleEvents     events={events} onRefresh={loadAll} onNewEvent={() => setShowNew(true)} onEdit={setEditingEvent} />}
             {module === 'organizers' && <ModuleOrganizers events={events} onRefresh={loadAll} />}
             {module === 'moi-notebook'   && <ModuleMoiNotebook   entries={allEntries} events={events} />}
@@ -265,7 +262,7 @@ export default function DashboardPage() {
     <Suspense fallback={
       <div className="h-screen bg-tn-light flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
           <p className="text-tn-muted text-sm">Loading…</p>
         </div>
       </div>

@@ -45,7 +45,7 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
         }`}
       >
         {/* Header */}
-        <div className="h-16 bg-gradient-to-r from-[#5B21B6] to-[#7C3AED] flex items-center justify-between px-4">
+        <div className="h-16 bg-gradient-to-r from-tn-purple to-tn-purple-2 flex items-center justify-between px-4">
           <h2 className="text-white font-bold text-lg">MoiApp</h2>
           <button
             onClick={onClose}
@@ -65,7 +65,7 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               key={`${item.href}-${item.label}`}
               href={item.href}
               onClick={onClose}
-              className="flex items-center gap-3 px-5 py-3 text-sm font-medium text-[#1F2937] hover:bg-[#F9FAFB] transition-colors"
+              className="flex items-center gap-3 px-5 py-3 text-sm font-medium text-tn-text hover:bg-tn-light transition-colors"
             >
               <Icon name={item.icon} size={18} />
               {item.label}
@@ -75,19 +75,19 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
         {/* User Footer */}
         {user && (
-          <div className="border-t border-[#E5E7EB] px-4 py-3">
+          <div className="border-t border-tn-border px-4 py-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#7C3AED] flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-8 h-8 rounded-full bg-tn-purple flex items-center justify-center text-white font-bold text-sm">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[#1F2937] truncate">{user.name}</p>
-                <p className="text-[11px] text-[#999] truncate">{user.email}</p>
+                <p className="text-sm font-semibold text-tn-text truncate">{user.name}</p>
+                <p className="text-[11px] text-tn-subtle truncate">{user.email}</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="w-full mt-3 text-sm text-[#EF4444] font-medium hover:bg-red-50 rounded-lg py-2 transition-colors"
+              className="w-full mt-3 text-sm text-tn-error font-medium hover:bg-tn-error-bg rounded-lg py-2 transition-colors"
             >
               Sign Out
             </button>

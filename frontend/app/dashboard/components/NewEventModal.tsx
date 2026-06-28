@@ -544,7 +544,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                 <label className={lbl}>Cover Photo</label>
                 <div
                   onClick={() => fileRef.current?.click()}
-                  className={`cursor-pointer rounded-xl overflow-hidden border-2 border-dashed transition-colors ${coverPreview ? 'border-[#FFC107]' : 'border-tn-border hover:border-[#FFC107]'}`}
+                  className={`cursor-pointer rounded-xl overflow-hidden border-2 border-dashed transition-colors ${coverPreview ? 'border-tn-yellow' : 'border-tn-border hover:border-tn-yellow'}`}
                 >
                   {coverPreview ? (
                     <div className="relative h-32">
@@ -577,7 +577,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
           {/* ── Step 3: Pending Approval ── */}
           {step === 3 && (
             <div className="space-y-5 text-center">
-              <div className="mx-auto w-16 h-16 bg-tn-yellow-light border-2 border-[#FFC107] rounded-full flex items-center justify-center text-3xl">
+              <div className="mx-auto w-16 h-16 bg-tn-yellow-bg border-2 border-tn-yellow rounded-full flex items-center justify-center text-3xl">
                 ⏳
               </div>
               <div>

@@ -87,60 +87,60 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
   };
 
   return (
-    <div className="bg-white border border-[#EBEBEB] rounded-xl p-4 sm:p-5 space-y-4">
+    <div className="bg-white border border-tn-border rounded-xl p-4 sm:p-5 space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div>
-          <h3 className="font-bold text-[#101010] text-sm">Guest QR Code</h3>
-          <p className="text-xs text-[#666] mt-0.5">Print on invitation · guests scan & pay — no app download</p>
+          <h3 className="font-bold text-tn-text text-sm">Guest QR Code</h3>
+          <p className="text-xs text-tn-muted mt-0.5">Print on invitation · guests scan & pay — no app download</p>
         </div>
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-[#666]">QR payments:</span>
-          <span className="font-bold text-[#101010]">{qrCount}</span>
-          <button type="button" onClick={refreshStats} className="text-[10px] text-[#FFC107] font-semibold hover:underline">
+          <span className="text-tn-muted">QR payments:</span>
+          <span className="font-bold text-tn-text">{qrCount}</span>
+          <button type="button" onClick={refreshStats} className="text-[10px] text-tn-yellow font-semibold hover:underline">
             Refresh
           </button>
         </div>
       </div>
 
       {!qrEnabled ? (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-600">
+        <div className="bg-tn-light border border-tn-border rounded-lg px-4 py-3 text-sm text-tn-muted">
           Guest QR is closed. Re-enable when you want guests to pay again.
           <button
             type="button"
             onClick={handleToggleQr}
             disabled={loading}
-            className="block mt-2 text-xs font-bold text-[#B8860B] hover:underline disabled:opacity-50"
+            className="block mt-2 text-xs font-bold text-tn-gold hover:underline disabled:opacity-50"
           >
             Re-enable QR
           </button>
         </div>
       ) : (
         <div className="flex flex-col md:flex-row gap-5 items-center md:items-start">
-          <div className="shrink-0 flex justify-center bg-white p-3 border-2 border-[#101010] rounded-xl">
+          <div className="shrink-0 flex justify-center bg-white p-3 border-2 border-tn-text rounded-xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrImg} alt="Event payment QR code" width={180} height={180} className="w-[180px] h-[180px] sm:w-[200px] sm:h-[200px]" />
           </div>
           <div className="flex-1 space-y-2">
-            <p className="text-[10px] text-[#999] break-all font-mono">{paymentUrl}</p>
+            <p className="text-[10px] text-tn-subtle break-all font-mono">{paymentUrl}</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
               <button
                 type="button"
                 onClick={() => downloadQrPng(paymentUrl, `moi-qr-${event.slug}.png`)}
-                className="px-3 py-2 rounded-lg text-xs font-semibold bg-[#FFC107] text-black hover:bg-[#E6AC00] text-center"
+                className="px-3 py-2 rounded-lg text-xs font-semibold bg-tn-yellow text-black hover:bg-tn-yellow-2 text-center"
               >
                 ⬇ Download PNG
               </button>
               <button
                 type="button"
                 onClick={shareWhatsApp}
-                className="px-3 py-2 rounded-lg text-xs font-semibold border border-[#25D366] text-[#128C7E] hover:bg-green-50 text-center"
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-tn-success text-tn-success hover:bg-tn-success-bg text-center"
               >
                 WhatsApp Share
               </button>
               <button
                 type="button"
                 onClick={() => { navigator.clipboard.writeText(paymentUrl); showSuccess('Link copied'); }}
-                className="px-3 py-2 rounded-lg text-xs font-semibold border border-[#E8E8E8] text-[#666] hover:border-[#FFC107] text-center"
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-tn-border text-tn-muted hover:border-tn-yellow text-center"
               >
                 Copy Link
               </button>
@@ -148,7 +148,7 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
                 type="button"
                 onClick={handleToggleQr}
                 disabled={loading}
-                className="px-3 py-2 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 text-center"
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-tn-error/20 text-tn-error hover:bg-tn-error-bg disabled:opacity-50 text-center"
               >
                 Close Function QR
               </button>
@@ -156,7 +156,7 @@ export default function EventQrPanel({ event, onUpdate }: EventQrPanelProps) {
                 type="button"
                 onClick={handleRegenerateQr}
                 disabled={loading}
-                className="px-3 py-2 rounded-lg text-xs font-semibold border border-[#E8E8E8] text-[#666] hover:border-[#FFC107] disabled:opacity-50 text-center"
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-tn-border text-tn-muted hover:border-tn-yellow disabled:opacity-50 text-center"
               >
                 🔄 Regenerate QR
               </button>

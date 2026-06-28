@@ -74,11 +74,11 @@ export default function ModuleFeatures({ isAdmin }: ModuleFeaturesProps) {
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <div className="text-tn-gold mb-4">
+        <div className="text-tn-yellow mb-4">
           <Icon name="lock" size={48} />
         </div>
-        <h2 className="text-xl font-bold text-[#101010] mb-2">Access Denied</h2>
-        <p className="text-sm text-[#666] text-center max-w-md">
+        <h2 className="text-xl font-bold text-tn-text mb-2">Access Denied</h2>
+        <p className="text-sm text-tn-muted text-center max-w-md">
           The Features module is only available to administrators. Please contact your admin if you need to enable or disable app features.
         </p>
       </div>
@@ -93,7 +93,7 @@ export default function ModuleFeatures({ isAdmin }: ModuleFeaturesProps) {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl p-3">
+        <div className="bg-tn-error-bg border-tn-error text-tn-error text-sm rounded-xl p-3">
           {error}
         </div>
       )}
@@ -120,13 +120,13 @@ export default function ModuleFeatures({ isAdmin }: ModuleFeaturesProps) {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${isEnabled(t.feature_key) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {isEnabled(t.feature_key) ? 'Enabled' : 'Disabled'}
-                  </span>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${isEnabled(t.feature_key) ? 'bg-tn-success text-white' : 'bg-tn-error-bg text-tn-error'}`}>
+                      {isEnabled(t.feature_key) ? 'Enabled' : 'Disabled'}
+                    </span>
                   <button
                     onClick={() => toggle(t.feature_key, t.is_enabled)}
                     disabled={saving === t.feature_key}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isEnabled(t.feature_key) ? 'border border-red-200 text-red-500 hover:bg-red-50' : 'bg-tn-yellow text-black hover:bg-tn-yellow-2'}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isEnabled(t.feature_key) ? 'border-tn-error text-tn-error hover:bg-tn-error' : 'bg-tn-yellow text-black hover:bg-tn-yellow-2'}`}
                   >
                     {saving === t.feature_key ? 'Saving…' : isEnabled(t.feature_key) ? 'Disable' : 'Enable'}
                   </button>
@@ -157,15 +157,15 @@ export default function ModuleFeatures({ isAdmin }: ModuleFeaturesProps) {
                     </td>
                     <td className="px-4 py-3 text-tn-muted">{t.description}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${isEnabled(t.feature_key) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {isEnabled(t.feature_key) ? 'Enabled' : 'Disabled'}
-                      </span>
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${isEnabled(t.feature_key) ? 'bg-tn-success text-white' : 'bg-tn-error-bg text-tn-error'}`}>
+                      {isEnabled(t.feature_key) ? 'Enabled' : 'Disabled'}
+                    </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => toggle(t.feature_key, t.is_enabled)}
                         disabled={saving === t.feature_key}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isEnabled(t.feature_key) ? 'border border-red-200 text-red-500 hover:bg-red-50' : 'bg-tn-yellow text-black hover:bg-tn-yellow-2'}`}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${isEnabled(t.feature_key) ? 'border-tn-error text-tn-error hover:bg-tn-error' : 'bg-tn-yellow text-black hover:bg-tn-yellow-2'}`}
                       >
                         {saving === t.feature_key ? 'Saving…' : isEnabled(t.feature_key) ? 'Disable' : 'Enable'}
                       </button>

@@ -89,8 +89,8 @@ export default function GiftEntryScreen() {
 
   if (loading || !event) {
     return (
-      <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FFC107] rounded-full animate-spin" />
+      <div className="min-h-screen bg-tn-light flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
       </div>
     );
   }
@@ -99,23 +99,23 @@ export default function GiftEntryScreen() {
     <HostEntryShell slug={slug} title="Gift Entry" activeTab="entries" onBack={() => router.push(`/events/${slug}/entries`)}>
       <EventContextCard event={event} icon="gift" detailsHref={`/events/${slug}/dashboard`} />
 
-      {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
+      {error && <div className="bg-tn-error border-tn-error text-tn-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-[#1F2937] mb-1.5">Contributor Name</label>
+          <label className="block text-sm font-semibold text-tn-text mb-1.5">Contributor Name</label>
           <input
             type="text"
             value={form.guest_name}
             onChange={(e) => setForm({ ...form, guest_name: e.target.value })}
-            className="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FFC107]"
+            className="w-full bg-white border border-tn-border rounded-xl px-4 py-3 text-sm text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow"
             placeholder="Enter name"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-[#1F2937] mb-1.5">Gift Type</label>
+          <label className="block text-sm font-semibold text-tn-text mb-1.5">Gift Type</label>
           <div className="grid grid-cols-3 gap-2">
             {GIFT_TYPES.map((g) => (
               <button
@@ -123,7 +123,7 @@ export default function GiftEntryScreen() {
                 type="button"
                 onClick={() => setForm({ ...form, gift_type: g.id })}
                 className={`py-3 rounded-xl text-xs font-semibold border transition-colors ${
-                  form.gift_type === g.id ? 'border-[#FFC107] bg-[#F5F3FF] text-tn-gold' : 'border-[#E5E7EB] bg-white text-[#6B7280]'
+                  form.gift_type === g.id ? 'border-tn-yellow bg-tn-purple-bg text-tn-gold' : 'border-tn-border bg-white text-tn-muted'
                 }`}
               >
                 <Icon name={g.icon} size={18} className="mx-auto mb-1" />
@@ -134,26 +134,26 @@ export default function GiftEntryScreen() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-[#1F2937] mb-1.5">Description</label>
+          <label className="block text-sm font-semibold text-tn-text mb-1.5">Description</label>
           <input
             type="text"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FFC107]"
+            className="w-full bg-white border border-tn-border rounded-xl px-4 py-3 text-sm text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow"
             placeholder="e.g., Gold chain, Silver plate..."
           />
         </div>
 
         {(form.gift_type === 'gold' || form.gift_type === 'silver') && (
           <div>
-            <label className="block text-sm font-semibold text-[#1F2937] mb-1.5">Weight (grams)</label>
+            <label className="block text-sm font-semibold text-tn-text mb-1.5">Weight (grams)</label>
             <input
               type="number"
               step="any"
               min="0"
               value={form.weight}
               onChange={(e) => setForm({ ...form, weight: e.target.value })}
-              className="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FFC107]"
+              className="w-full bg-white border border-tn-border rounded-xl px-4 py-3 text-sm text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow"
               placeholder="Enter weight in grams"
               required
             />
@@ -161,11 +161,11 @@ export default function GiftEntryScreen() {
         )}
 
         <div>
-          <label className="block text-sm font-semibold text-[#1F2937] mb-1.5">Note (Optional)</label>
+          <label className="block text-sm font-semibold text-tn-text mb-1.5">Note (Optional)</label>
           <textarea
             value={form.note}
             onChange={(e) => setForm({ ...form, note: e.target.value })}
-            className="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FFC107] resize-none"
+            className="w-full bg-white border border-tn-border rounded-xl px-4 py-3 text-sm text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow resize-none"
             placeholder="Add a note..."
             rows={2}
           />
@@ -174,7 +174,7 @@ export default function GiftEntryScreen() {
         <button
           type="submit"
           disabled={saving}
-          className="w-full h-12 bg-[#FFC107] text-white rounded-xl font-semibold text-sm disabled:opacity-40"
+          className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm disabled:opacity-40"
         >
           {saving ? 'Saving…' : 'Save Gift'}
         </button>

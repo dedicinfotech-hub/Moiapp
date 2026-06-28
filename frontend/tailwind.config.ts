@@ -40,23 +40,28 @@ const config: Config = {
           'purple-light': '#FFFBEE',
           'purple-text': '#7C3AED',
           'purple-bg': '#F5F3FF',
+          'purple-gradient-start': '#5D2DE1',
+          'purple-gradient-end': '#3E0FB7',
+          'purple-light-bg': '#F7F8FC',
           
           gold: '#B8860B',
           'gold-bg': '#FFF9E6',
           'gold-border': '#FFE082',
           
           'red-soft': '#EF4444',
-          'red-bg': '#FEF2F2',
-          
-          'green-soft': '#22C55E',
-          'green-bg': '#F0FFF4',
-          
-          'blue-soft': '#3B82F6',
-          'blue-bg': '#EFF6FF',
-          
-          // Status colors
+           'red-bg': '#FEF2F2',
+           
+           'green-soft': '#22C55E',
+           'green-bg': '#F0FFF4',
+           
+           'blue-soft': '#3B82F6',
+           'blue-bg': '#EFF6FF',
+           
+           // Status colors
           success: '#22C55E',
+          'success-bg': '#F0FFF4',
           error: '#EF4444',
+          'error-bg': '#FEF2F2',
           warning: '#F59E0B',
         },
       },

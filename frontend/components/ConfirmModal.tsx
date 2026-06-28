@@ -26,21 +26,21 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   const confirmColors = {
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
-    warning: 'bg-[#FFC107] hover:bg-[#E6AC00] text-black',
-    info: 'bg-[#4B218B] hover:bg-[#3A1A70] text-white',
+    danger: 'bg-tn-error hover:bg-tn-error/80 text-white',
+    warning: 'bg-tn-yellow hover:bg-tn-yellow-2 text-tn-text',
+    info: 'bg-tn-purple hover:bg-tn-purple-2 text-white',
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <h3 className="font-bold text-[#101010] text-lg mb-2">{title}</h3>
-        <p className="text-sm text-[#666] mb-6">{message}</p>
+        <h3 className="font-bold text-tn-text text-lg mb-2">{title}</h3>
+        <p className="text-sm text-tn-muted mb-6">{message}</p>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 border border-[#E8E8E8] text-[#666] py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
+            className="flex-1 border border-tn-border text-tn-muted py-2.5 rounded-lg text-sm font-semibold hover:bg-tn-light transition-colors"
           >
             {cancelText}
           </button>

@@ -160,8 +160,8 @@ export default function PublicEventPage() {
       <PublicGuestNavbar />
       <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FFC107] rounded-full animate-spin" />
-        <p className="text-[#666666] text-sm">Loading event…</p>
+        <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
+        <p className="text-tn-muted text-sm">Loading event…</p>
       </div>
     </div>
     </>
@@ -175,9 +175,9 @@ export default function PublicEventPage() {
           <div className="mb-4 text-tn-gold">
             <Icon name="sad" size={48} />
           </div>
-          <h1 className="text-xl font-bold text-[#101010]">Event not found</h1>
-        <p className="text-[#666666] text-sm mt-2">This link may be invalid or the event has been removed.</p>
-        <Link href="/events" className="mt-4 inline-block text-[#FFC107] font-semibold underline text-sm">Browse all events</Link>
+          <h1 className="text-xl font-bold text-tn-text">Event not found</h1>
+        <p className="text-tn-muted text-sm mt-2">This link may be invalid or the event has been removed.</p>
+        <Link href="/events" className="mt-4 inline-block text-tn-yellow font-semibold underline text-sm">Browse all events</Link>
       </div>
     </div>
     </>
@@ -230,34 +230,34 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
   };
 
   return (
-    <div className="bg-white text-[#101010]">
+    <div className="bg-white text-tn-text">
 
       {/* ── Mobile top bar ── */}
-      <div className="lg:hidden px-4 py-3 flex justify-between items-center gap-3 border-b border-[#E8E8E8]">
-        <Link href="/events" className="p-1 text-[#444444] shrink-0">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7.37 13.25L13.06 18.95L12 20L4.5 12.5L12 5L13.06 6.05L7.37 11.75H19.5V13.25H7.37Z" fill="#444444"/></svg>
-        </Link>
-        <h3 className="font-semibold text-base line-clamp-1 text-center flex-1">
-          {event.bride_name || ''} &amp; {event.groom_name || ''}
-        </h3>
-        {/* WhatsApp share */}
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(`${event.bride_name || ''} & ${event.groom_name || ''} Wedding — Give Moi here: ${shareUrl}`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-1 shrink-0"
-          title="Share on WhatsApp"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="#25D366"/>
-            <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.978-1.401A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.952 7.952 0 01-4.054-1.107l-.29-.173-3.006.845.838-3.065-.19-.314A7.953 7.953 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" fill="#25D366"/>
-          </svg>
-        </a>
-        {/* Native share / copy link */}
-        <button onClick={handleShare} className="p-1 text-[#444444] shrink-0">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16.8 22C16.05 22 15.41 21.74 14.89 21.21C14.37 20.69 14.11 20.06 14.11 19.31C14.11 19.21 14.14 18.96 14.21 18.58L7.1 14.39C6.86 14.64 6.57 14.84 6.24 14.98C5.91 15.12 5.55 15.19 5.18 15.19C4.43 15.19 3.8 14.93 3.28 14.4C2.75 13.88 2.49 13.24 2.49 12.5C2.49 11.76 2.75 11.12 3.28 10.6C3.8 10.07 4.43 9.81 5.18 9.81C5.55 9.81 5.91 9.88 6.24 10.02C6.57 10.16 6.86 10.36 7.1 10.61L14.21 6.43C14.17 6.31 14.15 6.19 14.13 6.07C14.12 5.95 14.11 5.83 14.11 5.69C14.11 4.94 14.37 4.31 14.89 3.79C15.42 3.26 16.05 3 16.8 3C17.55 3 18.19 3.26 18.71 3.79C19.23 4.31 19.49 4.95 19.49 5.69C19.49 6.44 19.23 7.08 18.71 7.6C18.18 8.12 17.55 8.38 16.8 8.38C16.42 8.38 16.07 8.31 15.74 8.17C15.41 8.02 15.13 7.83 14.89 7.58L7.77 11.76C7.81 11.88 7.84 12.01 7.86 12.12C7.87 12.24 7.88 12.37 7.88 12.5C7.88 12.63 7.87 12.76 7.86 12.88C7.84 12.99 7.81 13.12 7.77 13.24L14.89 17.43C15.13 17.18 15.41 16.98 15.74 16.83C16.07 16.69 16.42 16.62 16.8 16.62C17.55 16.62 18.18 16.88 18.71 17.4C19.23 17.93 19.49 18.56 19.49 19.31C19.49 20.06 19.23 20.69 18.71 21.22C18.18 21.74 17.55 22 16.8 22Z" fill="#444444"/></svg>
-        </button>
-      </div>
+      <div className="lg:hidden px-4 py-3 flex justify-between items-center gap-3 border-b border-tn-border">
+          <Link href="/events" className="p-1 text-tn-text shrink-0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7.37 13.25L13.06 18.95L12 20L4.5 12.5L12 5L13.06 6.05L7.37 11.75H19.5V13.25H7.37Z" fill="currentColor"/></svg>
+          </Link>
+          <h3 className="font-semibold text-base line-clamp-1 text-center flex-1">
+            {event.bride_name || ''} &amp; {event.groom_name || ''}
+          </h3>
+          {/* WhatsApp share */}
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(`${event.bride_name || ''} & ${event.groom_name || ''} Wedding — Give Moi here: ${shareUrl}`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1 shrink-0"
+            title="Share on WhatsApp"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="#25D366"/>
+              <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.978-1.401A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.952 7.952 0 01-4.054-1.107l-.29-.173-3.006.845.838-3.065-.19-.314A7.953 7.953 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" fill="#25D366"/>
+            </svg>
+          </a>
+          {/* Native share / copy link */}
+          <button onClick={handleShare} className="p-1 text-tn-text shrink-0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16.8 22C16.05 22 15.41 21.74 14.89 21.21C14.37 20.69 14.11 20.06 14.11 19.31C14.11 19.21 14.14 18.96 14.21 18.58L7.1 14.39C6.86 14.64 6.57 14.84 6.24 14.98C5.91 15.12 5.55 15.19 5.18 15.19C4.43 15.19 3.8 14.93 3.28 14.4C2.75 13.88 2.49 13.24 2.49 12.5C2.49 11.76 2.75 11.12 3.28 10.6C3.8 10.07 4.43 9.81 5.18 9.81C5.55 9.81 5.91 9.88 6.24 10.02C6.57 10.16 6.86 10.36 7.1 10.61L14.21 6.43C14.17 6.31 14.15 6.19 14.13 6.07C14.12 5.95 14.11 5.83 14.11 5.69C14.11 4.94 14.37 4.31 14.89 3.79C15.42 3.26 16.05 3 16.8 3C17.55 3 18.19 3.26 18.71 3.79C19.23 4.31 19.49 4.95 19.49 5.69C19.49 6.44 19.23 7.08 18.71 7.6C18.18 8.12 17.55 8.38 16.8 8.38C16.42 8.38 16.07 8.31 15.74 8.17C15.41 8.02 15.13 7.83 14.89 7.58L7.77 11.76C7.81 11.88 7.84 12.01 7.86 12.12C7.87 12.24 7.88 12.37 7.88 12.5C7.88 12.63 7.87 12.76 7.86 12.88C7.84 12.99 7.81 13.12 7.77 13.24L14.89 17.43C15.13 17.18 15.41 16.98 15.74 16.83C16.07 16.69 16.42 16.62 16.8 16.62C17.55 16.62 18.18 16.88 18.71 17.4C19.23 17.93 19.49 18.56 19.49 19.31C19.49 20.06 19.23 20.69 18.71 21.22C18.18 21.74 17.55 22 16.8 22Z" fill="currentColor"/></svg>
+          </button>
+        </div>
 
       {/* ── Banner image ── */}
       <div className="relative w-full px-4 lg:px-0 overflow-hidden pt-5 lg:pt-0 lg:flex justify-center lg:aspect-[1200/400]">
@@ -276,12 +276,12 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
             />
           </>
         ) : (
-          <div className="w-full h-48 lg:h-full bg-gradient-to-br from-[#FFF8E1] to-[#FFFCF5] rounded-lg lg:rounded-none flex items-center justify-center">
+          <div className="w-full h-48 lg:h-full bg-gradient-to-br from-tn-gold-bg to-tn-yellow-bg rounded-lg lg:rounded-none flex items-center justify-center">
             <div className="text-center">
-              <div className="mb-2 text-[#B8860B]">
+              <div className="mb-2 text-tn-gold">
                 <Icon name={getEventIcon(event.event_type)} size={44} />
               </div>
-              <p className="text-[#B8860B] font-semibold text-sm">{getEventLabel(event.event_type)} Event</p>
+              <p className="text-tn-gold font-semibold text-sm">{getEventLabel(event.event_type)} Event</p>
             </div>
           </div>
         )}
@@ -296,27 +296,27 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
 
             {/* Category pill + title + date/venue */}
             <div className="pb-6 pt-4 lg:pt-0">
-              <div className="flex items-center gap-1 border border-[#FFC107] bg-[#FFFCF5] ps-2 pe-3 py-1.5 rounded-full w-fit text-sm font-semibold text-[#FFC107] mb-3">
+              <div className="flex items-center gap-1 border border-tn-yellow bg-tn-yellow-bg ps-2 pe-3 py-1.5 rounded-full w-fit text-sm font-semibold text-tn-yellow mb-3">
                  <Icon name={getEventIcon(event.event_type)} size={16} />
-                 <span>{getEventLabel(event.event_type)}</span>
-               </div>
+                <span>{getEventLabel(event.event_type)}</span>
+              </div>
               <h1 className="font-bold text-xl lg:text-[32px] leading-tight">
                 {event.bride_name || ''} &amp; {event.groom_name || ''}
               </h1>
-              <div className="pt-2 flex flex-col gap-2 text-[#444444] lg:flex-row lg:gap-6 lg:pt-3">
+              <div className="pt-2 flex flex-col gap-2 text-tn-muted lg:flex-row lg:gap-6 lg:pt-3">
                 <p className="flex gap-2 items-center font-medium text-base">
                   <Icon name="calendar" size={20} />
                   {weddingDate}
                 </p>
                 {event.venue && (
-                  <p className="flex gap-2 items-center font-medium text-base text-[#444444]">
+                  <p className="flex gap-2 items-center font-medium text-base text-tn-muted">
                     <Icon name="map" size={20} />
                     {event.venue}
                     <a
                       href={`https://maps.google.com/?q=${encodeURIComponent(event.venue)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#FFC107] text-xs font-semibold underline ml-1 whitespace-nowrap"
+                      className="text-tn-yellow text-xs font-semibold underline ml-1 whitespace-nowrap"
                     >
                       ↗ Map
                     </a>
@@ -327,13 +327,13 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
 
             {/* About */}
             {event.description && (
-              <div className="py-6 border-y border-[#E8E8E8] flex flex-col gap-4">
+              <div className="py-6 border-y border-tn-border flex flex-col gap-4">
                 <h2 className="text-xl font-bold">About this Event</h2>
-                <div className="text-[#444444] text-[15px] leading-relaxed">
+                <div className="text-tn-muted text-[15px] leading-relaxed">
                   <p className={showMore ? '' : 'line-clamp-4'}>{event.description}</p>
                 </div>
                 {event.description.length > 200 && (
-                  <button onClick={() => setShowMore(!showMore)} className="underline font-semibold text-[#101010] w-fit text-sm">
+                  <button onClick={() => setShowMore(!showMore)} className="underline font-semibold text-tn-text w-fit text-sm">
                     {showMore ? 'Show less' : 'Read more'}
                   </button>
                 )}
@@ -342,12 +342,12 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
 
             {/* Stats */}
             {guestCount > 0 && (
-              <div className="py-6 border-b border-[#E8E8E8]">
+              <div className="py-6 border-b border-tn-border">
                 <h2 className="text-xl font-bold mb-4">Moi Summary</h2>
                 <div className="flex gap-6">
                   <div>
-                    <p className="text-2xl font-bold text-[#101010]">{guestCount}</p>
-                    <p className="text-sm text-[#666666] mt-0.5">Guests registered</p>
+                    <p className="text-2xl font-bold text-tn-text">{guestCount}</p>
+                    <p className="text-sm text-tn-muted mt-0.5">Guests registered</p>
                   </div>
                 </div>
               </div>
@@ -355,11 +355,11 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
 
             {/* Photos */}
             {photos.length > 0 && (
-              <div className="py-6 border-b border-[#E8E8E8]">
+              <div className="py-6 border-b border-tn-border">
                 <h2 className="text-xl font-bold mb-4">Photos</h2>
                 <div className="grid grid-cols-3 gap-2">
                   {photos.map((photo) => (
-                    <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+                    <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden bg-tn-border">
                       <Image src={photo.s3_url} alt={photo.caption || 'Wedding photo'} fill className="object-cover" />
                     </div>
                   ))}
@@ -373,24 +373,24 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
                 <h2 className="text-xl font-bold mb-4">Event Details</h2>
                 <div className="space-y-3">
                   <div className="flex gap-3 items-start">
-                    <span className="text-[#444444] mt-0.5"><Icon name="calendar" size={16} /></span>
+                    <span className="text-tn-muted mt-0.5"><Icon name="calendar" size={16} /></span>
                     <div>
-                      <p className="text-xs text-[#666666]">Date</p>
-                      <p className="font-medium text-[#101010]">{weddingDate}</p>
+                      <p className="text-xs text-tn-text-secondary">Date</p>
+                      <p className="font-medium text-tn-text">{weddingDate}</p>
                     </div>
                   </div>
                   {event.venue && (
                     <>
                       <div className="flex gap-3 items-start">
-                        <span className="text-[#444444] mt-0.5"><Icon name="map" size={16} /></span>
+                        <span className="text-tn-muted mt-0.5"><Icon name="map" size={16} /></span>
                         <div>
-                          <p className="text-xs text-[#666666]">Venue</p>
-                          <p className="font-medium text-[#101010]">{event.venue}</p>
+                          <p className="text-xs text-tn-text-secondary">Venue</p>
+                          <p className="font-medium text-tn-text">{event.venue}</p>
                           <a
                             href={`https://maps.google.com/?q=${encodeURIComponent(event.venue)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[#FFC107] text-xs font-semibold underline mt-0.5 inline-block"
+                            className="text-tn-yellow text-xs font-semibold underline mt-0.5 inline-block"
                           >
                             ↗ Open in Maps
                           </a>
@@ -403,50 +403,50 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
                   {event.event_type === 'wedding' && (
                    <>
                      <div className="flex gap-3 items-start">
-                       <span className="text-[#444444] mt-0.5"><Icon name="wedding" size={16} /></span>
+                       <span className="text-tn-muted mt-0.5"><Icon name="wedding" size={16} /></span>
                        <div>
-                         <p className="text-xs text-[#666666]">Bride</p>
-                         <p className="font-medium text-[#101010]">{event.bride_name || ''}</p>
+                         <p className="text-xs text-tn-text-secondary">Bride</p>
+                         <p className="font-medium text-tn-text">{event.bride_name || ''}</p>
                        </div>
                      </div>
                      <div className="flex gap-3 items-start">
-                       <span className="text-[#444444] mt-0.5"><Icon name="users" size={16} /></span>
+                       <span className="text-tn-muted mt-0.5"><Icon name="users" size={16} /></span>
                        <div>
-                         <p className="text-xs text-[#666666]">Groom</p>
-                         <p className="font-medium text-[#101010]">{event.groom_name || ''}</p>
+                         <p className="text-xs text-tn-text-secondary">Groom</p>
+                         <p className="font-medium text-tn-text">{event.groom_name || ''}</p>
                        </div>
                      </div>
                    </>
-                   )}
-                   {event.event_type === 'graduation' && (
-                   <div className="flex gap-3 items-start">
-                     <span className="text-[#444444] mt-0.5"><Icon name="sparkle" size={16} /></span>
-                     <div>
-                       <p className="text-xs text-[#666666]">Graduate</p>
-                       <p className="font-medium text-[#101010]">{event.graduate_name || ''}</p>
-                     </div>
-                   </div>
-                   )}
-                   {event.event_type === 'housewarming' && (
-                   <>
-                     <div className="flex gap-3 items-start">
-                       <span className="text-[#444444] mt-0.5"><Icon name="users" size={16} /></span>
-                       <div>
-                         <p className="text-xs text-[#666666]">Host</p>
-                         <p className="font-medium text-[#101010]">{event.host_name || ''}</p>
-                       </div>
-                     </div>
-                     {event.spouse_name && (
+                    )}
+                    {event.event_type === 'graduation' && (
+                    <div className="flex gap-3 items-start">
+                      <span className="text-tn-muted mt-0.5"><Icon name="sparkle" size={16} /></span>
+                      <div>
+                        <p className="text-xs text-tn-text-secondary">Graduate</p>
+                        <p className="font-medium text-tn-text">{event.graduate_name || ''}</p>
+                      </div>
+                    </div>
+                    )}
+                    {event.event_type === 'housewarming' && (
+                    <>
                       <div className="flex gap-3 items-start">
-                        <span className="text-[#444444] mt-0.5"><Icon name="users" size={16} /></span>
+                        <span className="text-tn-muted mt-0.5"><Icon name="users" size={16} /></span>
                         <div>
-                         <p className="text-xs text-[#666666]">Spouse</p>
-                         <p className="font-medium text-[#101010]">{event.spouse_name || ''}</p>
-                       </div>
-                     </div>
-                     )}
-                   </>
-                   )}
+                          <p className="text-xs text-tn-text-secondary">Host</p>
+                          <p className="font-medium text-tn-text">{event.host_name || ''}</p>
+                        </div>
+                      </div>
+                      {event.spouse_name && (
+                       <div className="flex gap-3 items-start">
+                         <span className="text-tn-muted mt-0.5"><Icon name="users" size={16} /></span>
+                         <div>
+                          <p className="text-xs text-tn-text-secondary">Spouse</p>
+                          <p className="font-medium text-tn-text">{event.spouse_name || ''}</p>
+                        </div>
+                      </div>
+                      )}
+                    </>
+                    )}
                 </div>
               </div>
             </div>
@@ -457,36 +457,36 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
           <div className="flex flex-col-reverse lg:flex-col-reverse lg:col-span-2 px-4 lg:px-0 pt-2 pb-20 lg:pb-3 lg:sticky lg:top-8 lg:pt-0 h-fit lg:gap-6">
 
             {/* Share panel — desktop only */}
-            <div className="hidden lg:block border border-[#E8E8E8] rounded-xl px-4 py-4">
-              <p className="text-xs font-semibold text-[#999] uppercase tracking-wider mb-3">Share this event</p>
+            <div className="hidden lg:block border border-tn-border rounded-xl px-4 py-4">
+              <p className="text-xs font-semibold text-tn-text-secondary uppercase tracking-wider mb-3">Share this event</p>
               <div className="flex gap-2">
                 {/* WhatsApp */}
                 <a
                   href={`https://wa.me/?text=${encodeURIComponent(`${event.bride_name || ''} & ${event.groom_name || ''} Wedding — Give Moi here: ${shareUrl}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 border-[#E8E8E8] hover:border-[#25D366] hover:bg-[#F0FFF4] transition-colors group"
+                  className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 border-tn-border hover:border-tn-success hover:bg-tn-green-bg transition-colors group"
                   title="Share on WhatsApp"
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="#25D366"/>
                     <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.978-1.401A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.952 7.952 0 01-4.054-1.107l-.29-.173-3.006.845.838-3.065-.19-.314A7.953 7.953 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" fill="#25D366"/>
                   </svg>
-                  <span className="text-[11px] font-semibold text-[#444] group-hover:text-[#25D366]">WhatsApp</span>
+                  <span className="text-[11px] font-semibold text-tn-text group-hover:text-tn-success">WhatsApp</span>
                 </a>
 
                 {/* Copy link */}
                 <button
                   onClick={handleShare}
-                  className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 border-[#E8E8E8] hover:border-[#FFC107] hover:bg-[#FFFCF5] transition-colors group"
+                  className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 border-tn-border hover:border-tn-yellow hover:bg-tn-yellow-bg transition-colors group"
                   title="Copy link"
                 >
                   {copied ? (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#22c55e"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/></svg>
                   ) : (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="#666"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/></svg>
                   )}
-                  <span className={`text-[11px] font-semibold transition-colors ${copied ? 'text-[#22c55e]' : 'text-[#444] group-hover:text-[#B8860B]'}`}>
+                  <span className={`text-[11px] font-semibold transition-colors ${copied ? 'text-tn-success' : 'text-tn-text group-hover:text-tn-gold'}`}>
                     {copied ? 'Copied!' : 'Copy Link'}
                   </span>
                 </button>
@@ -494,14 +494,14 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
             </div>
 
             {/* Organized by */}
-            <div className="border border-[#E8E8E8] rounded-xl px-4 py-5 flex flex-col gap-4">
-              <h3 className="font-bold text-[#000000] text-xl">Organized By</h3>
-              <div className="flex gap-4 items-center border-b border-[#E8E8E8] pb-4">
-                <div className="w-12 h-12 rounded-full bg-[#FFF8E1] border border-[#FFE082] flex items-center justify-center text-xl font-bold text-[#B8860B] shrink-0">
+            <div className="border border-tn-border rounded-xl px-4 py-5 flex flex-col gap-4">
+              <h3 className="font-bold text-tn-text text-xl">Organized By</h3>
+              <div className="flex gap-4 items-center border-b border-tn-border pb-4">
+                <div className="w-12 h-12 rounded-full bg-tn-gold-bg border border-tn-gold-border flex items-center justify-center text-xl font-bold text-tn-gold shrink-0">
                   {event.bride_name?.charAt(0) || '?'}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-[#222222]">
+                  <h4 className="font-semibold text-tn-text">
             {event.event_type === 'graduation' 
               ? event.graduate_name 
               : event.event_type === 'birthday'
@@ -513,21 +513,21 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
               : `${event.bride_name || ''} & ${event.groom_name || ''}`}
           </h4>
                   {event.creator_name && (
-                    <p className="text-sm text-[#666666] mt-0.5">Listed by {event.creator_name}</p>
+                    <p className="text-sm text-tn-muted mt-0.5">Listed by {event.creator_name}</p>
                   )}
                 </div>
               </div>
             </div>
 
             {/* Desktop: Give Moi card */}
-            <div className="hidden lg:flex flex-col border border-[#E8E8E8] rounded-xl p-6 gap-5">
+            <div className="hidden lg:flex flex-col border border-tn-border rounded-xl p-6 gap-5">
               <div>
-                <p className="text-sm text-[#666666] mb-1">{getEventLabel(event.event_type)} Gift</p>
-               <h3 className="text-2xl font-bold text-[#101010] flex items-center gap-2">Give Moi <Icon name={getEventIcon(event.event_type)} size={24} /></h3>
-                <p className="text-sm text-[#666666] mt-1">மொய் கொடுக்க இங்கே அழுத்துங்கள்</p>
+                <p className="text-sm text-tn-muted mb-1">{getEventLabel(event.event_type)} Gift</p>
+               <h3 className="text-2xl font-bold text-tn-text flex items-center gap-2">Give Moi <Icon name={getEventIcon(event.event_type)} size={24} /></h3>
+                <p className="text-sm text-tn-muted mt-1">மொய் கொடுக்க இங்கே அழுத்துங்கள்</p>
               </div>
               {guestMoiClosed ? (
-                <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+                <p className="text-sm text-tn-warning bg-tn-warning/10 border border-tn-warning/30 rounded-lg px-3 py-2.5">
                   {event.event_mode === 'past'
                     ? 'This is a past event — guest moi collection is not available.'
                     : 'Guest payments will open after admin approves this function.'}
@@ -535,13 +535,13 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
               ) : (
                 <>
                   {guestCount > 0 && (
-                    <div className="flex gap-4 text-sm text-[#666666]">
+                    <div className="flex gap-4 text-sm text-tn-muted">
                       <span className="inline-flex items-center gap-1"><Icon name="users" size={14} /> {guestCount} guests registered</span>
                     </div>
                   )}
                   <button
                     onClick={onGiveMoi}
-                    className="bg-[#FFC107] border border-[#FFC107] h-[50px] flex justify-center items-center text-center text-[#000000] font-semibold rounded-lg cursor-pointer hover:bg-[#E6AC00] transition-colors"
+                    className="bg-tn-yellow border border-tn-yellow h-[50px] flex justify-center items-center text-center text-black font-semibold rounded-lg cursor-pointer hover:bg-tn-yellow-2 transition-colors"
                   >
                     Give Moi Now
                   </button>
@@ -555,14 +555,14 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
 
       {/* ── Mobile: sticky bottom bar ── */}
       {!guestMoiClosed && (
-        <div className="sticky bottom-0 left-0 flex justify-between bg-white py-4 px-4 items-center border-t border-[#F5F5F5] shadow-lg lg:hidden">
+        <div className="sticky bottom-0 left-0 flex justify-between bg-white py-4 px-4 items-center border-t border-tn-border shadow-lg lg:hidden">
           <div className="flex-1">
-            <p className="text-xs text-[#666666]">{getEventLabel(event.event_type)} Gift</p>
-             <h3 className="text-lg font-bold text-[#101010] flex items-center gap-1">Give Moi <Icon name={getEventIcon(event.event_type)} size={18} /></h3>
+            <p className="text-xs text-tn-muted">{getEventLabel(event.event_type)} Gift</p>
+             <h3 className="text-lg font-bold text-tn-text flex items-center gap-1">Give Moi <Icon name={getEventIcon(event.event_type)} size={18} /></h3>
           </div>
           <button
             onClick={onGiveMoi}
-            className="bg-[#FFC107] border border-[#FFC107] flex-1 h-[50px] flex justify-center items-center rounded-lg font-semibold text-[#000000] hover:bg-[#E6AC00] transition-colors"
+            className="bg-tn-yellow border border-tn-yellow flex-1 h-[50px] flex justify-center items-center rounded-xl font-semibold text-tn-text hover:bg-tn-yellow-2 transition-colors"
           >
             Give Moi Now
           </button>
@@ -611,7 +611,7 @@ function MoiForm({ event, onBack, onNext }: { event: Event; onBack: () => void; 
   return (
     <div className="min-h-screen bg-white">
       <div className="flex items-center gap-3 px-4 py-4 border-b border-tn-border sticky top-0 bg-white z-10">
-        <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full bg-tn-light text-tn-muted hover:bg-gray-200 transition-colors">←</button>
+        <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full bg-tn-light text-tn-muted hover:bg-tn-border transition-colors">←</button>
         <div>
           <h2 className="font-bold text-tn-text">Guest Moi Form</h2>
           <p className="text-xs text-tn-subtle">
@@ -731,7 +731,7 @@ function MoiForm({ event, onBack, onNext }: { event: Event; onBack: () => void; 
           <p>Your information is secure. We respect your privacy. Your details will only be used for this event.</p>
         </div>
 
-        {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">{error}</div>}
+        {error && <div className="bg-tn-error border-tn-error text-tn-error rounded-xl px-4 py-3 text-sm">{error}</div>}
       </form>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-tn-border px-4 py-4">
@@ -754,9 +754,9 @@ function VenueMap({ venue }: { venue: string }) {
   const googleEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(venue)}&output=embed&z=15`;
 
   return (
-    <div className="border border-[#E8E8E8] rounded-xl overflow-hidden">
+    <div className="border border-tn-border rounded-xl overflow-hidden">
       {/* Map iframe — Google Maps embed, loads immediately, no API key required */}
-      <div className="relative w-full h-[220px] bg-[#f0f0f0]">
+      <div className="relative w-full h-[220px] bg-tn-light">
         <iframe
           src={googleEmbedUrl}
           title={`Map of ${venue}`}
@@ -768,13 +768,13 @@ function VenueMap({ venue }: { venue: string }) {
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-2.5 bg-[#fafafa] border-t border-[#F5F5F5] flex items-center justify-between">
-        <p className="text-xs text-[#888] truncate max-w-[60%]">📍 {venue}</p>
+      <div className="px-4 py-2.5 bg-tn-light border-t border-tn-border flex items-center justify-between">
+        <p className="text-xs text-tn-muted truncate max-w-[60%]">📍 {venue}</p>
         <a
           href={googleMapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 text-xs font-semibold text-[#FFC107] hover:text-[#E6AC00] transition-colors whitespace-nowrap"
+          className="flex items-center gap-1 text-xs font-semibold text-tn-yellow hover:text-tn-yellow-2 transition-colors whitespace-nowrap"
         >
           Open in Maps
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -978,7 +978,7 @@ function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () 
   return (
     <div className="min-h-screen bg-white">
       <div className="flex items-center gap-3 px-4 py-4 border-b border-tn-border sticky top-0 bg-white z-10">
-        <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full bg-tn-light text-tn-muted hover:bg-gray-200 transition-colors">←</button>
+        <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full bg-tn-light text-tn-muted hover:bg-tn-border transition-colors">←</button>
         <div>
           <h2 className="font-bold text-tn-text">Payment Method</h2>
           <p className="text-xs text-tn-subtle">{event.bride_name || ''} &amp; {event.groom_name || ''}</p>
@@ -986,7 +986,7 @@ function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () 
       </div>
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-5 pb-36">
-        {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">{error}</div>}
+        {error && <div className="bg-tn-error border-tn-error text-tn-error rounded-xl px-4 py-3 text-sm">{error}</div>}
 
         <div className="bg-tn-yellow-bg border border-tn-gold-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">

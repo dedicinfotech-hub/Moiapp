@@ -54,22 +54,22 @@ export default function ModuleAnalytics({ events, entries, totalMoi }: ModuleAna
           { label: 'Active Events',       value: String(events.filter((e) => e.is_active).length), icon: 'wedding' as IconName },
           { label: 'Average per Guest',   value: entries.length ? `₹${Math.round(totalMoi / entries.length).toLocaleString('en-IN')}` : '₹0', icon: 'trend' as IconName },
         ].map((k) => (
-          <div key={k.label} className="bg-white border border-[#EBEBEB] rounded-xl p-4">
+          <div key={k.label} className="bg-white border border-tn-border rounded-xl p-4">
             <span className="text-2xl text-tn-gold">
               <Icon name={k.icon} size={24} />
             </span>
-            <p className="text-xl font-bold text-[#101010] mt-2">{k.value}</p>
-            <p className="text-xs text-[#999] mt-0.5">{k.label}</p>
+            <p className="text-xl font-bold text-tn-text mt-2">{k.value}</p>
+            <p className="text-xs text-tn-muted mt-0.5">{k.label}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* By Relation */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Moi by Guest Relation</h3>
+        <div className="bg-white border border-tn-border rounded-xl p-5">
+          <h3 className="font-semibold text-tn-text text-sm mb-4">Moi by Guest Relation</h3>
           {Object.keys(byRelation).length === 0 ? (
-            <p className="text-[#bbb] text-sm">No data yet.</p>
+            <p className="text-tn-subtle text-sm">No data yet.</p>
           ) : (
             <div className="space-y-3">
               {Object.entries(byRelation).sort((a, b) => b[1] - a[1]).map(([rel, amt]) => {
@@ -77,13 +77,13 @@ export default function ModuleAnalytics({ events, entries, totalMoi }: ModuleAna
                 return (
                   <div key={rel}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-[#444] capitalize flex items-center gap-1"><Icon name={relIcon[rel] || 'users'} size={14} /> {rel}</span>
-                      <span className="text-sm font-semibold text-[#101010]">
-                        ₹{amt.toLocaleString('en-IN')} <span className="text-[#bbb] font-normal text-xs">({pct}%)</span>
+                      <span className="text-sm text-tn-muted capitalize flex items-center gap-1"><Icon name={relIcon[rel] || 'users'} size={14} /> {rel}</span>
+                      <span className="text-sm font-semibold text-tn-text">
+                        ₹{amt.toLocaleString('en-IN')} <span className="text-tn-subtle font-normal text-xs">({pct}%)</span>
                       </span>
                     </div>
-                    <div className="h-1.5 bg-[#F5F5F5] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#FFC107] rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    <div className="h-1.5 bg-tn-light rounded-full overflow-hidden">
+                      <div className="h-full bg-tn-yellow rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
@@ -93,10 +93,10 @@ export default function ModuleAnalytics({ events, entries, totalMoi }: ModuleAna
         </div>
 
         {/* By Payment Mode */}
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-5">
-          <h3 className="font-semibold text-[#101010] text-sm mb-4">Payment Mode Split</h3>
+        <div className="bg-white border border-tn-border rounded-xl p-5">
+          <h3 className="font-semibold text-tn-text text-sm mb-4">Payment Mode Split</h3>
           {Object.keys(byMode).length === 0 ? (
-            <p className="text-[#bbb] text-sm">No data yet.</p>
+            <p className="text-tn-subtle text-sm">No data yet.</p>
           ) : (
             <div className="space-y-3">
               {Object.entries(byMode).sort((a, b) => b[1] - a[1]).map(([mode, amt]) => {
@@ -104,13 +104,13 @@ export default function ModuleAnalytics({ events, entries, totalMoi }: ModuleAna
                 return (
                   <div key={mode}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-[#444] capitalize flex items-center gap-1"><Icon name={payIcon[mode] || 'wallet'} size={14} /> {mode}</span>
-                      <span className="text-sm font-semibold text-[#101010]">
-                        ₹{amt.toLocaleString('en-IN')} <span className="text-[#bbb] font-normal text-xs">({pct}%)</span>
+                      <span className="text-sm text-tn-muted capitalize flex items-center gap-1"><Icon name={payIcon[mode] || 'wallet'} size={14} /> {mode}</span>
+                      <span className="text-sm font-semibold text-tn-text">
+                        ₹{amt.toLocaleString('en-IN')} <span className="text-tn-subtle font-normal text-xs">({pct}%)</span>
                       </span>
                     </div>
-                    <div className="h-1.5 bg-[#F5F5F5] rounded-full overflow-hidden">
-                      <div className="h-full bg-[#101010] rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    <div className="h-1.5 bg-tn-light rounded-full overflow-hidden">
+                      <div className="h-full bg-tn-text rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
@@ -121,24 +121,24 @@ export default function ModuleAnalytics({ events, entries, totalMoi }: ModuleAna
       </div>
 
       {/* Top events */}
-      <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-[#F5F5F5]">
-          <h3 className="font-semibold text-[#101010] text-sm">Top Performing Events</h3>
+      <div className="bg-white border border-tn-border rounded-xl overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-tn-border">
+          <h3 className="font-semibold text-tn-text text-sm">Top Performing Events</h3>
         </div>
         {eventStats.length === 0 ? (
-          <div className="py-10 text-center text-[#bbb] text-sm">No events yet.</div>
+          <div className="py-10 text-center text-tn-subtle text-sm">No events yet.</div>
         ) : (
-          <div className="divide-y divide-[#F8F8F8]">
+          <div className="divide-y divide-tn-border">
             {eventStats.map(({ ev, count, total, avg }, i) => (
               <div key={ev.id} className="flex items-center gap-4 px-5 py-3.5">
                 <span className="text-sm font-bold text-tn-gold shrink-0">{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[#101010] text-sm truncate">{getEventDisplayName(ev)}</p>
-                  <p className="text-xs text-[#999]">{count} guests · avg ₹{avg.toLocaleString('en-IN')}</p>
+                  <p className="font-semibold text-tn-text text-sm truncate">{getEventDisplayName(ev)}</p>
+                  <p className="text-xs text-tn-muted">{count} guests · avg ₹{avg.toLocaleString('en-IN')}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="font-bold text-[#101010]">₹{total.toLocaleString('en-IN')}</p>
-                  <p className="text-[10px] text-[#bbb]">collected</p>
+                  <p className="font-bold text-tn-text">₹{total.toLocaleString('en-IN')}</p>
+                  <p className="text-[10px] text-tn-subtle">collected</p>
                 </div>
               </div>
             ))}
@@ -148,19 +148,19 @@ export default function ModuleAnalytics({ events, entries, totalMoi }: ModuleAna
 
       {/* Top contributors */}
       {top5.length > 0 && (
-        <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-[#F5F5F5]">
-            <h3 className="font-semibold text-[#101010] text-sm">Top Contributors</h3>
+        <div className="bg-white border border-tn-border rounded-xl overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-tn-border">
+            <h3 className="font-semibold text-tn-text text-sm">Top Contributors</h3>
           </div>
-          <div className="divide-y divide-[#F8F8F8]">
+          <div className="divide-y divide-tn-border">
             {top5.map((e, i) => (
               <div key={e.id} className="flex items-center gap-3 px-5 py-3">
                 <span className="text-sm font-bold text-tn-gold shrink-0">{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[#101010] text-sm">{e.guest_name}</p>
-                  <p className="text-xs text-[#999] capitalize">{e.relation} · {e.payment_mode}</p>
+                  <p className="font-semibold text-tn-text text-sm">{e.guest_name}</p>
+                  <p className="text-xs text-tn-muted capitalize">{e.relation} · {e.payment_mode}</p>
                 </div>
-                <span className="font-bold text-[#101010]">₹{Number(e.amount).toLocaleString('en-IN')}</span>
+                <span className="font-bold text-tn-text">₹{Number(e.amount).toLocaleString('en-IN')}</span>
               </div>
             ))}
           </div>

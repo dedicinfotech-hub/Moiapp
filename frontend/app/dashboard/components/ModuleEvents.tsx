@@ -75,25 +75,23 @@ export default function ModuleEvents({
 
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
+      {/* Toolbar - Modern mobile design */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="relative w-full sm:w-auto">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search events…"
-            className="w-full sm:w-60 border border-tn-border rounded-lg pl-9 pr-3 py-2 text-sm text-tn-text placeholder-tn-muted focus:outline-none focus:border-tn-yellow transition-colors"
+            className="w-full sm:w-60 border border-tn-border rounded-xl pl-9 pr-3 py-2.5 text-sm text-tn-text placeholder-tn-muted focus:outline-none focus:border-tn-yellow transition-colors"
+            inputMode="search"
           />
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-tn-muted">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <circle cx="11.5" cy="11.5" r="9.5" stroke="currentColor" strokeWidth="2"/>
-              <path d="M18.5 18.5L22 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+            <Icon name="search" size={14} />
           </span>
         </div>
         <button
           onClick={onNewEvent}
-          className="flex items-center gap-1.5 bg-tn-yellow text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-tn-yellow-2 transition-colors whitespace-nowrap"
+          className="flex items-center gap-1.5 bg-tn-yellow text-black px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-all active:scale-[0.98] whitespace-nowrap shadow-sm"
         >
           <Icon name="plus" size={14} />
           New Event
@@ -197,17 +195,17 @@ export default function ModuleEvents({
               </table>
             </div>
 
-            {/* Mobile Grid View */}
+            {/* Mobile Grid View - Modern design */}
             <div className="block sm:hidden divide-y divide-tn-border">
               {paginatedEvents.map((ev) => (
                 <div key={ev.id} className="p-4 space-y-3 bg-white transition-colors">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-tn-yellow-bg border border-tn-yellow-border flex items-center justify-center text-tn-gold shrink-0">
-                          <Icon name={getEventIcon(ev.event_type)} size={18} />
+                      <div className="w-10 h-10 rounded-full bg-tn-yellow-bg border border-tn-yellow-border flex items-center justify-center text-tn-gold shrink-0">
+                          <Icon name={getEventIcon(ev.event_type)} size={20} />
                         </div>
                         <div>
-                          <p className="font-semibold text-tn-text text-sm">
+                          <p className="font-semibold text-tn-text text-sm sm:text-base">
                             {getEventDisplayName(ev)}
                           </p>
                           <p className="text-xs text-tn-muted">/{ev.slug}</p>
@@ -216,49 +214,44 @@ export default function ModuleEvents({
                     <EventStatusBadges event={ev} />
                   </div>
 
-                  <div className="text-xs text-tn-muted space-y-1 pl-11">
+                  <div className="text-xs text-tn-muted space-y-1 pl-12">
                     <p className="flex items-center gap-1"><Icon name="calendar" size={12} /> {new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     {ev.venue && <p className="flex items-center gap-1"><Icon name="map" size={12} /> {ev.venue}</p>}
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-tn-border pl-11">
-                    <span className="text-[10px] text-tn-muted">Actions:</span>
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between pt-2 border-t border-tn-border">
+                    <span className="text-xs text-tn-muted font-medium">Actions:</span>
+                    <div className="flex items-center gap-1.5">
                       <Link
                         href={canAddMoi(ev) ? `/events/${ev.slug}` : '#'}
                         onClick={(e) => { if (!canAddMoi(ev)) e.preventDefault(); }}
                         title={canAddMoi(ev) ? 'Add manual moi entry' : 'Awaiting admin approval'}
-                        className={`p-1.5 transition-colors rounded ${canAddMoi(ev) ? 'text-tn-muted hover:text-tn-yellow' : 'text-tn-border cursor-not-allowed'}`}
+                        className={`w-8 h-8 flex items-center justify-center transition-colors rounded-lg ${canAddMoi(ev) ? 'text-tn-muted hover:text-tn-yellow hover:bg-tn-yellow-bg' : 'text-tn-border cursor-not-allowed'}`}
                       >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                          <circle cx="9" cy="7" r="4" />
-                          <line x1="19" y1="8" x2="19" y2="14" />
-                          <line x1="22" y1="11" x2="16" y2="11" />
-                        </svg>
+                        <Icon name="plus" size={16} />
                       </Link>
                       <Link href={`/e/${ev.slug}`} target="_blank" title="View public page"
-                        className="p-1.5 text-tn-muted hover:text-tn-text transition-colors">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        className="w-8 h-8 flex items-center justify-center text-tn-muted hover:text-tn-text hover:bg-tn-light transition-colors rounded-lg">
+                        <Icon name="share" size={16} />
                       </Link>
                       <button
                         onClick={() => onEdit(ev)}
                         title="Edit event"
-                        className="p-1.5 text-tn-muted hover:text-tn-text transition-colors"
+                        className="w-8 h-8 flex items-center justify-center text-tn-muted hover:text-tn-text hover:bg-tn-light transition-colors rounded-lg"
                       >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        <Icon name="settings" size={16} />
                       </button>
                       <button onClick={() => exportCSV(ev.id)} title="Export CSV"
-                        className="p-1.5 text-tn-muted hover:text-tn-text transition-colors">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        className="w-8 h-8 flex items-center justify-center text-tn-muted hover:text-tn-text hover:bg-tn-light transition-colors rounded-lg">
+                        <Icon name="download" size={16} />
                       </button>
                       <button onClick={async () => { try { const res = await emailPDF(ev.id); showSuccess(res.message); } catch { showError('Failed'); } }} title="Email PDF"
-                        className="p-1.5 text-tn-muted hover:text-tn-text transition-colors">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        className="w-8 h-8 flex items-center justify-center text-tn-muted hover:text-tn-text hover:bg-tn-light transition-colors rounded-lg">
+                        <Icon name="upload" size={16} />
                       </button>
                       <button onClick={() => setShowConfirmDelete(ev.id)} disabled={deleting === ev.id} title="Delete"
-                        className="p-1.5 text-tn-border hover:text-red-400 transition-colors disabled:opacity-40">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        className="w-8 h-8 flex items-center justify-center text-tn-border hover:text-tn-red-soft hover:bg-tn-red-bg transition-colors rounded-lg disabled:opacity-40">
+                        <Icon name="x" size={16} />
                       </button>
                     </div>
                   </div>

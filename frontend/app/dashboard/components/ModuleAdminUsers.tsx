@@ -78,14 +78,14 @@ export default function ModuleAdminUsers({ onNavigate }: ModuleAdminUsersProps) 
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold text-lg text-[#101010]">User Management</h2>
+          <h2 className="font-bold text-lg text-tn-text">User Management</h2>
         </div>
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="bg-white border border-[#EBEBEB] rounded-xl p-4 animate-pulse">
-              <div className="h-5 bg-gray-200 rounded mb-2 w-1/3"></div>
-              <div className="h-4 bg-gray-200 rounded mb-1 w-1/2"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+            <div key={i} className="bg-white border border-tn-border rounded-xl p-4 animate-pulse">
+              <div className="h-5 bg-tn-border rounded mb-2 w-1/3"></div>
+              <div className="h-4 bg-tn-border rounded mb-1 w-1/2"></div>
+              <div className="h-3 bg-tn-border rounded w-1/4"></div>
             </div>
           ))}
         </div>
@@ -95,8 +95,8 @@ export default function ModuleAdminUsers({ onNavigate }: ModuleAdminUsersProps) 
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-5">
-        <p className="text-red-600">Error: {error}</p>
+      <div className="bg-tn-error-bg border-tn-error rounded-xl p-5">
+        <p className="text-tn-error">Error: {error}</p>
       </div>
     );
   }
@@ -104,29 +104,29 @@ export default function ModuleAdminUsers({ onNavigate }: ModuleAdminUsersProps) 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg text-[#101010]">User Management</h2>
+        <h2 className="font-bold text-lg text-tn-text">User Management</h2>
         <button
-          onClick={() => onNavigate('admin-dashboard')}
-          className="text-sm text-[#FFC107] font-semibold hover:underline"
-        >
-          ← Back to Admin
-        </button>
+           onClick={() => onNavigate('admin-dashboard')}
+           className="text-sm text-tn-yellow font-semibold hover:underline"
+         >
+           ← Back to Admin
+         </button>
       </div>
 
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-3">
         <input
-          type="text"
-          placeholder="Search by name or phone..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-3 py-2 border border-[#E8E8E8] rounded-lg text-sm focus:outline-none focus:border-[#FFC107]"
-        />
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="px-3 py-2 border border-[#E8E8E8] rounded-lg text-sm focus:outline-none focus:border-[#FFC107]"
-        >
+           type="text"
+           placeholder="Search by name or phone..."
+           value={search}
+           onChange={(e) => setSearch(e.target.value)}
+           className="flex-1 px-3 py-2 border border-tn-border rounded-xl text-sm focus:outline-none focus:border-tn-yellow"
+         />
+         <select
+           value={filter}
+           onChange={(e) => setFilter(e.target.value)}
+           className="px-3 py-2 border border-tn-border rounded-xl text-sm focus:outline-none focus:border-tn-yellow"
+         >
           <option value="all">All Users</option>
           <option value="active">Active (30 days)</option>
           <option value="inactive">Inactive</option>
@@ -135,36 +135,36 @@ export default function ModuleAdminUsers({ onNavigate }: ModuleAdminUsersProps) 
       </div>
 
       {/* Users List */}
-      <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden">
+      <div className="bg-white border border-tn-border rounded-xl overflow-hidden">
         {users.length === 0 ? (
-          <div className="py-10 text-center text-[#bbb] text-sm">No users found</div>
+          <div className="py-10 text-center text-tn-subtle text-sm">No users found</div>
         ) : (
-          <div className="divide-y divide-[#F8F8F8]">
+          <div className="divide-y divide-tn-border">
             {users.map((u) => (
               <div key={u.id} className="flex items-center gap-3 px-5 py-3">
-                <div className="w-10 h-10 rounded-full bg-[#FFFCF5] border border-[#FFE082] flex items-center justify-center text-[#B8860B] font-bold text-sm shrink-0">
+                <div className="w-10 h-10 rounded-full bg-tn-light border border-tn-yellow flex items-center justify-center text-tn-gold font-bold text-sm shrink-0">
                   {u.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#101010] truncate">{u.name}</p>
-                  <p className="text-xs text-[#999] truncate">
+                  <p className="text-sm font-semibold text-tn-text truncate">{u.name}</p>
+                  <p className="text-xs text-tn-muted truncate">
                     {u.city && `${u.city} • `}{u.phone && `${u.phone} • `}{u.function_count} events
                   </p>
-                  <p className="text-[10px] text-[#bbb]">
+                  <p className="text-[10px] text-tn-subtle">
                     Joined: {new Date(u.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {u.is_blocked ? (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Blocked</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-tn-error text-white">Blocked</span>
                   ) : (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">Active</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-tn-success text-white">Active</span>
                   )}
                   {!u.is_blocked && (
                     <button
                       onClick={() => handleBlock(u.id)}
                       disabled={actionLoading === u.id}
-                      className="text-xs text-red-600 hover:underline disabled:opacity-50"
+                      className="text-xs text-tn-error hover:underline disabled:opacity-50"
                     >
                       Block
                     </button>
@@ -172,7 +172,7 @@ export default function ModuleAdminUsers({ onNavigate }: ModuleAdminUsersProps) 
                   <button
                     onClick={() => handleDelete(u.id)}
                     disabled={actionLoading === u.id}
-                    className="text-xs text-red-600 hover:underline disabled:opacity-50"
+                    className="text-xs text-tn-error hover:underline disabled:opacity-50"
                   >
                     Delete
                   </button>

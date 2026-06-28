@@ -94,7 +94,7 @@ export default function MoiEntryScreen() {
   if (loading || !event) {
     return (
       <div className="min-h-screen bg-tn-light flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
       </div>
     );
   }
@@ -104,7 +104,7 @@ export default function MoiEntryScreen() {
   return (
     <HostEntryShell slug={slug} title="Moi Entry" activeTab="entries" onBack={() => router.push(`/events/${slug}/entries`)} sidebarOverride="closed">
       <EventContextCard event={event} icon="calendar" detailsHref={`/events/${slug}/dashboard`} />
-      {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
+      {error && <div className="bg-tn-error border-tn-error text-tn-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
 
       <p className="text-xs font-semibold text-tn-text mb-2">Entry Type</p>
       <div className="grid grid-cols-2 gap-3 mb-5">
@@ -118,7 +118,7 @@ export default function MoiEntryScreen() {
             onClick={() => setEntryType(t.id)}
             className={`p-3 rounded-xl border-2 text-left ${entryType === t.id ? 'border-tn-yellow bg-tn-yellow-light' : 'border-tn-border bg-white'}`}
           >
-            <div className={`w-4 h-4 rounded-full border-2 mb-2 ${entryType === t.id ? 'border-tn-yellow bg-tn-yellow' : 'border-[#D1D5DB]'}`} />
+            <div className={`w-4 h-4 rounded-full border-2 mb-2 ${entryType === t.id ? 'border-tn-yellow bg-tn-yellow' : 'border-tn-border'}`} />
             <p className="text-xs font-bold text-tn-text">{t.label}</p>
             <p className="text-[10px] text-tn-muted">{t.sub}</p>
           </button>
@@ -127,7 +127,7 @@ export default function MoiEntryScreen() {
 
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1.5">
-          <label className="text-xs font-semibold text-tn-text">Contributor Name <span className="text-red-500">*</span></label>
+          <label className="text-xs font-semibold text-tn-text">Contributor Name <span className="text-tn-error">*</span></label>
           <button type="button" className="text-[10px] font-semibold text-tn-yellow">Add from Contacts</button>
         </div>
         <input required value={form.guest_name} onChange={(e) => update('guest_name', e.target.value)} className={inp} placeholder="Enter name" />
@@ -169,7 +169,7 @@ export default function MoiEntryScreen() {
       </div>
 
       <div className="mb-4">
-         <label className="text-xs font-semibold text-tn-text mb-1.5 block">Amount (₹) <span className="text-red-500">*</span></label>
+         <label className="text-xs font-semibold text-tn-text mb-1.5 block">Amount (₹) <span className="text-tn-error">*</span></label>
          <div className="flex gap-2 mb-2 flex-wrap">
            {PRESETS.map((a) => (
              <button key={a} type="button" onClick={() => update('amount', String(a))} className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${form.amount === String(a) ? 'bg-tn-yellow text-white border-tn-yellow' : 'border-tn-border text-tn-muted'}`}>

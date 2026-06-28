@@ -109,7 +109,7 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
           <div className="bg-white border border-tn-border rounded-xl p-5">
             <h3 className="font-semibold text-sm text-tn-text mb-3">Add Organizer</h3>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg px-3 py-2 text-xs mb-3">
+              <div className="bg-tn-error-bg border-tn-error text-tn-error rounded-lg px-3 py-2 text-xs mb-3">
                 {error}
               </div>
             )}
@@ -170,7 +170,7 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
                       <td className="px-4 py-3 text-right">
                         <button
                           onClick={() => handleRemove(org.id)}
-                          className="text-red-500 text-xs font-semibold hover:text-red-700"
+                          className="text-tn-error text-xs font-semibold hover:text-tn-error"
                         >
                           Remove
                         </button>
@@ -202,7 +202,7 @@ export default function ModuleOrganizers({ events, onRefresh }: ModuleOrganizers
                     </div>
                     <button
                       onClick={() => handleRemove(org.id)}
-                      className="text-red-500 text-xs font-semibold hover:text-red-700 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors shrink-0"
+                      className="text-tn-error text-xs font-semibold hover:text-tn-error px-2 py-1 rounded-lg hover:bg-red-50 transition-colors shrink-0"
                     >
                       Remove
                     </button>

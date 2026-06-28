@@ -33,8 +33,8 @@ function useSlug(): string {
 
 type Tab = 'moi' | 'photos' | 'summary' | 'invitations' | 'returns';
 
-const inputCls  = "w-full bg-white border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow transition-colors";
-const labelCls  = "block text-xs font-semibold text-gray-500 mb-1";
+const inputCls  = "w-full bg-white border-2 border-tn-border rounded-xl px-3 py-2.5 text-sm text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow transition-colors";
+const labelCls  = "block text-xs font-semibold text-tn-muted mb-1";
 const selectCls = `${inputCls} appearance-none bg-white`;
 
 function EventPageInner() {
@@ -89,8 +89,8 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
-          <p className="text-gray-400 text-sm">Loading event…</p>
+          <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
+          <p className="text-tn-subtle text-sm">Loading event…</p>
         </div>
       </div>
     );
@@ -248,8 +248,8 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
                     <p className="text-lg font-bold text-tn-muted">{totalSilver}g</p>
                     <p className="text-[10px] text-tn-subtle mt-1 uppercase font-semibold">Total Silver</p>
                   </div>
-                  <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
-                    <p className="text-lg font-bold text-red-600">{totalGifts}</p>
+                  <div className="bg-tn-error border border-tn-error rounded-xl p-4 text-center">
+                    <p className="text-lg font-bold text-tn-error">{totalGifts}</p>
                     <p className="text-[10px] text-tn-subtle mt-1 uppercase font-semibold">Total Gifts</p>
                   </div>
                   <div className="bg-tn-light border border-tn-border rounded-xl p-4 text-center">
@@ -304,7 +304,7 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
                       <button
                         type="button"
                         onClick={() => setSettingsForm({ ...settingsForm, venue: '' })}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-tn-subtle hover:text-red-500 transition-colors"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-tn-subtle hover:text-tn-error transition-colors"
                         title="Clear venue"
                       >
                         <Icon name="x" size={16} />
@@ -325,7 +325,7 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
                       <button
                         type="button"
                         onClick={() => setSettingsForm({ ...settingsForm, city: '' })}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-tn-subtle hover:text-red-500 transition-colors"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-tn-subtle hover:text-tn-error transition-colors"
                         title="Clear city"
                       >
                         <Icon name="x" size={16} />
@@ -471,7 +471,7 @@ function MoiRegisterTab({ slug, entries, blocked, onUpdate, onDelete }: { slug: 
             className="w-full bg-white border border-tn-border rounded-xl pl-9 pr-3 py-2.5 text-xs"
             placeholder="Search by name or relation..."
           />
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-tn-subtle" width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </div>
         <select
           value={sort}
@@ -487,29 +487,29 @@ function MoiRegisterTab({ slug, entries, blocked, onUpdate, onDelete }: { slug: 
       {/* Quick Action Buttons */}
       <div className="grid grid-cols-3 gap-3">
         <button
-          onClick={() => router.push(`/events/${slug}/moi-entry`)}
-          disabled={blocked}
-          className="flex flex-col items-center gap-2 p-4 bg-[#FFC107] text-white rounded-xl hover:bg-[#FFB300] transition-colors disabled:opacity-50"
-        >
-          <Icon name="list" size={28} />
-          <span className="text-xs font-bold">Manual Entry</span>
-        </button>
-        <button
-          onClick={() => router.push(`/events/${slug}/voice-entry`)}
-          disabled={blocked}
-          className="flex flex-col items-center gap-2 p-4 bg-[#3B82F6] text-white rounded-xl hover:bg-[#2563EB] transition-colors disabled:opacity-50"
-        >
-          <Icon name="users" size={28} />
-          <span className="text-xs font-bold">Voice Entry</span>
-        </button>
-        <button
-          onClick={() => router.push(`/events/${slug}/gift-entry`)}
-          disabled={blocked}
-          className="flex flex-col items-center gap-2 p-4 bg-[#F97316] text-white rounded-xl hover:bg-[#EA580C] transition-colors disabled:opacity-50"
-        >
-          <Icon name="gift" size={28} />
-          <span className="text-xs font-bold">Gift Entry</span>
-        </button>
+           onClick={() => router.push(`/events/${slug}/moi-entry`)}
+           disabled={blocked}
+           className="flex flex-col items-center gap-2 p-4 bg-tn-yellow text-white rounded-xl hover:bg-tn-yellow-2 transition-colors disabled:opacity-50"
+         >
+           <Icon name="list" size={28} />
+           <span className="text-xs font-bold">Manual Entry</span>
+         </button>
+         <button
+           onClick={() => router.push(`/events/${slug}/voice-entry`)}
+           disabled={blocked}
+           className="flex flex-col items-center gap-2 p-4 bg-tn-blue-soft text-white rounded-xl hover:bg-tn-blue-bg transition-colors disabled:opacity-50"
+         >
+           <Icon name="users" size={28} />
+           <span className="text-xs font-bold">Voice Entry</span>
+         </button>
+         <button
+           onClick={() => router.push(`/events/${slug}/gift-entry`)}
+           disabled={blocked}
+           className="flex flex-col items-center gap-2 p-4 bg-tn-warning text-white rounded-xl hover:bg-tn-warning/80 transition-colors disabled:opacity-50"
+         >
+           <Icon name="gift" size={28} />
+           <span className="text-xs font-bold">Gift Entry</span>
+         </button>
       </div>
 
       {/* Entries List */}
@@ -546,7 +546,7 @@ function MoiRegisterTab({ slug, entries, blocked, onUpdate, onDelete }: { slug: 
                   <button onClick={() => openEdit(entry)} className="text-[10px] font-semibold text-tn-yellow">Edit</button>
                   <button
                     onClick={() => setConfirmDeleteEntryId(entry.id)}
-                    className="text-[10px] font-semibold text-red-500"
+                    className="text-[10px] font-semibold text-tn-error"
                   >
                     {deletingId === entry.id ? 'Deleting...' : 'Delete'}
                   </button>
@@ -668,8 +668,8 @@ function PhotosTab({ eventId, photos, onAdd, onDelete }: { eventId: number; phot
 
   return (
     <div className="space-y-5">
-      <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-card">
-        <h2 className="font-bold text-gray-900 mb-4">Upload Photos</h2>
+      <div className="bg-white border border-tn-border rounded-2xl p-6 shadow-sm">
+        <h2 className="font-bold text-tn-text mb-4">Upload Photos</h2>
         <div className="flex gap-3 flex-wrap mb-3">
           <input type="text" value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Caption (optional)" className="bg-tn-light border border-tn-border rounded-xl px-3 py-2.5 text-sm text-tn-text placeholder-tn-subtle focus:outline-none focus:border-tn-yellow transition-colors flex-1 min-w-[180px]" />
         </div>
@@ -679,7 +679,7 @@ function PhotosTab({ eventId, photos, onAdd, onDelete }: { eventId: number; phot
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
               <p className="text-sm text-tn-subtle">Uploading...</p>
             </div>
           ) : (
@@ -699,14 +699,14 @@ function PhotosTab({ eventId, photos, onAdd, onDelete }: { eventId: number; phot
       </div>
 
       {photos.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200 text-gray-300 text-sm">No photos yet.</div>
+        <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-tn-border text-tn-subtle text-sm">No photos yet.</div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {photos.map((photo) => (
-            <div key={photo.id} className="relative group rounded-xl overflow-hidden aspect-square bg-gray-100">
+            <div key={photo.id} className="relative group rounded-xl overflow-hidden aspect-square bg-tn-light">
               <Image src={photo.s3_url} alt={photo.caption || 'Wedding photo'} fill className="object-cover cursor-pointer" onClick={() => setPreview(photo)} />
               {photo.caption && <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-2 py-1 truncate">{photo.caption}</div>}
-              <button onClick={() => setConfirmDeleteId(photo.id)} className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">×</button>
+              <button onClick={() => setConfirmDeleteId(photo.id)} className="absolute top-2 right-2 w-7 h-7 bg-tn-error0 text-white rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">×</button>
             </div>
           ))}
         </div>
@@ -770,7 +770,7 @@ function SummaryTab({ entries, eventId }: { entries: MoiEntry[]; eventId: number
   }).slice(0, 3);
   const relIcon: Record<string, IconName> = { family: 'users', friend: 'users', colleague: 'users', other: 'users' };
    const payIcon: Record<string, IconName> = { cash: 'wallet', upi: 'wallet', card: 'wallet', cheque: 'list', other: 'wallet' };
-   const card = "bg-white border border-gray-100 rounded-2xl p-6 shadow-card";
+   const card = "bg-white border border-tn-border rounded-2xl p-6 shadow-sm";
    
    const cashPercent = total > 0 ? Math.round((cashTotal / total) * 100) : 0;
    const onlinePercent = total > 0 ? Math.round((onlineTotal / total) * 100) : 0;
@@ -811,28 +811,28 @@ function SummaryTab({ entries, eventId }: { entries: MoiEntry[]; eventId: number
     <div className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className={`${card} text-center`}><p className="text-3xl font-bold text-tn-yellow">₹{total.toLocaleString('en-IN')}</p><p className="text-sm text-tn-subtle mt-1">Total Moi Value</p></div>
-        <div className={`${card} text-center`}><p className="text-3xl font-bold text-gray-700">{entries.length}</p><p className="text-sm text-gray-400 mt-1">Total Guests</p></div>
-        <div className={`${card} text-center`}><p className="text-3xl font-bold text-gray-700">₹{entries.length ? Math.round(total / entries.length).toLocaleString('en-IN') : 0}</p><p className="text-sm text-gray-400 mt-1">Average per Guest</p></div>
+        <div className={`${card} text-center`}><p className="text-3xl font-bold text-tn-text">{entries.length}</p><p className="text-sm text-tn-subtle mt-1">Total Guests</p></div>
+        <div className={`${card} text-center`}><p className="text-3xl font-bold text-tn-text">₹{entries.length ? Math.round(total / entries.length).toLocaleString('en-IN') : 0}</p><p className="text-sm text-tn-subtle mt-1">Average per Guest</p></div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className={card}>
-          <h3 className="font-bold text-gray-900 mb-4">By Relation</h3>
+          <h3 className="font-bold text-tn-text mb-4">By Relation</h3>
           <div className="space-y-3">
             {Object.entries(byRelation).map(([rel, data]) => (
               <div key={rel} className="flex items-center justify-between">
-                <div className="flex items-center gap-2"><Icon name={relIcon[rel] || 'users'} size={14} /><span className="text-sm text-gray-700 capitalize">{rel}</span><span className="text-xs text-gray-400">({data.count})</span></div>
+                <div className="flex items-center gap-2"><Icon name={relIcon[rel] || 'users'} size={14} /><span className="text-sm text-tn-text capitalize">{rel}</span><span className="text-xs text-tn-subtle">({data.count})</span></div>
                 <span className="font-bold text-tn-yellow text-sm">₹{data.total.toLocaleString('en-IN')}</span>
               </div>
             ))}
           </div>
         </div>
         <div className={card}>
-          <h3 className="font-bold text-gray-900 mb-4">By Payment Mode</h3>
+          <h3 className="font-bold text-tn-text mb-4">By Payment Mode</h3>
           <div className="space-y-3">
             {Object.entries(byPayment).map(([mode, data]) => (
               <div key={mode} className="flex items-center justify-between">
-                <div className="flex items-center gap-2"><Icon name={payIcon[mode] || 'wallet'} size={14} /><span className="text-sm text-gray-700 capitalize">{mode}</span><span className="text-xs text-gray-400">({data.count})</span></div>
+                <div className="flex items-center gap-2"><Icon name={payIcon[mode] || 'wallet'} size={14} /><span className="text-sm text-tn-text capitalize">{mode}</span><span className="text-xs text-tn-subtle">({data.count})</span></div>
                 <span className="font-bold text-tn-yellow text-sm">₹{data.total.toLocaleString('en-IN')}</span>
               </div>
             ))}
@@ -841,101 +841,101 @@ function SummaryTab({ entries, eventId }: { entries: MoiEntry[]; eventId: number
       </div>
 
       <div className={card}>
-         <h3 className="font-bold text-gray-900 mb-4">Payment Type Breakdown</h3>
+         <h3 className="font-bold text-tn-text mb-4">Payment Type Breakdown</h3>
          <div className="space-y-3">
            <div>
              <div className="flex justify-between text-sm mb-1">
-               <span className="text-gray-600">Cash</span>
-               <span className="font-semibold text-green-700">₹{cashTotal.toLocaleString('en-IN')} ({cashPercent}%)</span>
+               <span className="text-tn-muted">Cash</span>
+               <span className="font-semibold text-tn-success">₹{cashTotal.toLocaleString('en-IN')} ({cashPercent}%)</span>
              </div>
-             <div className="w-full bg-gray-200 rounded-full h-2">
-               <div className="bg-green-500 h-2 rounded-full" style={{ width: `${cashPercent}%` }}></div>
+             <div className="w-full bg-tn-border rounded-full h-2">
+               <div className="bg-tn-success h-2 rounded-full" style={{ width: `${cashPercent}%` }}></div>
              </div>
            </div>
            <div>
              <div className="flex justify-between text-sm mb-1">
-               <span className="text-gray-600">Online (UPI/Card/Cheque)</span>
-               <span className="font-semibold text-blue-600">₹{onlineTotal.toLocaleString('en-IN')} ({onlinePercent}%)</span>
+               <span className="text-tn-muted">Online (UPI/Card/Cheque)</span>
+               <span className="font-semibold text-tn-blue-soft">₹{onlineTotal.toLocaleString('en-IN')} ({onlinePercent}%)</span>
              </div>
-             <div className="w-full bg-gray-200 rounded-full h-2">
-               <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${onlinePercent}%` }}></div>
+             <div className="w-full bg-tn-border rounded-full h-2">
+               <div className="bg-tn-blue-bg h-2 rounded-full" style={{ width: `${onlinePercent}%` }}></div>
              </div>
            </div>
            <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600">Other</span>
-                <span className="font-semibold text-orange-600">₹{otherTotal.toLocaleString('en-IN')} ({otherPercent}%)</span>
+                <span className="text-tn-muted">Other</span>
+                <span className="font-semibold text-tn-warning">₹{otherTotal.toLocaleString('en-IN')} ({otherPercent}%)</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-orange-500 h-2 rounded-full" style={{ width: `${otherPercent}%` }}></div>
+              <div className="w-full bg-tn-border rounded-full h-2">
+                <div className="bg-tn-warning h-2 rounded-full" style={{ width: `${otherPercent}%` }}></div>
               </div>
             </div>
          </div>
       </div>
 
       <div className={card}>
-         <h3 className="font-bold text-gray-900 mb-4">Non-Cash Contributions</h3>
+         <h3 className="font-bold text-tn-text mb-4">Non-Cash Contributions</h3>
          <div className="space-y-3">
            <div>
              <div className="flex justify-between text-sm mb-1">
-               <span className="text-gray-600">Gold ({goldWeightTotal}g)</span>
-               <span className="font-semibold text-yellow-700">₹{goldValueTotal.toLocaleString('en-IN')} ({goldPercent}%)</span>
+               <span className="text-tn-muted">Gold ({goldWeightTotal}g)</span>
+               <span className="font-semibold text-tn-gold">₹{goldValueTotal.toLocaleString('en-IN')} ({goldPercent}%)</span>
              </div>
-             <div className="w-full bg-gray-200 rounded-full h-2">
-               <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${goldPercent}%` }}></div>
+             <div className="w-full bg-tn-border rounded-full h-2">
+               <div className="bg-tn-gold-bg h-2 rounded-full" style={{ width: `${goldPercent}%` }}></div>
              </div>
            </div>
            <div>
              <div className="flex justify-between text-sm mb-1">
-               <span className="text-gray-600">Silver ({silverWeightTotal}g)</span>
-               <span className="font-semibold text-gray-700">₹{silverValueTotal.toLocaleString('en-IN')} ({silverPercent}%)</span>
+               <span className="text-tn-muted">Silver ({silverWeightTotal}g)</span>
+               <span className="font-semibold text-tn-text">₹{silverValueTotal.toLocaleString('en-IN')} ({silverPercent}%)</span>
              </div>
-             <div className="w-full bg-gray-200 rounded-full h-2">
-               <div className="bg-gray-500 h-2 rounded-full" style={{ width: `${silverPercent}%` }}></div>
+             <div className="w-full bg-tn-border rounded-full h-2">
+               <div className="bg-tn-muted h-2 rounded-full" style={{ width: `${silverPercent}%` }}></div>
              </div>
            </div>
            <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600">Gifts ({giftCount} items)</span>
-                <span className="font-semibold text-red-600">₹{giftValueTotal.toLocaleString('en-IN')}</span>
+                <span className="text-tn-muted">Gifts ({giftCount} items)</span>
+                <span className="font-semibold text-tn-error">₹{giftValueTotal.toLocaleString('en-IN')}</span>
               </div>
               {giftValueTotal === 0 && (
-                <p className="text-xs text-gray-400 mt-1">Value not recorded for some or all gifts</p>
+                <p className="text-xs text-tn-subtle mt-1">Value not recorded for some or all gifts</p>
               )}
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-red-400 h-2 rounded-full" style={{ width: `${giftValueTotal > 0 ? Math.min(100, giftPercent) : 0}%` }}></div>
+              <div className="w-full bg-tn-border rounded-full h-2">
+                <div className="bg-tn-error h-2 rounded-full" style={{ width: `${giftValueTotal > 0 ? Math.min(100, giftPercent) : 0}%` }}></div>
               </div>
             </div>
             {otherTotal > 0 && (
              <div>
                <div className="flex justify-between text-sm mb-1">
-                 <span className="text-gray-600">Other</span>
-                 <span className="font-semibold text-orange-600">₹{otherTotal.toLocaleString('en-IN')} ({otherPercent}%)</span>
+                 <span className="text-tn-muted">Other</span>
+                 <span className="font-semibold text-tn-warning">₹{otherTotal.toLocaleString('en-IN')} ({otherPercent}%)</span>
                </div>
-               <div className="w-full bg-gray-200 rounded-full h-2">
-                 <div className="bg-orange-400 h-2 rounded-full" style={{ width: `${otherPercent}%` }}></div>
+               <div className="w-full bg-tn-border rounded-full h-2">
+                 <div className="bg-tn-warning h-2 rounded-full" style={{ width: `${otherPercent}%` }}></div>
                </div>
              </div>
            )}
            {goldTotal > 0 && (
              <div>
                <div className="flex justify-between text-sm mb-1">
-                 <span className="text-gray-600">Gold</span>
-                 <span className="font-semibold text-yellow-700">{goldTotal}g ({goldPercent}%)</span>
+                 <span className="text-tn-muted">Gold</span>
+                 <span className="font-semibold text-tn-gold">{goldTotal}g ({goldPercent}%)</span>
                </div>
-               <div className="w-full bg-gray-200 rounded-full h-2">
-                 <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${goldPercent}%` }}></div>
+               <div className="w-full bg-tn-border rounded-full h-2">
+                 <div className="bg-tn-gold-bg h-2 rounded-full" style={{ width: `${goldPercent}%` }}></div>
                </div>
              </div>
            )}
            {silverTotal > 0 && (
              <div>
                <div className="flex justify-between text-sm mb-1">
-                 <span className="text-gray-600">Silver</span>
-                 <span className="font-semibold text-gray-600">{silverTotal}g ({silverPercent}%)</span>
+                 <span className="text-tn-muted">Silver</span>
+                 <span className="font-semibold text-tn-muted">{silverTotal}g ({silverPercent}%)</span>
                </div>
-               <div className="w-full bg-gray-200 rounded-full h-2">
-                 <div className="bg-gray-400 h-2 rounded-full" style={{ width: `${silverPercent}%` }}></div>
+               <div className="w-full bg-tn-border rounded-full h-2">
+                 <div className="bg-tn-subtle h-2 rounded-full" style={{ width: `${silverPercent}%` }}></div>
                </div>
              </div>
            )}
@@ -944,13 +944,13 @@ function SummaryTab({ entries, eventId }: { entries: MoiEntry[]; eventId: number
 
       {top3.length > 0 && (
         <div className={card}>
-          <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2"><Icon name="trend" size={18} /> Top 3 Contributors</h3>
+          <h3 className="font-bold text-tn-text mb-4 flex items-center gap-2"><Icon name="trend" size={18} /> Top 3 Contributors</h3>
           <div className="space-y-1">
             {top3.map((e, i) => (
-              <div key={e.id} className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0">
+              <div key={e.id} className="flex items-center justify-between py-2.5 border-b border-tn-border last:border-0">
                 <div className="flex items-center gap-3">
                   <span className="text-lg font-bold text-tn-yellow">#{i + 1}</span>
-                  <div><p className="font-semibold text-gray-900 text-sm">{e.guest_name}</p><p className="text-xs text-gray-400 capitalize">{e.relation}</p></div>
+                  <div><p className="font-semibold text-tn-text text-sm">{e.guest_name}</p><p className="text-xs text-tn-subtle capitalize">{e.relation}</p></div>
                 </div>
                 <span className="font-bold text-tn-yellow">₹{Number(e.amount).toLocaleString('en-IN')}</span>
               </div>
@@ -968,7 +968,7 @@ function SummaryTab({ entries, eventId }: { entries: MoiEntry[]; eventId: number
         </button>
         <button
           onClick={handleWhatsAppShare}
-          className="flex items-center gap-2 px-5 py-2.5 bg-green-500 text-white rounded-xl text-sm font-bold hover:bg-green-600 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-tn-success text-white rounded-xl text-sm font-bold hover:bg-tn-success transition-colors"
         >
           <Icon name="arrow-right" size={16} /> Share via WhatsApp
         </button>
@@ -1063,8 +1063,8 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
 
   return (
      <div className="space-y-5">
-       <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-card">
-         <h2 className="font-bold text-gray-900 mb-4">Upload Invitation List</h2>
+       <div className="bg-white border border-tn-border rounded-2xl p-6 shadow-card">
+         <h2 className="font-bold text-tn-text mb-4">Upload Invitation List</h2>
          <div className="flex gap-3 flex-wrap mb-3">
            <button
              type="button"
@@ -1085,7 +1085,7 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
          >
            {uploading ? (
              <div className="flex flex-col items-center gap-3">
-               <div className="w-8 h-8 border-2 border-gray-200 border-t-tn-yellow rounded-full animate-spin" />
+               <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
                <p className="text-sm text-tn-subtle">Uploading...</p>
              </div>
            ) : (
@@ -1112,7 +1112,7 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
              onClick={handleUpload}
              disabled={!file || uploading}
              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors ${
-               !file || uploading ? 'bg-gray-100 text-gray-400' : 'bg-tn-yellow text-tn-text hover:bg-tn-yellow-2'
+               !file || uploading ? 'bg-tn-light text-tn-subtle' : 'bg-tn-yellow text-tn-text hover:bg-tn-yellow-2'
              }`}
            >
              {uploading ? 'Uploading…' : '📤 Upload'}
@@ -1133,7 +1133,7 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
                <Icon name="download" size={16} /> Sample Template
              </button>
          </div>
-         <p className="text-xs text-gray-300 mt-2">CSV or XLSX format. Required columns: Name, Phone, Relation, City. <button onClick={() => {
+         <p className="text-xs text-tn-subtle mt-2">CSV or XLSX format. Required columns: Name, Phone, Relation, City. <button onClick={() => {
            const csvContent = 'Name,Phone,Relation,City\nRamesh,9876543210,family,Chennai\nPriya,9876543211,friend,Bangalore\n';
            const blob = new Blob([csvContent], { type: 'text/csv' });
            const url = URL.createObjectURL(blob);
@@ -1146,12 +1146,12 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
        </div>
 
       {notInvitedButGaveMoi.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
-          <h3 className="font-bold text-yellow-800 mb-2 flex items-center gap-2"><Icon name="alert" size={18} /> Not in Invitation List</h3>
-          <p className="text-sm text-yellow-700">
+        <div className="bg-tn-gold-bg border border-tn-gold-border rounded-2xl p-4">
+          <h3 className="font-bold text-tn-gold mb-2 flex items-center gap-2"><Icon name="alert" size={18} /> Not in Invitation List</h3>
+          <p className="text-sm text-tn-gold">
             {notInvitedButGaveMoi.length} person(s) gave moi but were not in the invitation list:
           </p>
-          <ul className="mt-2 text-sm text-yellow-700">
+          <ul className="mt-2 text-sm text-tn-gold">
             {notInvitedButGaveMoi.slice(0, 5).map(e => (
               <li key={e.id}>• {e.guest_name}</li>
             ))}
@@ -1161,39 +1161,39 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
       )}
 
       {invitedButDidNotAttend.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-          <h3 className="font-bold text-blue-800 mb-2 flex items-center gap-2"><Icon name="calendar" size={18} /> Invited but Not Attended</h3>
-          <p className="text-sm text-blue-700">
+        <div className="bg-tn-blue-bg border border-tn-blue-bg rounded-2xl p-4">
+          <h3 className="font-bold text-tn-blue-soft mb-2 flex items-center gap-2"><Icon name="calendar" size={18} /> Invited but Not Attended</h3>
+          <p className="text-sm text-tn-blue-soft">
             {invitedButDidNotAttend.length} person(s) were invited but haven&apos;t given moi yet.
           </p>
         </div>
       )}
 
-      <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-card">
-        <h3 className="font-bold text-gray-900 mb-4">Attendance Summary</h3>
+      <div className="bg-white border border-tn-border rounded-2xl p-6 shadow-card">
+        <h3 className="font-bold text-tn-text mb-4">Attendance Summary</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="text-center p-3 bg-gray-50 rounded-xl">
-            <p className="text-xl font-bold text-gray-700">{summary.invited}</p>
-            <p className="text-xs text-gray-400">Invited</p>
+          <div className="text-center p-3 bg-tn-light rounded-xl">
+            <p className="text-xl font-bold text-tn-text">{summary.invited}</p>
+            <p className="text-xs text-tn-subtle">Invited</p>
           </div>
-          <div className="text-center p-3 bg-green-50 rounded-xl">
-            <p className="text-xl font-bold text-green-700">{summary.came}</p>
-            <p className="text-xs text-gray-400">Came</p>
+          <div className="text-center p-3 bg-tn-success rounded-xl">
+            <p className="text-xl font-bold text-tn-success">{summary.came}</p>
+            <p className="text-xs text-tn-subtle">Came</p>
           </div>
           <div className="text-center p-3 bg-tn-yellow-light rounded-xl">
           <p className="text-xl font-bold text-tn-yellow">{summary.gaveMoi}</p>
           <p className="text-xs text-tn-subtle">Gave Moi</p>
           </div>
-          <div className="text-center p-3 bg-red-50 rounded-xl">
-            <p className="text-xl font-bold text-red-600">{summary.noShow}</p>
-            <p className="text-xs text-gray-400">No Show</p>
+          <div className="text-center p-3 bg-tn-error rounded-xl">
+            <p className="text-xl font-bold text-tn-error">{summary.noShow}</p>
+            <p className="text-xs text-tn-subtle">No Show</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-card">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
-          <h2 className="font-bold text-gray-900">Invitations ({invitations.length})</h2>
+      <div className="bg-white border border-tn-border rounded-2xl overflow-hidden shadow-card">
+        <div className="px-5 py-4 border-b border-tn-border flex items-center justify-between flex-wrap gap-3">
+          <h2 className="font-bold text-tn-text">Invitations ({invitations.length})</h2>
           <div className="flex gap-2 flex-wrap">
             {(['all', 'invited', 'came', 'gave_moi', 'no_show'] as const).map((f) => (
               <button
@@ -1211,7 +1211,7 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
             ))}
           </div>
         </div>
-        <div className="px-5 py-3 border-b border-gray-100">
+        <div className="px-5 py-3 border-b border-tn-border">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -1221,9 +1221,9 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-300 text-sm">Loading invitations…</div>
+          <div className="text-center py-12 text-tn-subtle text-sm">Loading invitations…</div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 text-gray-300 text-sm">
+          <div className="text-center py-12 text-tn-subtle text-sm">
             {invitations.length === 0 ? 'No invitations uploaded yet.' : 'No results found.'}
           </div>
         ) : (
@@ -1231,16 +1231,16 @@ function InvitationTab({ eventId, entries }: { eventId: number; entries: MoiEntr
             {filtered.map((inv) => (
               <div key={inv.id} className="flex items-center justify-between px-5 py-3.5">
                 <div>
-                  <p className="font-semibold text-gray-900 text-sm">{inv.name}</p>
-                  <p className="text-xs text-gray-400 capitalize">
+                  <p className="font-semibold text-tn-text text-sm">{inv.name}</p>
+                  <p className="text-xs text-tn-subtle capitalize">
                     {inv.relation} • {inv.phone} • {inv.city}
                   </p>
                 </div>
                 <span className={`text-xs font-semibold px-2 py-1 rounded-full capitalize ${
                   inv.status === 'gave_moi' ? 'bg-tn-yellow-light text-tn-yellow' :
-                  inv.status === 'came' ? 'bg-green-100 text-green-700' :
-                  inv.status === 'no_show' ? 'bg-red-100 text-red-700' :
-                  'bg-gray-100 text-gray-600'
+                  inv.status === 'came' ? 'bg-tn-success text-tn-success' :
+                  inv.status === 'no_show' ? 'bg-tn-error text-tn-error' :
+                  'bg-tn-light text-tn-muted'
                 }`}>
                   {inv.status === 'gave_moi' ? 'Gave Moi' : inv.status.replace('_', ' ')}
                 </span>
@@ -1415,23 +1415,23 @@ function ReturnTrackerTab({ eventId, entries }: { eventId: number; entries: MoiE
     <div className="space-y-5">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <div className="bg-white border border-gray-100 rounded-xl p-4 text-center">
-          <p className="text-lg font-bold text-gray-700">{returnGifts.length}</p>
-          <p className="text-[10px] text-gray-400 mt-1 uppercase font-semibold">Total Tracked</p>
+        <div className="bg-white border border-tn-border rounded-xl p-4 text-center">
+          <p className="text-lg font-bold text-tn-text">{returnGifts.length}</p>
+          <p className="text-[10px] text-tn-subtle mt-1 uppercase font-semibold">Total Tracked</p>
         </div>
-        <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 text-center">
-          <p className="text-lg font-bold text-yellow-700">{pendingCount}</p>
-          <p className="text-[10px] text-gray-400 mt-1 uppercase font-semibold">Pending</p>
+        <div className="bg-tn-gold-bg border border-tn-gold-border rounded-xl p-4 text-center">
+          <p className="text-lg font-bold text-tn-gold">{pendingCount}</p>
+          <p className="text-[10px] text-tn-subtle mt-1 uppercase font-semibold">Pending</p>
         </div>
-        <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
-          <p className="text-lg font-bold text-green-700">{returnedCount}</p>
-          <p className="text-[10px] text-gray-400 mt-1 uppercase font-semibold">Returned</p>
+        <div className="bg-tn-success border border-tn-success rounded-xl p-4 text-center">
+          <p className="text-lg font-bold text-tn-success">{returnedCount}</p>
+          <p className="text-[10px] text-tn-subtle mt-1 uppercase font-semibold">Returned</p>
         </div>
       </div>
 
       {/* Add Return Gift Form */}
-      <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-card">
-        <h2 className="font-bold text-gray-900 mb-4">Add Return Gift</h2>
+      <div className="bg-white border border-tn-border rounded-2xl p-6 shadow-card">
+        <h2 className="font-bold text-tn-text mb-4">Add Return Gift</h2>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
@@ -1556,21 +1556,21 @@ function ReturnTrackerTab({ eventId, entries }: { eventId: number; entries: MoiE
       </div>
 
       {/* Return Gifts List */}
-      <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-card">
-        <div className="px-5 py-4 border-b border-gray-100">
-           <h2 className="font-bold text-gray-900">Return Gifts ({returnGifts.length})</h2>
+      <div className="bg-white border border-tn-border rounded-2xl overflow-hidden shadow-card">
+        <div className="px-5 py-4 border-b border-tn-border">
+           <h2 className="font-bold text-tn-text">Return Gifts ({returnGifts.length})</h2>
          </div>
          {loading ? (
-           <div className="text-center py-12 text-gray-300 text-sm">Loading return gifts…</div>
+           <div className="text-center py-12 text-tn-subtle text-sm">Loading return gifts…</div>
          ) : returnGifts.length === 0 ? (
-           <div className="text-center py-12 text-gray-300 text-sm">No return gifts tracked yet.</div>
+           <div className="text-center py-12 text-tn-subtle text-sm">No return gifts tracked yet.</div>
          ) : (
            <div className="divide-y divide-gray-50 max-h-96 overflow-y-auto">
              {returnGifts.map((r) => (
                  <div key={r.id} className="flex items-center justify-between px-5 py-3.5">
                    <div>
-                     <p className="font-semibold text-gray-900 text-sm">{r.guest_name}</p>
-                     <p className="text-xs text-gray-400">
+                     <p className="font-semibold text-tn-text text-sm">{r.guest_name}</p>
+                     <p className="text-xs text-tn-subtle">
                        {r.return_type !== 'none' && (
                          <>
                            {r.return_type === 'cash' && `₹${Number(r.return_amount || 0).toLocaleString('en-IN')}`}
@@ -1583,9 +1583,9 @@ function ReturnTrackerTab({ eventId, entries }: { eventId: number; entries: MoiE
                    </div>
                    <div className="flex items-center gap-2">
                      <span className={`text-xs font-semibold px-2 py-1 rounded-full capitalize ${
-                       r.status === 'returned' ? 'bg-green-100 text-green-700' :
-                       r.status === 'not_applicable' ? 'bg-gray-100 text-gray-600' :
-                       'bg-yellow-100 text-yellow-700'
+                       r.status === 'returned' ? 'bg-tn-success text-tn-success' :
+                       r.status === 'not_applicable' ? 'bg-tn-light text-tn-muted' :
+                       'bg-tn-gold-bg text-tn-gold'
                      }`}>
                        {r.status}
                      </span>
@@ -1608,10 +1608,10 @@ function ReturnTrackerTab({ eventId, entries }: { eventId: number; entries: MoiE
        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setEditingReturnGift(null)}>
          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
            <div className="flex items-center justify-between mb-4">
-             <h2 className="font-bold text-gray-900 text-lg">Edit Return Gift</h2>
+             <h2 className="font-bold text-tn-text text-lg">Edit Return Gift</h2>
              <button
                onClick={() => setEditingReturnGift(null)}
-               className="text-gray-400 hover:text-gray-600 text-xl"
+               className="text-tn-subtle hover:text-tn-muted text-xl"
              >
                ×
              </button>
@@ -1753,7 +1753,7 @@ function ReturnTrackerTab({ eventId, entries }: { eventId: number; entries: MoiE
                <button
                    type="button"
                    onClick={() => setEditingReturnGift(null)}
-                   className="px-6 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50"
+                   className="px-6 py-2.5 rounded-xl text-sm font-semibold border border-tn-border text-tn-muted hover:bg-tn-light"
                  >
                    Cancel
                  </button>
@@ -1765,7 +1765,7 @@ function ReturnTrackerTab({ eventId, entries }: { eventId: number; entries: MoiE
                       }
                     }}
                     disabled={deletingReturnGift}
-                    className="px-6 py-2.5 rounded-xl text-sm font-semibold border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-xl text-sm font-semibold border border-tn-error text-tn-error hover:bg-tn-error disabled:opacity-50"
                   >
                     Delete
                   </button>

@@ -23,7 +23,7 @@ export default function NewEventPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-400">Please <Link href="/login" className="text-[#B8860B] underline">login</Link> first.</p>
+        <p className="text-tn-text-secondary">Please <Link href="/login" className="text-tn-gold underline">login</Link> first.</p>
       </div>
     );
   }
@@ -64,29 +64,29 @@ export default function NewEventPage() {
     }
   };
 
-  const inp = 'w-full bg-white border-2 border-[#E8E8E8] rounded-xl px-4 py-3 text-sm text-[#101010] placeholder-[#bbb] focus:outline-none focus:border-[#FFC107] transition-colors';
-  const lbl = 'block text-sm font-semibold text-[#444] mb-1.5';
+  const inp = 'w-full bg-white border-2 border-tn-border rounded-xl px-4 py-3 text-sm text-tn-text placeholder-tn-text-secondary focus:outline-none focus:border-tn-yellow transition-colors';
+  const lbl = 'block text-sm font-semibold text-tn-muted mb-1.5';
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] py-10 px-4">
+    <div className="min-h-screen bg-tn-light py-10 px-4">
       <div className="max-w-lg mx-auto">
-        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-[#999] hover:text-[#444] transition-colors mb-6">
+        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-tn-text-secondary hover:text-tn-text transition-colors mb-6">
           ← Back to Dashboard
         </Link>
 
-        <div className="bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white border border-tn-border rounded-2xl shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#FFF8E1] to-[#FFFCF5] border-b border-[#FFE082] px-8 py-6 text-center">
-            <div className="mb-2 text-[#B8860B]">
+          <div className="bg-gradient-to-r from-tn-gold-bg to-tn-yellow-bg border-b border-tn-gold-border px-8 py-6 text-center">
+            <div className="mb-2 text-tn-gold">
               <Icon name="venue" size={40} />
             </div>
-            <h1 className="text-xl font-extrabold text-[#101010]">Create Wedding Event</h1>
-            <p className="text-[#888] text-sm mt-1">புதிய திருமண நிகழ்வு உருவாக்கவும்</p>
+            <h1 className="text-xl font-extrabold text-tn-text">Create Wedding Event</h1>
+            <p className="text-tn-text-secondary text-sm mt-1">புதிய திருமண நிகழ்வு உருவாக்கவும்</p>
           </div>
 
           <div className="p-8 space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">{error}</div>
+              <div className="bg-tn-red-bg border border-tn-red-bg rounded-xl px-4 py-3 text-sm text-tn-error">{error}</div>
             )}
 
             {/* Cover photo upload */}
@@ -95,7 +95,7 @@ export default function NewEventPage() {
               <div
                 onClick={() => fileRef.current?.click()}
                 className={`relative cursor-pointer rounded-xl overflow-hidden border-2 border-dashed transition-colors ${
-                  coverPreview ? 'border-[#FFC107]' : 'border-[#E8E8E8] hover:border-[#FFC107]'
+                  coverPreview ? 'border-tn-yellow' : 'border-tn-border hover:border-tn-yellow'
                 }`}
               >
                 {coverPreview ? (
@@ -127,16 +127,16 @@ export default function NewEventPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={lbl}>Bride Name <span className="text-[#FFC107]">*</span></label>
+                  <label className={lbl}>Bride Name <span className="text-tn-yellow">*</span></label>
                   <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={inp} placeholder="Priya" />
                 </div>
                 <div>
-                  <label className={lbl}>Groom Name <span className="text-[#FFC107]">*</span></label>
+                  <label className={lbl}>Groom Name <span className="text-tn-yellow">*</span></label>
                   <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={inp} placeholder="Ravi" />
                 </div>
               </div>
               <div>
-                <label className={lbl}>Wedding Date <span className="text-[#FFC107]">*</span></label>
+                <label className={lbl}>Wedding Date <span className="text-tn-yellow">*</span></label>
                 <input required type="date" value={form.wedding_date} onChange={(e) => setForm({ ...form, wedding_date: e.target.value })} className={inp} />
               </div>
               <div>
@@ -148,7 +148,7 @@ export default function NewEventPage() {
                 <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={`${inp} resize-none`} placeholder="A brief note about the wedding…" />
               </div>
               <button type="submit" disabled={loading}
-                className="w-full bg-[#FFC107] text-black py-3.5 rounded-xl font-extrabold text-base hover:bg-[#E6AC00] transition-colors disabled:opacity-50 shadow-lg shadow-[#FFC107]/30">
+                className="w-full bg-tn-yellow text-tn-text py-3.5 rounded-xl font-extrabold text-base hover:bg-tn-yellow-2 transition-colors disabled:opacity-50 shadow-lg shadow-tn-yellow/30">
                 {loading ? 'Creating…' : 'Create Event →'}
               </button>
             </form>

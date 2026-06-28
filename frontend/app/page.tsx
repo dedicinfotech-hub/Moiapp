@@ -498,13 +498,13 @@ export default function HomePage() {
 
           {/* Bottom bar */}
           <div className="pt-8 border-t border-[#222] flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-[#666] text-xs text-center md:text-left">
-              © {new Date().getFullYear()} MoiApp · Made with <span className="text-red-500">❤️</span> for Tamil weddings
+            <p className="text-tn-muted text-xs text-center md:text-left">
+              © {new Date().getFullYear()} MoiApp · Made with <span className="text-tn-error">❤️</span> for Tamil weddings
             </p>
             
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-xs text-[#666]">
-                <Icon name="lock" size={14} className="text-[#FFC107]" />
+              <div className="flex items-center gap-2 text-xs text-tn-muted">
+                <Icon name="lock" size={14} className="text-tn-yellow" />
                 <span>Secure & Free</span>
               </div>
               <div className="w-px h-4 bg-[#333]" />

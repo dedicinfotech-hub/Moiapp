@@ -479,10 +479,10 @@ export default function VoiceEntryScreen() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-tn-light flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FFC107] rounded-full animate-spin" />
-          <p className="text-[#666] text-sm">Loading…</p>
+          <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
+          <p className="text-tn-muted text-sm">Loading…</p>
         </div>
       </div>
     );
@@ -491,7 +491,7 @@ export default function VoiceEntryScreen() {
   if (!event) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-400">Event not found</p>
+        <p className="text-tn-subtle">Event not found</p>
       </div>
     );
   }
@@ -499,13 +499,13 @@ export default function VoiceEntryScreen() {
   return (
     <HostEntryShell slug={slug} title="Voice Entry" subtitle="Speak the contributor details and amount. We'll convert it to text for you to review and save." activeTab="voice" onBack={() => router.push(`/events/${slug}/entries`)} sidebarOverride="closed">
       <EventContextCard event={event} icon="calendar" detailsHref={`/events/${slug}/dashboard`} />
-      {error && <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
+      {error && <div className="bg-tn-error border-tn-error text-tn-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
 
       <div className="flex flex-col items-center py-6 mb-4">
         {recordingState === 'listening' && (
           <div className="flex items-end gap-0.5 h-12 mb-4">
             {[...Array(24)].map((_, i) => (
-              <div key={i} className="w-1 bg-[#FFC107] rounded-full animate-pulse" style={{ height: `${12 + (i % 5) * 6}px`, animationDelay: `${i * 0.04}s` }} />
+              <div key={i} className="w-1 bg-tn-yellow rounded-full animate-pulse" style={{ height: `${12 + (i % 5) * 6}px`, animationDelay: `${i * 0.04}s` }} />
             ))}
           </div>
         )}
@@ -517,18 +517,18 @@ export default function VoiceEntryScreen() {
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
         </button>
-        <p className="text-sm font-bold text-[#FFC107]">{recordingState === 'listening' ? 'Listening...' : recordingState === 'completed' ? 'Done' : 'Tap to speak'}</p>
-        <p className="text-xs text-[#6B7280] mt-1">{recordingState === 'listening' ? 'Tap stop when you\'re done speaking.' : 'Include name and amount.'}</p>
+        <p className="text-sm font-bold text-tn-yellow">{recordingState === 'listening' ? 'Listening...' : recordingState === 'completed' ? 'Done' : 'Tap to speak'}</p>
+        <p className="text-xs text-tn-muted mt-1">{recordingState === 'listening' ? 'Tap stop when you\'re done speaking.' : 'Include name and amount.'}</p>
         {(recordingState === 'listening' || recordingState === 'completed') && (
-          <p className="text-2xl font-bold text-[#FFC107] mt-3">{formatTime(timer)}</p>
+          <p className="text-2xl font-bold text-tn-yellow mt-3">{formatTime(timer)}</p>
         )}
       </div>
 
-      <div className="bg-[#F5F3FF] border border-[#EDE9FE] rounded-xl p-3 mb-5">
+      <div className="bg-tn-purple-bg border border-tn-yellow/20 rounded-xl p-3 mb-5">
         {/* Language selector */}
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-bold text-[#FFC107]">🎙️ Recognition Language</p>
-          <div className="flex bg-white border border-[#EDE9FE] rounded-lg p-0.5 gap-0.5">
+          <p className="text-xs font-bold text-tn-yellow">🎙️ Recognition Language</p>
+          <div className="flex bg-white border border-tn-border rounded-lg p-0.5 gap-0.5">
             {LANG_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
@@ -537,8 +537,8 @@ export default function VoiceEntryScreen() {
                 onClick={() => { setLang(opt.value); handleRetry(); }}
                 className={`px-3 py-1 rounded-md text-[11px] font-bold transition-colors disabled:opacity-50 ${
                   lang === opt.value
-                    ? 'bg-[#FFC107] text-white'
-                    : 'text-[#6B7280] hover:text-[#FFC107]'
+                    ? 'bg-tn-yellow text-white'
+                    : 'text-tn-muted hover:text-tn-yellow'
                 }`}
               >
                 {opt.label}
@@ -546,53 +546,53 @@ export default function VoiceEntryScreen() {
             ))}
           </div>
         </div>
-        <p className="text-[10px] text-[#6B7280] italic">
+        <p className="text-[10px] text-tn-muted italic">
           {LANG_OPTIONS.find(o => o.value === lang)?.hint}
         </p>
-        <p className="text-[10px] text-[#9CA3AF] mt-1.5">💡 Speak clearly · Include name and amount</p>
+        <p className="text-[10px] text-tn-subtle mt-1.5">💡 Speak clearly · Include name and amount</p>
       </div>
 
       {transcript && (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 mb-4">
+        <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-bold text-[#1F2937]">Recognized Text</h3>
-            <button type="button" onClick={handleRetry} className="text-[10px] text-[#EF4444] font-semibold">Clear</button>
+            <h3 className="text-xs font-bold text-tn-text">Recognized Text</h3>
+            <button type="button" onClick={handleRetry} className="text-[10px] text-tn-error font-semibold">Clear</button>
           </div>
-          <p className="text-sm text-[#374151]">{transcript}</p>
-          <p className="text-[10px] text-[#22C55E] font-semibold mt-2">Confidence: High</p>
+          <p className="text-sm text-tn-text">{transcript}</p>
+          <p className="text-[10px] text-tn-success font-semibold mt-2">Confidence: High</p>
         </div>
       )}
 
       {(recordingState === 'completed' || transcript || Object.values(extracted).some(Boolean)) && (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 mb-4">
-          <h3 className="text-xs font-bold text-[#1F2937] mb-3">Extracted Details (Review before saving)</h3>
+        <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4">
+          <h3 className="text-xs font-bold text-tn-text mb-3">Extracted Details (Review before saving)</h3>
           {[
             { label: 'Contributor Name', key: 'guest_name' as const },
             { label: 'Phone Number', key: 'phone' as const },
             { label: 'Amount (₹)', key: 'amount' as const, raw: true },
           ].map((row) => (
-            <div key={row.key} className="flex items-center gap-3 py-2 border-b border-[#F3F4F6] last:border-0">
-              <div className="w-8 h-8 rounded-lg bg-[#F5F3FF] flex items-center justify-center text-tn-gold text-sm"><Icon name="users" size={16} /></div>
+            <div key={row.key} className="flex items-center gap-3 py-2 border-b border-tn-border last:border-0">
+              <div className="w-8 h-8 rounded-lg bg-tn-purple-bg flex items-center justify-center text-tn-gold text-sm"><Icon name="users" size={16} /></div>
               <div className="flex-1">
-                <p className="text-[10px] text-[#6B7280]">{row.label}</p>
+                <p className="text-[10px] text-tn-muted">{row.label}</p>
                 {row.raw ? (
-                  <input value={extracted[row.key]} onChange={(e) => handleExtractedChange(row.key, e.target.value)} className="text-sm font-semibold text-[#1F2937] bg-transparent w-full outline-none" />
+                  <input value={extracted[row.key]} onChange={(e) => handleExtractedChange(row.key, e.target.value)} className="text-sm font-semibold text-tn-text bg-transparent w-full outline-none" />
                 ) : (
-                  <input value={extracted[row.key]} onChange={(e) => handleExtractedChange(row.key, e.target.value)} className="text-sm font-semibold text-[#1F2937] bg-transparent w-full outline-none" />
+                  <input value={extracted[row.key]} onChange={(e) => handleExtractedChange(row.key, e.target.value)} className="text-sm font-semibold text-tn-text bg-transparent w-full outline-none" />
                 )}
               </div>
             </div>
           ))}
-          <div className="bg-[#F5F3FF] rounded-lg p-2 mt-3 flex gap-2">
+          <div className="bg-tn-purple-bg rounded-lg p-2 mt-3 flex gap-2">
             <Icon name="list" size={16} />
-            <p className="text-[10px] text-[#FFC107]">Please review the details above. You can edit any field before saving.</p>
+            <p className="text-[10px] text-tn-yellow">Please review the details above. You can edit any field before saving.</p>
           </div>
         </div>
       )}
 
       <div className="flex gap-3 mt-4">
-        <button type="button" onClick={() => router.push(`/events/${slug}/moi-entry`)} className="flex-1 h-12 border-2 border-[#FFC107] text-[#FFC107] rounded-xl font-semibold text-sm">Edit Details</button>
-        <button type="button" onClick={handleSave} disabled={saving || !extracted.guest_name} className="flex-1 h-12 bg-[#FFC107] text-white rounded-xl font-semibold text-sm disabled:opacity-40">
+        <button type="button" onClick={() => router.push(`/events/${slug}/moi-entry`)} className="flex-1 h-12 border-2 border-tn-yellow text-tn-yellow rounded-xl font-semibold text-sm">Edit Details</button>
+        <button type="button" onClick={handleSave} disabled={saving || !extracted.guest_name} className="flex-1 h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm disabled:opacity-40">
           {saving ? 'Saving…' : 'Save Entry'}
         </button>
       </div>

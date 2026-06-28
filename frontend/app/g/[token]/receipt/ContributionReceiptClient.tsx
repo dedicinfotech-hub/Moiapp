@@ -46,7 +46,7 @@ export default function ContributionReceiptScreen() {
   }, [token]);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-gray-200 border-t-[#7C3AED] rounded-full animate-spin" /></div>;
+    return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" /></div>;
   }
 
   const guestName = receiptData?.guest_name || guestData?.guest_name || 'Guest';
@@ -59,22 +59,22 @@ export default function ContributionReceiptScreen() {
     : new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="min-h-screen bg-[#FFFBF5] px-4 py-8">
+    <div className="min-h-screen bg-tn-yellow-bg px-4 py-8">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-6 relative">
-          <div className="w-16 h-16 bg-[#F0FFF4] rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-[#22C55E]">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <div className="w-16 h-16 bg-tn-green-bg rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-tn-success">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-tn-success"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <h1 className="text-2xl font-bold text-[#1F2937]">Thank You!</h1>
-          <p className="text-sm text-[#6B7280] mt-2">Dear {guestName},</p>
-          <p className="text-sm text-[#6B7280]">Thank you for your thoughtful contribution towards our special occasion.</p>
-          <p className="text-sm font-bold text-[#22C55E] mt-2">Your Moi has been received successfully.</p>
+          <h1 className="text-2xl font-bold text-tn-text">Thank You!</h1>
+          <p className="text-sm text-tn-muted mt-2">Dear {guestName},</p>
+          <p className="text-sm text-tn-muted">Thank you for your thoughtful contribution towards our special occasion.</p>
+          <p className="text-sm font-bold text-tn-success mt-2">Your Moi has been received successfully.</p>
         </div>
 
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 mb-4 shadow-sm">
+        <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Icon name="gift" size={18} className="text-[#7C3AED]" />
-            <h3 className="text-sm font-bold text-[#4B218B]">Contribution Details</h3>
+            <Icon name="gift" size={18} className="text-tn-yellow" />
+            <h3 className="text-sm font-bold text-tn-text">Contribution Details</h3>
           </div>
           {[
             { icon: 'users' as IconName, label: 'Name', value: guestName },
@@ -83,27 +83,27 @@ export default function ContributionReceiptScreen() {
             { icon: 'list' as IconName, label: 'Transaction ID', value: transactionId },
             { icon: 'calendar' as IconName, label: 'Date & Time', value: receiptDate },
           ].map((row) => (
-            <div key={row.label} className="flex items-center justify-between py-2 border-b border-[#F3F4F6] last:border-0">
-              <div className="flex items-center gap-2 text-xs text-[#6B7280]"><Icon name={row.icon} size={14} />{row.label}</div>
-              <span className={`text-xs font-semibold ${row.highlight ? 'text-[#4B218B]' : 'text-[#1F2937]'}`}>{row.value}</span>
+            <div key={row.label} className="flex items-center justify-between py-2 border-b border-tn-border last:border-0">
+              <div className="flex items-center gap-2 text-xs text-tn-muted"><Icon name={row.icon} size={14} />{row.label}</div>
+              <span className={`text-xs font-semibold ${row.highlight ? 'text-tn-yellow' : 'text-tn-text'}`}>{row.value}</span>
             </div>
           ))}
         </div>
 
-        <div className="bg-[#F5F3FF] border border-[#EDE9FE] rounded-2xl p-5 mb-6 relative">
-          <span className="text-4xl text-[#7C3AED] opacity-30 absolute top-2 left-4">&ldquo;</span>
-          <p className="text-sm font-bold text-[#4B218B] mb-2">A Message from the Host</p>
-          <p className="text-sm text-[#6B7280] italic pl-2">Your blessings and support mean a lot to us. Thank you for being part of our celebration.</p>
-          <p className="text-xs text-[#6B7280] text-right mt-3 font-semibold">— {hostNames}</p>
+        <div className="bg-tn-yellow/10 border border-tn-yellow-border rounded-2xl p-5 mb-6 relative">
+          <span className="text-4xl text-tn-yellow opacity-30 absolute top-2 left-4">&ldquo;</span>
+          <p className="text-sm font-bold text-tn-text mb-2">A Message from the Host</p>
+          <p className="text-sm text-tn-muted italic pl-2">Your blessings and support mean a lot to us. Thank you for being part of our celebration.</p>
+          <p className="text-xs text-tn-muted text-right mt-3 font-semibold">— {hostNames}</p>
         </div>
 
         <div className="space-y-3">
-          <button type="button" onClick={() => window.print()} className="w-full h-12 bg-[#4B218B] text-white rounded-xl font-semibold text-sm">Download Receipt</button>
-          <button type="button" onClick={() => navigator.share?.({ title: 'Moi Contribution', text: `I contributed ₹${amount} to ${hostNames}` })} className="w-full h-12 border-2 border-[#7C3AED] text-[#7C3AED] rounded-xl font-semibold text-sm">Share Confirmation</button>
-          <button type="button" onClick={() => router.push('/')} className="w-full h-12 border-2 border-[#7C3AED] text-[#7C3AED] rounded-xl font-semibold text-sm">Back to Home</button>
+          <button type="button" onClick={() => window.print()} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm">Download Receipt</button>
+          <button type="button" onClick={() => navigator.share?.({ title: 'Moi Contribution', text: `I contributed ₹${amount} to ${hostNames}` })} className="w-full h-12 border-2 border-tn-yellow text-tn-yellow rounded-xl font-semibold text-sm">Share Confirmation</button>
+          <button type="button" onClick={() => router.push('/')} className="w-full h-12 border-2 border-tn-yellow text-tn-yellow rounded-xl font-semibold text-sm">Back to Home</button>
         </div>
 
-        <p className="text-center text-xs text-[#9CA3AF] mt-6">We look forward to celebrating with you!</p>
+        <p className="text-center text-xs text-tn-subtle mt-6">We look forward to celebrating with you!</p>
       </div>
     </div>
   );

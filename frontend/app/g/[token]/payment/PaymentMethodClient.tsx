@@ -215,8 +215,8 @@ export default function PaymentMethodScreen() {
           contact: order.phone || '',
         },
         theme: {
-          color: '#4B218B',
-        },
+           color: '#FFC107',
+         },
         modal: {
           ondismiss: () => {
             if (!paymentCompletedRef.current) {
@@ -292,7 +292,7 @@ export default function PaymentMethodScreen() {
   };
 
   if (loading || !event || !guestData) {
-    return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-gray-200 border-t-[#7C3AED] rounded-full animate-spin" /></div>;
+    return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" /></div>;
   }
 
   const title = event.custom_title || event.event_type;
@@ -314,99 +314,99 @@ export default function PaymentMethodScreen() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
+    <div className="min-h-screen bg-tn-light">
       <GuestFlowHeader title="Payment" subtitle={title} backHref={`/g/${token}/form`} badge="Secure Payment" />
       <main className="max-w-md mx-auto px-4 py-4 pb-8">
-        {error && <div className="bg-red-50 text-red-600 rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
+        {error && <div className="bg-tn-error-bg text-tn-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
 
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 mb-4">
+        <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4">
           <div className="flex items-start justify-between mb-3">
             <div className="flex gap-3">
-              <div className="w-10 h-10 bg-[#F5F3FF] rounded-xl flex items-center justify-center text-[#7C3AED]">
+              <div className="w-10 h-10 bg-tn-yellow/10 rounded-xl flex items-center justify-center text-tn-yellow">
                 <Icon name="gift" size={20} />
               </div>
               <div>
-                <p className="text-sm font-bold text-[#1F2937]">Moi (Gift)</p>
-                <p className="text-[10px] text-[#6B7280]">From: {guestData.guest_name || 'Guest'}</p>
-                <p className="text-[10px] text-[#6B7280] capitalize">Gift Type: {guestData.gift_type || 'cash'}</p>
+                <p className="text-sm font-bold text-tn-text">Moi (Gift)</p>
+                <p className="text-[10px] text-tn-muted">From: {guestData.guest_name || 'Guest'}</p>
+                <p className="text-[10px] text-tn-muted capitalize">Gift Type: {guestData.gift_type || 'cash'}</p>
               </div>
             </div>
-            <button type="button" onClick={() => router.push(`/g/${token}/form`)} className="text-[10px] font-semibold text-[#7C3AED]">Edit Details</button>
+            <button type="button" onClick={() => router.push(`/g/${token}/form`)} className="text-[10px] font-semibold text-tn-yellow">Edit Details</button>
           </div>
-          <p className="text-2xl font-bold text-[#4B218B] text-center">₹ {amount.toLocaleString('en-IN')}</p>
+          <p className="text-2xl font-bold text-tn-yellow text-center">₹ {amount.toLocaleString('en-IN')}</p>
         </div>
 
-        <p className="text-xs font-bold text-[#1F2937] mb-3">Select Payment Method</p>
+        <p className="text-xs font-bold text-tn-text mb-3">Select Payment Method</p>
         <div className="space-y-2 mb-4">
           {methods.map((m) => (
-            <button key={m.id} type="button" onClick={() => setSelectedMethod(m.id)} className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left ${selectedMethod === m.id ? 'border-[#7C3AED] bg-[#F5F3FF]' : 'border-[#E5E7EB] bg-white'}`}>
-              <div className={`w-4 h-4 rounded-full border-2 ${selectedMethod === m.id ? 'border-[#7C3AED] bg-[#7C3AED]' : 'border-[#D1D5DB]'}`} />
+            <button key={m.id} type="button" onClick={() => setSelectedMethod(m.id)} className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left ${selectedMethod === m.id ? 'border-tn-yellow bg-tn-yellow/10' : 'border-tn-border bg-white'}`}>
+              <div className={`w-4 h-4 rounded-full border-2 ${selectedMethod === m.id ? 'border-tn-yellow bg-tn-yellow' : 'border-tn-border'}`} />
               <div className="flex-1">
-                <p className="text-sm font-semibold text-[#1F2937]">{m.label}</p>
-                <p className="text-[10px] text-[#6B7280]">{m.sub}</p>
+                <p className="text-sm font-semibold text-tn-text">{m.label}</p>
+                <p className="text-[10px] text-tn-muted">{m.sub}</p>
               </div>
-              <span className="text-[9px] font-bold text-[#22C55E] bg-[#F0FFF4] px-2 py-0.5 rounded-full">{m.badge}</span>
+              <span className="text-[9px] font-bold text-tn-success bg-tn-green-bg px-2 py-0.5 rounded-full">{m.badge}</span>
             </button>
           ))}
         </div>
 
         {selectedMethod === 'scan' && (
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 mb-4">
+          <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-[#F0FFF4] flex items-center justify-center text-[#16A34A]">
+              <div className="w-10 h-10 rounded-xl bg-tn-green-bg flex items-center justify-center text-tn-success">
                 <Icon name="qr-code" size={20} />
               </div>
               <div>
-                <p className="text-sm font-bold text-[#1F2937]">Scan & Pay with UPI</p>
-                <p className="text-[10px] text-[#6B7280]">Pay directly to the host UPI ID</p>
+                <p className="text-sm font-bold text-tn-text">Scan & Pay with UPI</p>
+                <p className="text-[10px] text-tn-muted">Pay directly to the host UPI ID</p>
               </div>
             </div>
             {hostUpiId ? (
               <>
-                <div className="bg-white border border-[#E5E7EB] rounded-xl p-3 mb-3 flex justify-center">
+                <div className="bg-white border border-tn-border rounded-xl p-3 mb-3 flex justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={scanQrUrl} alt="Scan and pay UPI QR code" className="w-[220px] h-[220px] rounded-lg" />
                 </div>
-                <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl p-3 mb-3 break-all text-sm">
-                  <p className="text-[10px] text-[#6B7280] mb-1">Host UPI ID</p>
-                  <p className="font-semibold text-[#1F2937]">{hostUpiId}</p>
+                <div className="bg-tn-light border border-tn-border rounded-xl p-3 mb-3 break-all text-sm">
+                  <p className="text-[10px] text-tn-muted mb-1">Host UPI ID</p>
+                  <p className="font-semibold text-tn-text">{hostUpiId}</p>
                 </div>
-                <button type="button" onClick={copyUpiId} className="w-full h-10 rounded-xl border border-[#7C3AED] text-[#7C3AED] font-semibold text-sm mb-3">
+                <button type="button" onClick={copyUpiId} className="w-full h-10 rounded-xl border border-tn-yellow text-tn-yellow font-semibold text-sm mb-3">
                   Copy UPI ID
                 </button>
-                <label className="block text-[10px] font-semibold text-[#1F2937] mb-1">UPI Reference / Transaction ID</label>
-                <input value={scanRef} onChange={(e) => setScanRef(e.target.value)} className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm text-[#101010] focus:outline-none focus:border-[#7C3AED] mb-3" placeholder="e.g. 409123456789" />
-                <p className="text-[11px] text-[#6B7280] leading-relaxed">
+                <label className="block text-[10px] font-semibold text-tn-text mb-1">UPI Reference / Transaction ID</label>
+                <input value={scanRef} onChange={(e) => setScanRef(e.target.value)} className="w-full border border-tn-border rounded-xl px-3 py-2.5 text-sm text-tn-text focus:outline-none focus:border-tn-yellow mb-3" placeholder="e.g. 409123456789" />
+                <p className="text-[11px] text-tn-muted leading-relaxed">
                   Scan this QR, pay <strong>₹ {total.toFixed(2)}</strong>, then enter the UPI reference ID shown in your UPI app. The host will verify this reference.
                 </p>
               </>
             ) : (
-              <div className="bg-[#FEF3C7] border border-[#F59E0B] rounded-xl p-3 text-[11px] text-[#92400E] leading-relaxed">
+              <div className="bg-tn-warning/10 border border-tn-warning/30 rounded-xl p-3 text-[11px] text-tn-warning leading-relaxed">
                 Host has not added a UPI ID in Settings yet. Please use Razorpay or contact the host.
               </div>
             )}
           </div>
         )}
 
-        <div className="bg-[#F5F3FF] rounded-xl p-3 mb-4 flex gap-2 text-[11px] text-[#4B218B]">
+        <div className="bg-tn-yellow/10 rounded-xl p-3 mb-4 flex gap-2 text-[11px] text-tn-text">
           <Icon name="shield" size={16} />
           <p>100% Secure Payments. Your payment details are encrypted and safe with us.</p>
         </div>
 
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 mb-4 space-y-2 text-sm">
-          <div className="flex justify-between text-[#6B7280]"><span>Gift Amount</span><span>₹ {amount.toFixed(2)}</span></div>
-          <div className="flex justify-between text-[#6B7280]"><span>Convenience Fee</span><span>₹ {fee.toFixed(2)}</span></div>
-          <div className="border-t border-dashed border-[#E5E7EB] pt-2 flex justify-between font-bold text-[#4B218B]"><span>Total Amount</span><span>₹ {total.toFixed(2)}</span></div>
+        <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4 space-y-2 text-sm">
+          <div className="flex justify-between text-tn-muted"><span>Gift Amount</span><span>₹ {amount.toFixed(2)}</span></div>
+          <div className="flex justify-between text-tn-muted"><span>Convenience Fee</span><span>₹ {fee.toFixed(2)}</span></div>
+          <div className="border-t border-dashed border-tn-border pt-2 flex justify-between font-bold text-tn-yellow"><span>Total Amount</span><span>₹ {total.toFixed(2)}</span></div>
         </div>
 
-        <div className="bg-[#F0FFF4] border border-[#BBF7D0] rounded-xl p-3 mb-5 text-[11px] text-[#166534]">
+        <div className="bg-tn-green-bg border border-tn-success/30 rounded-xl p-3 mb-5 text-[11px] text-tn-success/80">
           Thank you for your contribution! Your generosity makes this celebration even more special.
         </div>
 
-        <button type="button" onClick={handlePay} disabled={processing || amount <= 0 || !isCashContribution || (selectedMethod === 'scan' && (!hostUpiId || !scanRef.trim()))} className="w-full h-12 bg-[#4B218B] text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
+        <button type="button" onClick={handlePay} disabled={processing || amount <= 0 || !isCashContribution || (selectedMethod === 'scan' && (!hostUpiId || !scanRef.trim()))} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
           <Icon name="lock" size={16} /> {processing ? 'Processing…' : selectedMethod === 'scan' ? `Confirm Scan & Pay ₹ ${total.toFixed(2)}` : `Pay ₹ ${total.toFixed(2)}`}
         </button>
-        <p className="text-center text-[10px] text-[#9CA3AF] mt-3">{selectedMethod === 'scan' ? 'Direct UPI payment to host' : 'Secured by Razorpay'}</p>
+        <p className="text-center text-[10px] text-tn-subtle mt-3">{selectedMethod === 'scan' ? 'Direct UPI payment to host' : 'Secured by Razorpay'}</p>
       </main>
     </div>
   );

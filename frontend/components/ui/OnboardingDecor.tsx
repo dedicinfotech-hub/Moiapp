@@ -84,15 +84,15 @@ export function FamilyIllustration() {
 
 export function OtpPhoneIllustration() {
   return (
-    <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-[#EDE9FE] flex items-center justify-center">
+    <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-tn-purple-bg flex items-center justify-center">
       <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
-        <rect x="22" y="12" width="28" height="48" rx="4" stroke="#7C3AED" strokeWidth="2" fill="white" />
-        <circle cx="36" cy="52" r="3" fill="#7C3AED" />
-        <rect x="28" y="20" width="16" height="22" rx="2" fill="#EDE9FE" />
-        <path d="M32 28 L40 28 M32 32 L40 32 M32 36 L38 36" stroke="#A78BFA" strokeWidth="1.5" strokeLinecap="round" />
-        <rect x="44" y="18" width="20" height="14" rx="4" fill="#7C3AED" />
+        <rect x="22" y="12" width="28" height="48" rx="4" stroke="currentColor" className="text-tn-purple" strokeWidth="2" fill="white" />
+        <circle cx="36" cy="52" r="3" className="fill-tn-purple" />
+        <rect x="28" y="20" width="16" height="22" rx="2" className="fill-tn-purple-bg" />
+        <path d="M32 28 L40 28 M32 32 L40 32 M32 36 L38 36" stroke="currentColor" className="text-tn-purple" strokeWidth="1.5" strokeLinecap="round" />
+        <rect x="44" y="18" width="20" height="14" rx="4" className="fill-tn-purple" />
         <text x="48" y="28" fill="white" fontSize="8" fontWeight="bold">***</text>
-        <circle cx="36" cy="8" r="5" fill="#7C3AED" />
+        <circle cx="36" cy="8" r="5" className="fill-tn-purple" />
         <path d="M33 8 L36 5 L39 8" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     </div>
@@ -102,7 +102,7 @@ export function OtpPhoneIllustration() {
 export function StepProgress({ currentStep }: { currentStep: number }) {
   const steps = ['Profile', 'Event Type', 'Function Details', 'Finish'];
   return (
-    <div className="px-6 py-5 border-t border-[#F3F4F6] bg-white">
+    <div className="px-6 py-5 border-t border-tn-border bg-white">
       <div className="flex items-center justify-between max-w-sm mx-auto">
         {steps.map((label, index) => {
           const stepNum = index + 1;
@@ -111,14 +111,14 @@ export function StepProgress({ currentStep }: { currentStep: number }) {
           return (
             <div key={label} className="flex flex-col items-center flex-1 relative">
               {index > 0 && (
-                <div className={`absolute right-1/2 top-4 w-full h-0.5 -translate-y-1/2 ${isDone || isActive ? 'bg-[#7C3AED]' : 'bg-[#E5E7EB]'}`} style={{ width: '100%', left: '-50%' }} />
+                <div className={`absolute right-1/2 top-4 w-full h-0.5 -translate-y-1/2 ${isDone || isActive ? 'bg-tn-purple' : 'bg-tn-border'}`} style={{ width: '100%', left: '-50%' }} />
               )}
               <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                isActive ? 'bg-[#7C3AED] text-white' : isDone ? 'bg-[#7C3AED] text-white' : 'bg-[#E5E7EB] text-[#9CA3AF]'
+                isActive ? 'bg-tn-purple text-white' : isDone ? 'bg-tn-purple text-white' : 'bg-tn-border text-tn-muted'
               }`}>
                 {stepNum}
               </div>
-              <p className={`text-[10px] mt-1.5 font-medium text-center ${isActive ? 'text-[#7C3AED]' : 'text-[#9CA3AF]'}`}>
+              <p className={`text-[10px] mt-1.5 font-medium text-center ${isActive ? 'text-tn-purple' : 'text-tn-muted'}`}>
                 {label}
               </p>
             </div>

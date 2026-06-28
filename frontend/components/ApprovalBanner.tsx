@@ -20,8 +20,8 @@ export default function ApprovalBanner({ event, onResubmit, onEdit, resubmitting
     <div
       className={`rounded-xl border px-4 py-3 text-sm ${
         isRejected
-          ? 'bg-red-50 border-red-200 text-red-800'
-          : 'bg-yellow-50 border-yellow-200 text-yellow-900'
+          ? 'bg-tn-error-bg border-tn-error/20 text-tn-error'
+          : 'bg-tn-warning/10 border-tn-warning/30 text-tn-warning'
       }`}
     >
       <p className="font-semibold">
@@ -45,7 +45,7 @@ export default function ApprovalBanner({ event, onResubmit, onEdit, resubmitting
             <button
               type="button"
               onClick={onEdit}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-300 bg-white hover:bg-red-50 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-tn-error/30 bg-white hover:bg-tn-error-bg transition-colors"
             >
               Edit Function
             </button>
@@ -55,7 +55,7 @@ export default function ApprovalBanner({ event, onResubmit, onEdit, resubmitting
               type="button"
               onClick={onResubmit}
               disabled={resubmitting}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#FFC107] text-black hover:bg-[#E6AC00] disabled:opacity-50 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-tn-yellow text-tn-text hover:bg-tn-yellow-2 disabled:opacity-50 transition-colors"
             >
               {resubmitting ? 'Resubmitting…' : 'Resubmit for Approval'}
             </button>

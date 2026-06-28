@@ -147,7 +147,7 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-tn-light transition-colors"
         aria-label="Notifications"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -155,20 +155,20 @@ export default function NotificationBell() {
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-tn-error text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 w-72 sm:w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
-          <div className="p-3 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">Notifications</h3>
+        <div className="absolute right-0 top-12 w-72 sm:w-80 bg-white border border-tn-border rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
+          <div className="p-3 border-b border-tn-border flex items-center justify-between">
+            <h3 className="font-semibold text-tn-text">Notifications</h3>
             <button
               type="button"
               onClick={() => loadNotifications()}
-              className="text-[10px] text-[#FFC107] font-semibold hover:underline"
+              className="text-[10px] text-tn-yellow font-semibold hover:underline"
             >
               Refresh
             </button>
@@ -176,10 +176,10 @@ export default function NotificationBell() {
 
           {loading ? (
             <div className="p-4 text-center">
-              <div className="w-5 h-5 border-2 border-gray-200 border-t-[#FFC107] rounded-full animate-spin mx-auto" />
+              <div className="w-5 h-5 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin mx-auto" />
             </div>
           ) : notifications.length === 0 ? (
-            <div className="p-4 text-center text-gray-400 text-sm">
+            <div className="p-4 text-center text-tn-muted text-sm">
               No notifications yet
             </div>
           ) : (
@@ -187,22 +187,22 @@ export default function NotificationBell() {
               {notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`p-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 cursor-pointer ${
+                  className={`p-3 border-b border-tn-border last:border-0 hover:bg-tn-light cursor-pointer ${
                     n.is_read ? 'opacity-70' : ''
                   }`}
                   onClick={() => !n.is_read && markAsRead(n.id)}
                 >
                   <div className="flex items-start gap-2">
-                    <span className="text-lg text-[#7C3AED]"><Icon name={getNotificationIcon(n.type)} size={18} /></span>
+                    <span className="text-lg text-tn-purple-text"><Icon name={getNotificationIcon(n.type)} size={18} /></span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{n.title}</p>
+                      <p className="text-sm font-medium text-tn-text">{n.title}</p>
                       {n.message && (
-                        <p className="text-xs text-gray-500 mt-0.5 whitespace-pre-wrap">{n.message}</p>
+                        <p className="text-xs text-tn-muted mt-0.5 whitespace-pre-wrap">{n.message}</p>
                       )}
                       {n.event_name && (
-                        <p className="text-xs text-gray-400 mt-0.5">Event: {n.event_name}</p>
+                        <p className="text-xs text-tn-subtle mt-0.5">Event: {n.event_name}</p>
                       )}
-                      <p className="text-[10px] text-gray-400 mt-1">
+                      <p className="text-[10px] text-tn-subtle mt-1">
                         {new Date(n.created_at).toLocaleDateString('en-IN', {
                           day: 'numeric',
                           month: 'short',
@@ -216,7 +216,7 @@ export default function NotificationBell() {
                         e.stopPropagation();
                         deleteNotification(n.id);
                       }}
-                      className="text-gray-300 hover:text-red-500 p-1"
+                      className="text-tn-muted hover:text-tn-error p-1"
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="18" y1="6" x2="6" y2="18" />

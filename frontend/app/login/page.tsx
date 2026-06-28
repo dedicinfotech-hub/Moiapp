@@ -33,7 +33,7 @@ export default function LoginPage() {
   const [error, setError]   = useState('');
   const [loading, setLoading] = useState(false);
 
-  const inputCls = "w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#FFC107] transition-colors";
+  const inputCls = "w-full bg-white border-2 border-tn-border rounded-xl px-4 py-3 text-sm text-tn-text placeholder-tn-muted focus:outline-none focus:border-tn-yellow transition-colors";
 
   // Start resend countdown
   const startTimer = () => {
@@ -123,13 +123,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFFDF5] via-white to-[#FFF8E1] relative overflow-hidden flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-tn-yellow-bg via-white to-tn-yellow-bg relative overflow-hidden flex items-center justify-center px-4 py-8">
       {/* Decorative background rings */}
-      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#FFC107]/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-[#FFC107]/8 blur-2xl pointer-events-none" />
+      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-tn-yellow/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-tn-yellow/8 blur-2xl pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white border border-[#FFC107]/45 rounded-2xl shadow-[0_0_12px_rgba(255,193,7,0.15)] p-8 transition-all duration-300 hover:shadow-[0_0_18px_rgba(255,193,7,0.25)]">
+        <div className="bg-white border border-tn-yellow/45 rounded-2xl shadow-[0_0_12px_rgba(255,193,7,0.15)] p-8 transition-all duration-300 hover:shadow-[0_0_18px_rgba(255,193,7,0.25)]">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
               <div className="relative w-[110px] h-[24px]">
@@ -142,22 +142,22 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-[#101010]">Welcome back</h1>
-            <p className="text-gray-500 text-sm mt-1">Sign in to your MoiApp account</p>
+            <h1 className="text-2xl font-bold text-tn-text">Welcome back</h1>
+            <p className="text-tn-muted text-sm mt-1">Sign in to your MoiApp account</p>
           </div>
           {/* Login Mode Toggle */}
-          <div className="flex border-b-2 border-gray-100 mb-6">
+          <div className="flex border-b-2 border-tn-border mb-6">
             <button type="button" onClick={() => { setMode('phone'); setError(''); setOtpStep('phone'); }}
-              className={`flex-1 pb-3 text-center font-bold text-sm border-b-[3px] transition-all duration-200 focus:outline-none ${mode === 'phone' ? 'border-[#FFC107] text-[#101010]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
+              className={`flex-1 pb-3 text-center font-bold text-sm border-b-[3px] transition-all duration-200 focus:outline-none ${mode === 'phone' ? 'border-tn-yellow text-tn-text' : 'border-transparent text-tn-muted hover:text-tn-text'}`}>
               Phone Login
             </button>
             <button type="button" onClick={() => { setMode('email'); setError(''); }}
-              className={`flex-1 pb-3 text-center font-bold text-sm border-b-[3px] transition-all duration-200 focus:outline-none ${mode === 'email' ? 'border-[#FFC107] text-[#101010]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
+              className={`flex-1 pb-3 text-center font-bold text-sm border-b-[3px] transition-all duration-200 focus:outline-none ${mode === 'email' ? 'border-tn-yellow text-tn-text' : 'border-transparent text-tn-muted hover:text-tn-text'}`}>
               Email Login
             </button>
           </div>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm mb-5">
+            <div className="bg-tn-error-bg border border-tn-error/20 text-tn-error rounded-xl px-4 py-3 text-sm mb-5">
               {error}
             </div>
           )}
@@ -166,23 +166,23 @@ export default function LoginPage() {
           {mode === 'email' && (
             <form onSubmit={handleEmailLogin} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Email</label>
+                <label className="block text-sm font-semibold text-tn-muted mb-1.5">Email</label>
                 <input type="email" required value={emailForm.email}
                   onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
                   className={inputCls} placeholder="you@example.com" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Password</label>
+                <label className="block text-sm font-semibold text-tn-muted mb-1.5">Password</label>
                 <input type="password" required value={emailForm.password}
                   onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
                   className={inputCls} placeholder="••••••••" />
               </div>
               <button type="submit" disabled={loading}
-                className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50 mt-2">
+                className="w-full bg-tn-yellow text-tn-text py-3 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50 mt-2">
                 {loading ? 'Signing in…' : 'Sign In'}
               </button>
               <div className="text-right mt-2">
-                <Link href="/forgot-password" className="text-sm text-[#B8860B] font-semibold hover:underline">
+                <Link href="/forgot-password" className="text-sm text-tn-gold font-semibold hover:underline">
                   Forgot Password?
                 </Link>
               </div>
@@ -196,14 +196,14 @@ export default function LoginPage() {
               {otpStep === 'phone' && (
                 <form onSubmit={handleSendOTP} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-600 mb-1.5">Mobile Number</label>
+                    <label className="block text-sm font-semibold text-tn-muted mb-1.5">Mobile Number</label>
                     <input type="tel" required value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       className={inputCls} placeholder="9876543210" maxLength={10}
                       inputMode="numeric" autoComplete="tel" />
                   </div>
                   <button type="submit" disabled={loading || phone.length !== 10}
-                    className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
+                    className="w-full bg-tn-yellow text-tn-text py-3 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50">
                     {loading ? 'Sending OTP…' : 'Send OTP'}
                   </button>
                 </form>
@@ -213,19 +213,19 @@ export default function LoginPage() {
               {otpStep === 'otp' && (
                 <form onSubmit={handleVerifyOTP} className="space-y-4">
                   {/* Phone number display with change option */}
-                  <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
+                  <div className="flex items-center justify-between bg-tn-light rounded-xl px-4 py-3">
                     <div>
-                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">OTP sent to</p>
-                      <p className="text-sm font-bold text-gray-800">+91 {phone}</p>
+                      <p className="text-[10px] text-tn-subtle font-semibold uppercase tracking-wide">OTP sent to</p>
+                      <p className="text-sm font-bold text-tn-text">+91 {phone}</p>
                     </div>
                     <button type="button" onClick={() => { setOtpStep('phone'); setOtp(''); setError(''); }}
-                      className="text-xs text-[#B8860B] font-semibold hover:underline">
+                      className="text-xs text-tn-gold font-semibold hover:underline">
                       Change
                     </button>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-600 mb-1.5">Enter OTP</label>
+                    <label className="block text-sm font-semibold text-tn-muted mb-1.5">Enter OTP</label>
                     <input type="text" required value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       className={`${inputCls} text-center text-2xl font-bold tracking-[0.5em]`}
@@ -234,17 +234,17 @@ export default function LoginPage() {
                   </div>
 
                   <button type="submit" disabled={loading || otp.length < 4}
-                    className="w-full bg-[#FFC107] text-gray-900 py-3 rounded-xl font-bold hover:bg-[#E6AC00] transition-colors disabled:opacity-50">
+                    className="w-full bg-tn-yellow text-tn-text py-3 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50">
                     {loading ? 'Verifying…' : 'Verify & Sign In'}
                   </button>
 
                   {/* Resend */}
                   <div className="text-center">
                     {otpTimer > 0 ? (
-                      <p className="text-sm text-gray-400">Resend OTP in <span className="font-bold text-[#B8860B]">{otpTimer}s</span></p>
+                      <p className="text-sm text-tn-muted">Resend OTP in <span className="font-bold text-tn-gold">{otpTimer}s</span></p>
                     ) : (
                       <button type="button" onClick={handleResendOTP} disabled={loading}
-                        className="text-sm text-[#B8860B] font-semibold hover:underline disabled:opacity-50">
+                        className="text-sm text-tn-gold font-semibold hover:underline disabled:opacity-50">
                         Resend OTP
                       </button>
                     )}
@@ -254,9 +254,9 @@ export default function LoginPage() {
             </>
           )}
 
-          <p className="text-center text-sm text-gray-400 mt-6">
+          <p className="text-center text-sm text-tn-muted mt-6">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-[#B8860B] font-semibold hover:underline">Register</Link>
+            <Link href="/register" className="text-tn-gold font-semibold hover:underline">Register</Link>
           </p>
         </div>
       </div>
