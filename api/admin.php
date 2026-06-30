@@ -517,5 +517,68 @@ if ($method === 'GET' && $action === 'private_events') {
     exit;
 }
 
+// ── Login audit logs ─────────────────────────────────────────────────────────────
+if ($method === 'GET' && $action === 'login-logs') {
+    requireAdmin();
+    $db = getDB();
+
+    $page = max(1, intval($_GET['page'] ?? 1));
+    $limit = min(100, max(10, intval($_GET['limit'] ?? 50)));
+    $offset = ($page - 1) * $limit;
+    $status = trim($_GET['status'] ?? '');
+    $search = trim($_GET['search'] ?? '');
+
+    $where = '1=1';
+    $types = '';
+    $params = [];
+
+    if ($status !== '' && in_array($status, ['success', 'failed', 'blocked'], true)) {
+        $where .= ' AND status = ?';
+        $types .= 's';
+        $params[] = $status;
+    }
+
+    if ($search !== '') {
+        $where .= ' AND (email LIKE ? OR ip_address LIKE ? OR user_agent LIKE ?)';
+        $types .= 'sss';
+        $like = "%{$search}%";
+        $params[] = $like;
+        $params[] = $like;
+        $params[] = $like;
+    }
+
+    $countSql = "SELECT COUNT(*) AS total FROM login_logs WHERE {$where}";
+    $countStmt = $db->prepare($countSql);
+    if ($types !== '') {
+        $countStmt->bind_param($types, ...$params);
+    }
+    $countStmt->execute();
+    $total = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+
+    $sql = "SELECT id, user_id, email, role, ip_address, user_agent, status, created_at
+            FROM login_logs
+            WHERE {$where}
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?";
+    $stmt = $db->prepare($sql);
+    $typesWithPage = $types . 'ii';
+    $pageParams = array_merge($params, [$limit, $offset]);
+    $stmt->bind_param($typesWithPage, ...$pageParams);
+    $stmt->execute();
+    $logs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    echo json_encode([
+        'success' => true,
+        'logs' => $logs,
+        'pagination' => [
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
+            'pages' => $limit > 0 ? (int) ceil($total / $limit) : 0,
+        ],
+    ]);
+    exit;
+}
+
 http_response_code(404);
 echo json_encode(['error' => 'Not found']);

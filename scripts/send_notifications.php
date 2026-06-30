@@ -16,6 +16,7 @@
 
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/cors.php';
+require_once __DIR__ . '/../config/push.php';
 
 $db = getDB();
 
@@ -147,4 +148,5 @@ function sendNotification(mysqli $db, int $userId, ?int $eventId, string $title,
     $eventIdNull = $eventId;
     $stmt->bind_param('iisss', $userId, $eventIdNull, $title, $message, $type);
     $stmt->execute();
+    sendExpoPushToUser($db, $userId, $title, $message, $type, $eventId);
 }

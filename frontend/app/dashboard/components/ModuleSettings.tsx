@@ -436,9 +436,15 @@ export default function ModuleSettings({ user, onLogout }: ModuleSettingsProps) 
                 className="px-4 py-2 border border-tn-border text-tn-muted rounded-lg text-sm font-semibold hover:bg-tn-light">
                 Cancel
               </button>
-              <button onClick={() => {
-                showSuccess('Account deletion scheduled. You have 30 days to cancel.');
-                setShowDeleteConfirm(false);
+              <button onClick={async () => {
+                try {
+                  const res = await authApi.deleteAccount();
+                  showSuccess(res.message || 'Account scheduled for deletion');
+                  setShowDeleteConfirm(false);
+                  onLogout();
+                } catch (err: unknown) {
+                  showSuccess(err instanceof Error ? err.message : 'Failed to delete account');
+                }
               }}
                 className="px-4 py-2 bg-tn-error text-white rounded-lg text-sm font-semibold hover:bg-tn-error/80">
                 Confirm Delete

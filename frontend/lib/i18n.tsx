@@ -43,8 +43,8 @@ const translations: Translations = {
   enter_otp: { en: 'Enter OTP', ta: 'OTP உள்ளிடவும்' },
   resend_otp: { en: 'Resend OTP', ta: 'OTP மீண்டும் அனுப்பு' },
   
-  // Dashboard
-  dashboard: { en: 'Dashboard', ta: 'மேஸ்போர்டு' },
+  menu: { en: 'Menu', ta: 'மெனு' },
+  section_admin: { en: 'Admin', ta: 'நிர்வாகம்' },
   home: { en: 'Home', ta: 'முகப்பு' },
   functions: { en: 'Functions', ta: 'செயல்பாடுகள்' },
   moi_list: { en: 'Moi List', ta: 'மோய் பட்டியல்' },
@@ -105,6 +105,35 @@ const translations: Translations = {
   get_started: { en: 'Get Started', ta: 'தொடங்குங்கள்' },
   already_have_account: { en: 'Already have an account?', ta: 'ஏற்கனவே கணக்கு உள்ளதா?' },
   your_data_is_safe: { en: 'Your data is safe with us', ta: 'உங்கள் தரவு எங்களிடம் பாதுகாப்பாக உள்ளது' },
+
+  // Admin modules
+  admin_dashboard: { en: 'Admin Dashboard', ta: 'நிர்வாக முகப்பு' },
+  admin_approvals: { en: 'Approvals', ta: 'அனுமதிகள்' },
+  admin_users: { en: 'User Management', ta: 'பயனர் நிர்வாகம்' },
+  admin_analytics: { en: 'Analytics', ta: 'பகுப்பாய்வு' },
+  admin_revenue: { en: 'Revenue', ta: 'வருவாய்' },
+  admin_support: { en: 'Support', ta: 'ஆதரவு' },
+  admin_private_events: { en: 'Private Events', ta: 'தனிப்பட்ட நிகழ்வுகள்' },
+  admin_login_logs: { en: 'Login Logs', ta: 'உள்நுழைவு பதிவுகள்' },
+  mod_dashboard_sub: { en: 'Overview of your Moi activity', ta: 'உங்கள் மொய் சுருக்கம்' },
+  mod_events_sub: { en: 'Manage all wedding events', ta: 'அனைத்து நிகழ்வுகளையும் நிர்வகிக்கவும்' },
+  mod_organizers_sub: { en: 'Manage event organizers', ta: 'நிகழ்வு ஒருங்கிணைப்பாளர்களை நிர்வகிக்கவும்' },
+  mod_moi_notebook_sub: { en: 'Track all moi entries', ta: 'அனைத்து மொய் பதிவுகளையும் கண்காணிக்கவும்' },
+  mod_users_sub: { en: 'Guest & user management', ta: 'விருந்தினர் மற்றும் பயனர் நிர்வாகம்' },
+  mod_analytics_sub: { en: 'Performance & insights', ta: 'செயல்திறன் மற்றும் நுண்ணறிவு' },
+  mod_features_sub: { en: 'Enable or disable app features', ta: 'அம்சங்களை இயக்கு அல்லது முடக்கு' },
+  mod_settings_sub: { en: 'Account & preferences', ta: 'கணக்கு மற்றும் விருப்பங்கள்' },
+  mod_admin_dashboard_sub: { en: 'Admin overview and statistics', ta: 'நிர்வாக சுருக்கம்' },
+  mod_admin_users_sub: { en: 'Manage all users', ta: 'அனைத்து பயனர்களையும் நிர்வகிக்கவும்' },
+  mod_admin_analytics_sub: { en: 'Platform analytics and insights', ta: 'தள பகுப்பாய்வு' },
+  mod_admin_revenue_sub: { en: 'Revenue management', ta: 'வருவாய் நிர்வாகம்' },
+  mod_admin_support_sub: { en: 'Support tickets and complaints', ta: 'ஆதரவு டிக்கெட்டுகள்' },
+  mod_admin_approvals_sub: { en: 'Approve or reject new events', ta: 'புதிய நிகழ்வுகளை அனுமதி அல்லது நிராகரி' },
+  mod_admin_private_events_sub: { en: 'Manage private events', ta: 'தனிப்பட்ட நிகழ்வுகளை நிர்வகிக்கவும்' },
+  mod_admin_login_logs_sub: { en: 'Authentication audit trail', ta: 'அங்கீகார தணிக்கை பதிவு' },
+  moi_notebook: { en: 'Moi Notebook', ta: 'மொய் நோட்புக்' },
+  organizers: { en: 'Organizers', ta: 'ஒருங்கிணைப்பாளர்கள்' },
+  guests: { en: 'Guests', ta: 'விருந்தினர்கள்' },
 };
 
 interface LanguageContextType {

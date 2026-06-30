@@ -82,7 +82,11 @@ if ($method === 'POST') {
         $stmt->execute();
 
         if ($stmt->affected_rows > 0) {
-            $synced[] = ['id' => $db->insert_id, 'guest_name' => $guestName];
+            $synced[] = [
+                'id' => $db->insert_id,
+                'guest_name' => $guestName,
+                'client_id' => $entry['id'] ?? null,
+            ];
         } else {
             $failed[] = ['entry' => $entry, 'reason' => 'Database insert failed'];
         }

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { assetUrl } from '@/lib/assetUrl';
 
 type LoginMode = 'email' | 'phone';
 type OtpStep = 'phone' | 'otp';
@@ -22,6 +23,10 @@ export default function LoginPage() {
 
   // ── Email form ────────────────────────────────────────────────────────────
   const [emailForm, setEmailForm] = useState({ email: '', password: '' });
+  const [adminOtp, setAdminOtp] = useState('');
+  const [needsAdminOtp, setNeedsAdminOtp] = useState(false);
+  const [adminOtpEmail, setAdminOtpEmail] = useState('');
+  const [adminOtpNotice, setAdminOtpNotice] = useState('');
 
   // ── Phone / OTP form ──────────────────────────────────────────────────────
   const [phone, setPhone]         = useState('');
@@ -49,13 +54,48 @@ export default function LoginPage() {
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
+  const handleResendAdminOtp = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await authApi.login({
+        email: emailForm.email,
+        password: emailForm.password,
+      });
+      if (res.requires_otp) {
+        setAdminOtpEmail(res.otp_email || emailForm.email);
+        setAdminOtpNotice(res.message || 'OTP resent. Check inbox and spam folder.');
+        setAdminOtp('');
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to resend OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ── Email login ───────────────────────────────────────────────────────────
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const res = await authApi.login(emailForm);
+      const res = await authApi.login({
+        email: emailForm.email,
+        password: emailForm.password,
+        otp: needsAdminOtp ? adminOtp : undefined,
+      });
+      if (res.requires_otp) {
+        setNeedsAdminOtp(true);
+        setAdminOtp('');
+        setAdminOtpEmail(res.otp_email || emailForm.email);
+        setAdminOtpNotice(res.message || 'OTP sent to your admin email. Check inbox and spam folder.');
+        return;
+      }
+      if (!res.token || !res.user) {
+        setError('Login failed');
+        return;
+      }
       login(res.token, res.user);
       router.push('/dashboard');
     } catch (err: unknown) {
@@ -134,7 +174,7 @@ export default function LoginPage() {
             <div className="flex justify-center mb-4">
               <div className="relative w-[110px] h-[24px]">
                 <Image
-                  src="/logo.png"
+                  src={assetUrl('/logo.png')}
                   alt="MoiApp Logo"
                   fill
                   className="object-contain"
@@ -177,9 +217,31 @@ export default function LoginPage() {
                   onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
                   className={inputCls} placeholder="••••••••" />
               </div>
+              {needsAdminOtp ? (
+                <div>
+                  {adminOtpNotice ? (
+                    <div className="bg-tn-blue-bg border border-tn-blue-soft/30 text-tn-text rounded-xl px-4 py-3 text-sm mb-4">
+                      <p>{adminOtpNotice}</p>
+                      {adminOtpEmail ? (
+                        <p className="text-tn-muted mt-1">Sent to <span className="font-semibold">{adminOtpEmail}</span></p>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  <label className="block text-sm font-semibold text-tn-muted mb-1.5">Admin OTP (sent to your email)</label>
+                  <input type="text" required value={adminOtp} maxLength={6}
+                    onChange={(e) => setAdminOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    className={inputCls} placeholder="6-digit code" />
+                  <div className="text-right mt-2">
+                    <button type="button" onClick={handleResendAdminOtp} disabled={loading}
+                      className="text-sm text-tn-gold font-semibold hover:underline disabled:opacity-50">
+                      Resend OTP
+                    </button>
+                  </div>
+                </div>
+              ) : null}
               <button type="submit" disabled={loading}
                 className="w-full bg-tn-yellow text-tn-text py-3 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50 mt-2">
-                {loading ? 'Signing in…' : 'Sign In'}
+                {loading ? 'Signing in…' : needsAdminOtp ? 'Verify & Sign In' : 'Sign In'}
               </button>
               <div className="text-right mt-2">
                 <Link href="/forgot-password" className="text-sm text-tn-gold font-semibold hover:underline">

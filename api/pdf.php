@@ -10,6 +10,7 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/cors.php';
 require_once __DIR__ . '/../config/mail.php';
+require_once __DIR__ . '/../config/event_helpers.php';
 
 // CORS for file download
 $origin = env('CORS_ORIGIN', 'http://localhost:3000');
@@ -81,13 +82,15 @@ foreach ($entries as $e) {
 }
 
 // ── Generate HTML report ───────────────────────────────────────────────────────
-$eventTypeLabel = ucfirst($event['event_type']);
-$eventTitle = $event['event_type'] === 'wedding'
-    ? $event['bride_name'] . ' & ' . $event['groom_name'] . ' Wedding'
-    : $event['birthday_person_name'] . "'s Birthday";
+$eventTypeLabel = get_event_type_label($event['event_type'] ?? '');
+$eventTitle = get_event_display_name($event);
+$eventTitleSafe = htmlspecialchars($eventTitle, ENT_QUOTES, 'UTF-8');
+$creatorSafe = htmlspecialchars($event['creator'] ?? '', ENT_QUOTES, 'UTF-8');
 
 $eventDate = date('d M Y', strtotime($event['wedding_date']));
-$venueLine = $event['venue'] ? '<p><strong>Venue:</strong> ' . $event['venue'] . '</p>' : '';
+$venueLine = $event['venue']
+    ? '<p><strong>Venue:</strong> ' . htmlspecialchars($event['venue'], ENT_QUOTES, 'UTF-8') . '</p>'
+    : '';
 $generatedDate = date('d M Y, h:i A');
 
 // Build table rows
@@ -109,12 +112,12 @@ foreach ($entries as $idx => $e) {
     
     $tableRows .= '<tr>' .
         '<td>' . $i . '</td>' .
-        '<td>' . htmlspecialchars($e['guest_name']) . '</td>' .
-        '<td>' . $giftTypeLabel . '</td>' .
-        '<td>' . $amountDisplay . '</td>' .
-        '<td>' . $e['relation'] . '</td>' .
-        '<td>' . $e['payment_mode'] . '</td>' .
-        '<td>' . htmlspecialchars($noteDisplay) . '</td>' .
+        '<td>' . htmlspecialchars($e['guest_name'], ENT_QUOTES, 'UTF-8') . '</td>' .
+        '<td>' . htmlspecialchars($giftTypeLabel, ENT_QUOTES, 'UTF-8') . '</td>' .
+        '<td>' . htmlspecialchars($amountDisplay, ENT_QUOTES, 'UTF-8') . '</td>' .
+        '<td>' . htmlspecialchars($e['relation'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>' .
+        '<td>' . htmlspecialchars($e['payment_mode'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>' .
+        '<td>' . htmlspecialchars($noteDisplay, ENT_QUOTES, 'UTF-8') . '</td>' .
         '<td>' . $entryDate . '</td>' .
         '</tr>';
 }
@@ -123,7 +126,7 @@ $html = '<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Moi Report - ' . $eventTitle . '</title>
+    <title>Moi Report - ' . $eventTitleSafe . '</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; }
@@ -160,11 +163,11 @@ $html = '<!DOCTYPE html>
     </div>
 
     <div class="event-info">
-        <p><strong>Event:</strong> ' . $eventTitle . '</p>
-        <p><strong>Type:</strong> ' . $eventTypeLabel . '</p>
+        <p><strong>Event:</strong> ' . $eventTitleSafe . '</p>
+        <p><strong>Type:</strong> ' . htmlspecialchars($eventTypeLabel, ENT_QUOTES, 'UTF-8') . '</p>
         <p><strong>Date:</strong> ' . $eventDate . '</p>
         ' . $venueLine . '
-        <p><strong>Organizer:</strong> ' . $event['creator'] . '</p>
+        <p><strong>Organizer:</strong> ' . $creatorSafe . '</p>
     </div>
 
     <div class="summary">
@@ -218,8 +221,8 @@ $downloadUrl = ($_SERVER['HTTP_ORIGIN'] ?? '') . '/api/pdf.php?event_id=' . $eve
 
 $body = '<html><body style="font-family: Arial, sans-serif; color: #333;">';
 $body .= '<h2 style="color: #101010;">Moi Report Ready</h2>';
-$body .= '<p>Dear ' . $event['creator'] . ',</p>';
-$body .= '<p>Your Moi Report for <strong>' . $eventTitle . '</strong> is ready.</p>';
+$body .= '<p>Dear ' . $creatorSafe . ',</p>';
+$body .= '<p>Your Moi Report for <strong>' . $eventTitleSafe . '</strong> is ready.</p>';
 $body .= '<ul>';
 $body .= '<li><strong>Total Guests:</strong> ' . $totalGuests . '</li>';
 $body .= '<li><strong>Total Cash:</strong> ₹' . number_format($totalCash, 2) . '</li>';

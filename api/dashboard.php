@@ -31,7 +31,10 @@ $summaryRows = $db->query("
          FROM moi_entries me JOIN events e ON e.id = me.event_id WHERE e.user_id = {$userId}) AS total_gold,
         (SELECT COUNT(*) FROM moi_entries me JOIN events e ON e.id = me.event_id WHERE e.user_id = {$userId} AND me.gift_type = 'gift') AS total_gifts,
         (SELECT COALESCE(ROUND(AVG(CASE WHEN me.gift_type = 'cash' OR me.gift_type IS NULL THEN CAST(me.amount AS DECIMAL(12,2)) END), 2), 0)
-         FROM moi_entries me JOIN events e ON e.id = me.event_id WHERE e.user_id = {$userId}) AS avg_cash_gift
+         FROM moi_entries me JOIN events e ON e.id = me.event_id WHERE e.user_id = {$userId}) AS avg_cash_gift,
+        (SELECT COALESCE(SUM(CAST(rg.return_amount AS DECIMAL(12,2))), 0)
+         FROM return_gifts rg JOIN events e ON e.id = rg.event_id
+         WHERE e.user_id = {$userId} AND rg.status = 'pending') AS pending_returns
 ")->fetch_assoc();
 
 $recentEntries = $db->query("
@@ -106,6 +109,7 @@ echo json_encode([
         'total_gold' => (float)($summaryRows['total_gold'] ?? 0),
         'total_gifts' => (int)($summaryRows['total_gifts'] ?? 0),
         'avg_cash_gift' => (float)($summaryRows['avg_cash_gift'] ?? 0),
+        'pending_returns' => (float)($summaryRows['pending_returns'] ?? 0),
     ],
     'recentEntries' => $recentEntries,
     'recentEvents' => $recentEvents,

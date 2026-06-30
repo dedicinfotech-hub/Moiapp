@@ -15,7 +15,36 @@ function refValues($arr) {
 }
 
 $method  = $_SERVER['REQUEST_METHOD'];
+$action  = $_GET['action'] ?? '';
 $eventId = intval($_GET['event_id'] ?? 0);
+
+// ── GET overdue pending return gifts for current user ────────────────────────
+if ($method === 'GET' && $action === 'overdue') {
+    $user = getAuthUser();
+    if (!$user) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized']);
+        exit;
+    }
+
+    $db = getDB();
+    $stmt = $db->prepare("
+        SELECT rg.*, e.custom_title AS event_title
+        FROM return_gifts rg
+        JOIN events e ON rg.event_id = e.id
+        WHERE e.user_id = ?
+          AND rg.status = 'pending'
+          AND rg.return_date IS NOT NULL
+          AND rg.return_date < CURDATE()
+        ORDER BY rg.return_date ASC
+    ");
+    $stmt->bind_param('i', $user['id']);
+    $stmt->execute();
+    $overdue = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    echo json_encode(['success' => true, 'overdue' => $overdue]);
+    exit;
+}
 
 // ── GET all return gifts for an event ───────────────────────────────────────
 if ($method === 'GET' && $eventId) {

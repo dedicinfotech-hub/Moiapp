@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import { assetUrl } from '@/lib/assetUrl';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -61,7 +62,7 @@ export default function Navbar() {
           <Link href="/" onClick={closeMobile} className="flex items-center group flex-shrink-0">
             <div className="relative w-[120px] h-[24px] lg:w-[140px] lg:h-[28px] transition-transform duration-200 group-hover:scale-105">
               <Image
-                src="/logo.png"
+                src={assetUrl('/logo.png')}
                 alt="MoiApp Logo"
                 fill
                 className="object-contain"

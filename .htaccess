@@ -28,8 +28,18 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_URI} ^/[^/]+/config/ [NC]
 RewriteRule ^ - [L]
 
-# ── Serve real files and directories directly ─────────────────────────────────
-RewriteCond %{REQUEST_FILENAME} -f [OR]
+# ── Serve real files directly ─────────────────────────────────────────────────
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# ── Fix 403 on reload/back: folder URL → sibling .html (Next.js static export) ─
+# Next.js creates both events.html and events/ for nested routes. Apache serves
+# the folder on /events/ → Options -Indexes → 403 Forbidden.
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond $1.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
+
+# ── Serve remaining directories (_next/, uploads/, etc.) ──────────────────────
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 

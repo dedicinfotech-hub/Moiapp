@@ -32,7 +32,12 @@ if ($method === 'POST') {
     $evId    = intval($_POST['event_id'] ?? 0);
     $caption = trim($_POST['caption']   ?? '');
 
-    if (!$evId || empty($_FILES['photo'])) {
+    $upload = $_FILES['photo'] ?? null;
+    $hasFile = is_array($upload)
+        && ($upload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK
+        && !empty($upload['tmp_name']);
+
+    if (!$evId || !$hasFile) {
         http_response_code(400);
         echo json_encode(['error' => 'event_id and photo file are required']);
         exit;
@@ -56,7 +61,7 @@ if ($method === 'POST') {
         }
     }
 
-    $file     = $_FILES['photo'];
+    $file     = $upload;
     $allowed  = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     $mimeType = mime_content_type($file['tmp_name']);
 

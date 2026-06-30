@@ -8,7 +8,8 @@ import AppSidebar from '@/components/AppSidebar';
 import Icon from '@/components/ui/Icon';
 import { useAuth } from '@/lib/auth';
 import { useFeatures } from '@/lib/features';
-import { ADMIN_NAV_LABELS, getAppSidebarSections } from '@/lib/navigation';
+import { useTranslation } from '@/lib/i18n';
+import { getAppSidebarSections } from '@/lib/navigation';
 import {
   ModuleDashboard,
   ModuleEvents,
@@ -25,37 +26,57 @@ import {
   ModuleAdminSupport,
   ModuleAdminApprovals,
   ModuleAdminPrivateEvents,
+  ModuleAdminLoginLogs,
   NewEventModal,
   EditEventModal,
   BulkImportModal,
 } from './components';
 
-type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support' | 'admin-approvals' | 'admin-private-events';
+type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support' | 'admin-approvals' | 'admin-private-events' | 'admin-login-logs';
 
-const MODULE_SUBTITLE: Record<Module, string> = {
-  dashboard:  'Overview of your Moi activity',
-  events:     'Manage all wedding events',
-  organizers: 'Manage event organizers',
-  'moi-notebook':   'Track all moi entries',
-  users:      'Guest & user management',
-  analytics:  'Performance & insights',
-  features:   'Enable or disable app features',
-  settings:   'Account & preferences',
-  'admin-dashboard': 'Admin overview and statistics',
-  'admin-users': 'Manage all users',
-  'admin-analytics': 'Platform analytics and insights',
-  'admin-revenue': 'Revenue management',
-  'admin-support': 'Support tickets and complaints',
-  'admin-approvals': 'Approve or reject new events',
-  'admin-private-events': 'Manage private events',
+const MODULE_SUBTITLE_KEY: Record<Module, string> = {
+  dashboard: 'mod_dashboard_sub',
+  events: 'mod_events_sub',
+  organizers: 'mod_organizers_sub',
+  'moi-notebook': 'mod_moi_notebook_sub',
+  users: 'mod_users_sub',
+  analytics: 'mod_analytics_sub',
+  features: 'mod_features_sub',
+  settings: 'mod_settings_sub',
+  'admin-dashboard': 'mod_admin_dashboard_sub',
+  'admin-users': 'mod_admin_users_sub',
+  'admin-analytics': 'mod_admin_analytics_sub',
+  'admin-revenue': 'mod_admin_revenue_sub',
+  'admin-support': 'mod_admin_support_sub',
+  'admin-approvals': 'mod_admin_approvals_sub',
+  'admin-private-events': 'mod_admin_private_events_sub',
+  'admin-login-logs': 'mod_admin_login_logs_sub',
 };
 
-const MODULE_LABELS: Record<Module, string> = ADMIN_NAV_LABELS as Record<Module, string>;
+const MODULE_I18N_KEY: Record<Module, string> = {
+  dashboard: 'dashboard',
+  events: 'functions',
+  organizers: 'organizers',
+  'moi-notebook': 'moi_notebook',
+  users: 'guests',
+  analytics: 'reports',
+  features: 'settings',
+  settings: 'settings',
+  'admin-dashboard': 'admin_dashboard',
+  'admin-users': 'admin_users',
+  'admin-analytics': 'admin_analytics',
+  'admin-revenue': 'admin_revenue',
+  'admin-support': 'admin_support',
+  'admin-approvals': 'admin_approvals',
+  'admin-private-events': 'admin_private_events',
+  'admin-login-logs': 'admin_login_logs',
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 function DashboardInner() {
   const { user, logout, loading: authLoading } = useAuth();
   const { isEnabled } = useFeatures();
+  const { t } = useTranslation();
   const router = useRouter();
 
   const [module,   setModule]   = useState<Module>('dashboard');
@@ -86,6 +107,8 @@ function DashboardInner() {
     isAdmin,
     isEnabled,
     activeModule: module,
+    labelForModule: (id) => t(MODULE_I18N_KEY[id]),
+    sectionLabels: { menu: t('menu'), admin: t('section_admin') },
   });
 
   useEffect(() => {
@@ -96,7 +119,7 @@ function DashboardInner() {
     if (authLoading) return; // Wait for auth to load before processing module
     
     const mod = searchParams.get('module') as Module | null;
-    if (mod && ['dashboard', 'events', 'moi-notebook', 'users', 'analytics', 'settings', 'organizers', 'features', 'admin-dashboard', 'admin-users', 'admin-analytics', 'admin-revenue', 'admin-support', 'admin-approvals', 'admin-private-events'].includes(mod)) {
+    if (mod && ['dashboard', 'events', 'moi-notebook', 'users', 'analytics', 'settings', 'organizers', 'features', 'admin-dashboard', 'admin-users', 'admin-analytics', 'admin-revenue', 'admin-support', 'admin-approvals', 'admin-private-events', 'admin-login-logs'].includes(mod)) {
       // Only allow features module for admin users
       if (mod === 'features' && !isAdmin) {
         setModule('dashboard');
@@ -175,8 +198,8 @@ function DashboardInner() {
             </button>
 
             <div className="flex-1 min-w-0">
-              <h1 className="font-bold text-tn-text text-sm sm:text-base capitalize leading-tight">{MODULE_LABELS[module]}</h1>
-              <p className="text-xs text-tn-muted hidden sm:block">{MODULE_SUBTITLE[module]}</p>
+              <h1 className="font-bold text-tn-text text-sm sm:text-base capitalize leading-tight">{t(MODULE_I18N_KEY[module])}</h1>
+              <p className="text-xs text-tn-muted hidden sm:block">{t(MODULE_SUBTITLE_KEY[module])}</p>
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -204,7 +227,7 @@ function DashboardInner() {
           {/* Scrollable content */}
           <main className="flex-1 overflow-y-auto p-4 lg:p-6 bg-tn-light pb-20 lg:pb-6">
             {module === 'dashboard' && (
-               <ModuleDashboard events={events} entries={allEntries} onNavigate={setModule} onNewEvent={() => setShowNew(true)} user={user} />
+               <ModuleDashboard events={events} entries={allEntries} onNavigate={setModule} onNewEvent={() => setShowNew(true)} />
              )}
             {module === 'events'     && <ModuleEvents     events={events} onRefresh={loadAll} onNewEvent={() => setShowNew(true)} onEdit={setEditingEvent} />}
             {module === 'organizers' && <ModuleOrganizers events={events} onRefresh={loadAll} />}
@@ -220,6 +243,7 @@ function DashboardInner() {
             {module === 'admin-support' && <ModuleAdminSupport onNavigate={setModule} />}
             {module === 'admin-approvals' && <ModuleAdminApprovals onNavigate={setModule} onRefresh={loadAll} />}
             {module === 'admin-private-events' && <ModuleAdminPrivateEvents onNavigate={setModule} />}
+            {module === 'admin-login-logs' && <ModuleAdminLoginLogs onNavigate={setModule} />}
           </main>
         </div>
       </div>

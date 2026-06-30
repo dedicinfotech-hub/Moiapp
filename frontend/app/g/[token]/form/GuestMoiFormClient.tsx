@@ -33,6 +33,10 @@ export default function GuestMoiFormScreen() {
 
   useEffect(() => {
     if (!token) return;
+    if (typeof window !== 'undefined' && sessionStorage.getItem(`guest_submitted_${token}`)) {
+      router.push(`/g/${token}/success`);
+      return;
+    }
     eventsApi.getByGuestToken(token).then((data) => {
       if (data.approval_status !== 'approved' || data.qr_enabled !== 1) router.push(`/g/${token}/expired`);
       else setEvent(data);
@@ -44,10 +48,22 @@ export default function GuestMoiFormScreen() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!event) return;
+    const amount = parseFloat(form.amount);
+    if (!form.amount || Number.isNaN(amount) || amount <= 0) {
+      setError('Please enter a valid gift amount');
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
-      sessionStorage.setItem(`guest_contribution_${token}`, JSON.stringify({ ...form, event_title: event.custom_title || event.event_type }));
+      sessionStorage.setItem(`guest_contribution_${token}`, JSON.stringify({
+        ...form,
+        guest_name: form.guest_name.trim() || 'Guest',
+        phone: form.phone.trim(),
+        city: form.city.trim(),
+        relation: form.relation || 'other',
+        event_title: event.custom_title || event.event_type,
+      }));
       router.push(`/g/${token}/payment`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to submit');
@@ -69,31 +85,31 @@ export default function GuestMoiFormScreen() {
       <main className="max-w-md mx-auto px-4 py-4 pb-8">
         <div className="bg-tn-light border border-tn-border rounded-xl p-3 mb-5 flex gap-2">
           <Icon name="alert" size={18} className="text-tn-yellow font-bold" />
-          <p className="text-[11px] text-tn-muted">Please fill in the details below to send your Moi (Gift). All fields marked with * are mandatory.</p>
+          <p className="text-[11px] text-tn-muted">Only the gift amount is required. Other fields are optional.</p>
         </div>
         {error && <div className="bg-tn-error-bg text-tn-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <p className="text-xs font-bold text-tn-text">Personal Details</p>
           {[
-            { key: 'guest_name', label: 'Full Name *', placeholder: 'Enter your full name', required: true },
-            { key: 'phone', label: 'Mobile Number *', placeholder: 'Enter mobile number', required: true, type: 'tel' },
+            { key: 'guest_name', label: 'Full Name (Optional)', placeholder: 'Enter your full name' },
+            { key: 'phone', label: 'Mobile Number (Optional)', placeholder: 'Enter mobile number', type: 'tel' },
             { key: 'email', label: 'Email Address (Optional)', placeholder: 'Enter email' },
             { key: 'company', label: 'Organisation (Optional)', placeholder: 'Company name' },
             { key: 'occupation', label: 'Occupation (Optional)', placeholder: 'Your occupation' },
           ].map((f) => (
             <div key={f.key}>
               <label className="text-xs font-semibold text-tn-text mb-1 block">{f.label}</label>
-              <input required={f.required} type={f.type || 'text'} value={form[f.key as keyof typeof form]} onChange={(e) => update(f.key, e.target.value)} className={inp} placeholder={f.placeholder} />
+              <input type={f.type || 'text'} value={form[f.key as keyof typeof form]} onChange={(e) => update(f.key, e.target.value)} className={inp} placeholder={f.placeholder} />
             </div>
           ))}
           <div>
-            <label className="text-xs font-semibold text-tn-text mb-1 block">City *</label>
-            <input required value={form.city} onChange={(e) => update('city', e.target.value)} className={inp} placeholder="Select city" />
+            <label className="text-xs font-semibold text-tn-text mb-1 block">City (Optional)</label>
+            <input value={form.city} onChange={(e) => update('city', e.target.value)} className={inp} placeholder="Select city" />
           </div>
           <div>
-            <label className="text-xs font-semibold text-tn-text mb-1 block">Relationship with the Host *</label>
-            <select required value={form.relation} onChange={(e) => update('relation', e.target.value)} className={inp}>
+            <label className="text-xs font-semibold text-tn-text mb-1 block">Relationship (Optional)</label>
+            <select value={form.relation} onChange={(e) => update('relation', e.target.value)} className={inp}>
               {['family', 'friend', 'relative', 'colleague', 'neighbor', 'business', 'other'].map((r) => (
                 <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
               ))}
@@ -131,7 +147,7 @@ export default function GuestMoiFormScreen() {
             <p>Your information is secure. We respect your privacy. Your details will only be used for this event.</p>
           </div>
 
-          <button type="submit" disabled={submitting || !form.guest_name || !form.phone || !form.amount} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm disabled:opacity-40">
+          <button type="submit" disabled={submitting || !form.amount} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm disabled:opacity-40">
             {submitting ? 'Please wait…' : 'Continue to Payment'}
           </button>
         </form>

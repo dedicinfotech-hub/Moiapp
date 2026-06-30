@@ -39,7 +39,10 @@ export type IconName =
   | 'mic'
   | 'check'
   | 'receipt'
-  | 'clock';
+  | 'clock'
+  | 'star'
+  | 'login'
+  | 'user';
 
 const paths: Record<IconName, JSX.Element> = {
   wedding: (
@@ -260,6 +263,26 @@ const paths: Record<IconName, JSX.Element> = {
     <>
       <circle cx="12" cy="12" r="9" />
       <path d="M12 7v5l3 3" />
+    </>
+  ),
+  star: (
+    <path
+      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+      fill="currentColor"
+      stroke="none"
+    />
+  ),
+  login: (
+    <>
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+      <path d="M10 17l5-5-5-5" />
+      <path d="M15 12H3" />
+    </>
+  ),
+  user: (
+    <>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </>
   ),
   'qr-code': (

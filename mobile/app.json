@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "MoiApp",
+    "slug": "moiapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFC107"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.moiapp.weddinggift",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition.",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to use the microphone."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFC107"
+      },
+      "package": "com.moiapp.weddinggift",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "scheme": "moiapp",
+    "extra": {
+      "apiUrl": "https://dsitesai.com/moiapp/api",
+      "eas": {
+        "projectId": "b2dc0972-561f-4483-b33c-2dc0eac8f464"
+      }
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font",
+      "expo-speech-recognition",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FFC107"
+        }
+      ]
+    ],
+    "owner": "nainarcse"
+  }
+}

@@ -27,6 +27,18 @@ register_shutdown_function(function () {
 });
 
 // Use __DIR__ so paths work regardless of cwd or symlinks
+$projectRoot = dirname(__DIR__);
+$composerAutoloadCandidates = [
+    $projectRoot . '/vendor/autoload.php',
+    $projectRoot . '/../vendor/autoload.php',
+];
+foreach ($composerAutoloadCandidates as $composerAutoload) {
+    if (is_file($composerAutoload)) {
+        require_once $composerAutoload;
+        break;
+    }
+}
+
 require_once __DIR__ . '/env.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth_helper.php';

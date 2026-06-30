@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { notificationsApi, type Notification } from '@/lib/api';
 import Icon, { type IconName } from '@/components/ui/Icon';
+import { assetUrl } from '@/lib/assetUrl';
 
 function notificationsEnabled(): boolean {
   if (typeof window === 'undefined') return true;
@@ -57,7 +58,7 @@ export default function NotificationBell() {
     try {
       new window.Notification(n.title, {
         body: n.message || undefined,
-        icon: '/favicon.ico',
+        icon: assetUrl('/favicon.png'),
       });
     } catch {
       // ignore

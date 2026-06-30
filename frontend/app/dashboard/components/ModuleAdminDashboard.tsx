@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import { adminApi } from '@/lib/api';
 
-type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support' | 'admin-approvals';
+type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features' | 'admin-dashboard' | 'admin-users' | 'admin-analytics' | 'admin-revenue' | 'admin-support' | 'admin-approvals' | 'admin-login-logs';
 
 interface ModuleAdminDashboardProps {
   onNavigate: (m: Module) => void;
@@ -206,6 +206,23 @@ export default function ModuleAdminDashboard({ onNavigate }: ModuleAdminDashboar
             className="w-full bg-tn-yellow text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors"
           >
             View Support Tickets
+          </button>
+        </div>
+
+        {/* Login Logs */}
+        <div className="bg-white border border-tn-border rounded-xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-2xl text-tn-gold"><Icon name="settings" size={24} /></span>
+              <h3 className="font-semibold text-tn-text">Login Audit Logs</h3>
+            </div>
+          <p className="text-sm text-tn-muted mb-4">
+            Review successful, failed, and blocked login attempts across the platform.
+          </p>
+          <button
+            onClick={() => onNavigate('admin-login-logs')}
+            className="w-full bg-tn-yellow text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-colors"
+          >
+            View Login Logs
           </button>
         </div>
       </div>

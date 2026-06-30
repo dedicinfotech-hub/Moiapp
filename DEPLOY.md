@@ -136,8 +136,16 @@ RewriteRule ^(.*)$ $1 [R=200,L]
 # Route /moiapp/api/* → PHP files (already in api/ folder, no rewrite needed)
 
 # Route everything else to Next.js static files
-# If the file exists, serve it directly
-RewriteCond %{REQUEST_FILENAME} -f [OR]
+# Serve real files first
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Fix 403: /events/ → events.html when Next.js created both file and folder
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond $1.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
+
+# Remaining directories (_next/, uploads/)
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 

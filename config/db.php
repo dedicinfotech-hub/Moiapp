@@ -3,7 +3,7 @@ require_once __DIR__ . '/env.php';
 
 define('DB_HOST', env('DB_HOST', 'localhost'));
 define('DB_USER', env('DB_USER', 'root'));
-define('DB_PASS', env('DB_PASS'));
+define('DB_PASS', env('DB_PASS', 'root'));
 define('DB_NAME', env('DB_NAME', 'moiapp'));
 
 function getDB(): mysqli {

@@ -16,7 +16,8 @@ export type AppModule =
   | 'admin-revenue'
   | 'admin-support'
   | 'admin-approvals'
-  | 'admin-private-events';
+  | 'admin-private-events'
+  | 'admin-login-logs';
 
 export interface AppNavItem {
   id: AppModule;
@@ -44,6 +45,7 @@ export const ADMIN_NAV_IDS: AppModule[] = [
   'admin-revenue',
   'admin-support',
   'admin-private-events',
+  'admin-login-logs',
 ];
 
 export const ADMIN_NAV_LABELS: Record<AppModule, string> = {
@@ -62,6 +64,7 @@ export const ADMIN_NAV_LABELS: Record<AppModule, string> = {
   'admin-revenue': 'Revenue',
   'admin-support': 'Support',
   'admin-private-events': 'Private Events',
+  'admin-login-logs': 'Login Logs',
 };
 
 export function getAdminIcon(module: AppModule): IconName {
@@ -81,9 +84,10 @@ export function getAdminIcon(module: AppModule): IconName {
     'admin-revenue': 'wallet',
     'admin-support': 'ticket',
     'admin-private-events': 'lock',
+    'admin-login-logs': 'shield',
   };
 
-  return icons[module];
+  return icons[module] ?? 'dashboard';
 }
 
 export function getVisibleAppNav({
@@ -105,16 +109,20 @@ export function getAppSidebarSections({
   isEnabled,
   activeModule,
   hrefForModule = (module) => `/dashboard?module=${module}`,
+  labelForModule,
+  sectionLabels,
 }: {
   isAdmin: boolean;
   isEnabled: (feature: string) => boolean;
   activeModule?: AppModule;
   hrefForModule?: (module: AppModule) => string;
+  labelForModule?: (module: AppModule) => string;
+  sectionLabels?: { menu: string; admin: string };
 }): AppSidebarSection[] {
   const menuItems = getVisibleAppNav({ isAdmin, isEnabled }).map(
     (item): AppSidebarItem => ({
       id: item.id,
-      label: item.label,
+      label: labelForModule ? labelForModule(item.id) : item.label,
       icon: item.icon,
       href: hrefForModule(item.id),
       active: activeModule === item.id,
@@ -125,7 +133,7 @@ export function getAppSidebarSections({
     ? ADMIN_NAV_IDS.map(
         (id): AppSidebarItem => ({
           id,
-          label: ADMIN_NAV_LABELS[id],
+          label: labelForModule ? labelForModule(id) : ADMIN_NAV_LABELS[id],
           icon: getAdminIcon(id),
           href: hrefForModule(id),
           active: activeModule === id,
@@ -134,7 +142,7 @@ export function getAppSidebarSections({
     : [];
 
   return [
-    { label: 'Menu', items: menuItems },
-    ...(adminItems.length ? [{ label: 'Admin', items: adminItems }] : []),
+    { label: sectionLabels?.menu ?? 'Menu', items: menuItems },
+    ...(adminItems.length ? [{ label: sectionLabels?.admin ?? 'Admin', items: adminItems }] : []),
   ];
 }

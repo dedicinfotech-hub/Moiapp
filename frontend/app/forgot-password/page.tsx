@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import Image from 'next/image';
+import { assetUrl } from '@/lib/assetUrl';
 
 
 export default function ForgotPasswordPage() {
@@ -47,7 +48,7 @@ export default function ForgotPasswordPage() {
             <div className="flex justify-center mb-4">
               <div className="relative w-[110px] h-[24px]">
                 <Image
-                  src="/logo.png"
+                  src={assetUrl('/logo.png')}
                   alt="MoiApp Logo"
                   fill
                   className="object-contain"

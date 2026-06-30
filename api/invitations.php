@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/cors.php';
+require_once __DIR__ . '/../config/spreadsheet.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $user = getAuthUser();
@@ -102,50 +103,94 @@ if ($method === 'POST' && ($_GET['action'] ?? '') === 'csv') {
         exit;
     }
 
-    $handle = fopen($file['tmp_name'], 'r');
-    if (!$handle) {
+    try {
+        $allRows = parseSpreadsheetRows($file['tmp_name'], $ext);
+    } catch (RuntimeException $e) {
         http_response_code(400);
-        echo json_encode(['error' => 'Failed to read file']);
+        echo json_encode(['error' => $e->getMessage()]);
         exit;
     }
 
-    $header = fgetcsv($handle);
+    if (empty($allRows)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Failed to read file or file is empty']);
+        exit;
+    }
+
+    $header = array_map('strtolower', array_map('trim', $allRows[0]));
     $requiredColumns = ['name', 'phone', 'relation', 'city'];
-    $headerMap = array_map('strtolower', $header);
-    
-    $missingColumns = array_filter($requiredColumns, function($col) use ($headerMap) {
-        return !in_array($col, $headerMap);
+    $headerMap = $header;
+
+    $missingColumns = array_filter($requiredColumns, function ($col) use ($headerMap) {
+        return !in_array($col, $headerMap, true);
     });
-    
+
     if (count($missingColumns) > 0) {
         http_response_code(400);
         echo json_encode(['error' => 'Missing required columns: ' . implode(', ', $missingColumns)]);
         exit;
     }
 
-    $nameIdx = array_search('name', $headerMap);
-    $phoneIdx = array_search('phone', $headerMap);
-    $relationIdx = array_search('relation', $headerMap);
-    $cityIdx = array_search('city', $headerMap);
+    $nameIdx = array_search('name', $headerMap, true);
+    $phoneIdx = array_search('phone', $headerMap, true);
+    $relationIdx = array_search('relation', $headerMap, true);
+    $cityIdx = array_search('city', $headerMap, true);
 
     $stmt = $db->prepare('INSERT INTO invitations (event_id, name, phone, relation, city) VALUES (?, ?, ?, ?, ?)');
     $count = 0;
-    
-    while (($row = fgetcsv($handle)) !== false) {
+    $invalid = 0;
+    $errors = [];
+    $seenPhones = [];
+
+    for ($i = 1, $n = count($allRows); $i < $n; $i++) {
+        $rowNum = $i + 1;
+        $row = $allRows[$i];
         $name = trim($row[$nameIdx] ?? '');
-        $phone = trim($row[$phoneIdx] ?? '');
+        $phone = preg_replace('/\D/', '', trim($row[$phoneIdx] ?? ''));
         $relation = strtolower(trim($row[$relationIdx] ?? 'friend'));
         $city = trim($row[$cityIdx] ?? '');
-        
-        if ($name) {
-            $stmt->bind_param('issss', $eventId, $name, $phone, $relation, $city);
-            $stmt->execute();
-            $count++;
+
+        if ($name === '') {
+            $invalid++;
+            if (count($errors) < 25) {
+                $errors[] = "Row {$rowNum}: Missing name";
+            }
+            continue;
         }
+
+        if ($phone !== '' && strlen($phone) !== 10) {
+            $invalid++;
+            if (count($errors) < 25) {
+                $errors[] = "Row {$rowNum}: Invalid phone number";
+            }
+            continue;
+        }
+
+        if ($phone !== '' && isset($seenPhones[$phone])) {
+            $invalid++;
+            if (count($errors) < 25) {
+                $errors[] = "Row {$rowNum}: Duplicate phone number";
+            }
+            continue;
+        }
+
+        if ($phone !== '') {
+            $seenPhones[$phone] = true;
+        }
+
+        $stmt->bind_param('issss', $eventId, $name, $phone, $relation, $city);
+        $stmt->execute();
+        $count++;
     }
-    
-    fclose($handle);
-    echo json_encode(['success' => true, 'count' => $count]);
+
+    echo json_encode([
+        'success' => true,
+        'count' => $count,
+        'valid' => $count,
+        'invalid' => $invalid,
+        'total' => max(0, count($allRows) - 1),
+        'errors' => $errors,
+    ]);
     exit;
 }
 

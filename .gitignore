@@ -2,6 +2,7 @@
 config/.env
 config/.env.production
 uploads/
+vendor/
 
 # ── Next.js ───────────────────────────────────────────────────────────────────
 frontend/.env.local

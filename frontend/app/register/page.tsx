@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { assetUrl } from '@/lib/assetUrl';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function RegisterPage() {
             <div className="flex justify-center mb-4">
               <div className="relative w-[110px] h-[24px]">
                 <Image
-                  src="/logo.png"
+                  src={assetUrl('/logo.png')}
                   alt="MoiApp Logo"
                   fill
                   className="object-contain"

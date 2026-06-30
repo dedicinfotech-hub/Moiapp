@@ -124,7 +124,7 @@ export const authApi = {
     }),
 
   login: (body: { email: string; password: string; otp?: string }) =>
-    request<{ token: string; user: User; requires_otp?: boolean }>('/auth.php?action=login', {
+    request<{ token?: string; user?: User; requires_otp?: boolean; message?: string; otp_email?: string }>('/auth.php?action=login', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
@@ -166,6 +166,12 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ token, password }),
     }),
+
+  deleteAccount: () =>
+    request<{ success: boolean; message: string; grace_period_days?: number }>(
+      '/auth.php?action=account',
+      { method: 'DELETE' }
+    ),
 };
 
 // ── Features ───────────────────────────────────────────────────────────────────
@@ -774,6 +780,15 @@ export interface ReturnGift {
 }
 
 // ── Admin API ───────────────────────────────────────────────────────────────────
+// ── Contact / public enquiry ─────────────────────────────────────────────────
+export const contactApi = {
+  submitEnquiry: (body: { name: string; email: string; phone: string; message: string }) =>
+    request<{ success: boolean; message: string }>('/contact.php', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+};
+
 export const adminApi = {
   // Get admin dashboard statistics
   getStats: () =>
@@ -868,6 +883,27 @@ export const adminApi = {
       method: 'POST',
       body: JSON.stringify({ id, is_enabled }),
     }),
+
+  getLoginLogs: (params?: { page?: number; limit?: number; status?: string; search?: string }) => {
+    const q = new URLSearchParams({ action: 'login-logs' });
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.limit) q.set('limit', String(params.limit));
+    if (params?.status) q.set('status', params.status);
+    if (params?.search) q.set('search', params.search);
+    return request<{
+      logs: Array<{
+        id: number;
+        user_id: number | null;
+        email: string | null;
+        role: string | null;
+        ip_address: string | null;
+        user_agent: string | null;
+        status: 'success' | 'failed' | 'blocked';
+        created_at: string;
+      }>;
+      pagination: { page: number; limit: number; total: number; pages: number };
+    }>(`/admin.php?${q.toString()}`);
+  },
 };
 
 export interface AdminUser {

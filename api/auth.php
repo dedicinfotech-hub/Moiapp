@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/cors.php';
 require_once __DIR__ . '/../config/mail.php';
+require_once __DIR__ . '/../config/sms.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
@@ -44,11 +45,31 @@ function generateOTP(): string {
     return str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
 }
 
-function sendOTP($phone, $otp) {
-    // In production, integrate with SMS gateway (Twilio, MSG91, etc.)
-    // For now, we'll log it and return success
-    error_log("OTP for $phone: $otp");
-    return true;
+function sendOTP(string $phone, string $otp, ?string $email = null, ?string $name = null): array {
+    $smsMessage = "Your MoiApp OTP is {$otp}. Valid for 5 minutes. Do not share this code.";
+    $devFallback = env('DEV_OTP_FALLBACK', '0') === '1';
+
+    if (isSmsConfigured()) {
+        if (sendSMS($phone, $smsMessage)) {
+            return ['sent' => true, 'method' => 'sms'];
+        }
+        error_log("SMS OTP failed for $phone");
+    }
+
+    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $displayName = $name ?: 'User';
+        if (sendOTPEmail($email, $displayName, $otp)) {
+            return ['sent' => true, 'method' => 'email'];
+        }
+        error_log("Email OTP failed for $email");
+    }
+
+    if ($devFallback) {
+        error_log("DEV_OTP_FALLBACK: OTP for $phone: $otp");
+        return ['sent' => true, 'method' => 'dev', 'dev_otp' => $otp];
+    }
+
+    return ['sent' => false, 'method' => null];
 }
 
 // ── Send OTP ──────────────────────────────────────────────────────────────────
@@ -66,7 +87,7 @@ if ($method === 'POST' && $action === 'send-otp') {
     $db = getDB();
     
     // Check for OTP blocking (3 wrong attempts = 10 min block)
-    $stmt = $db->prepare('SELECT id, otp_attempts, otp_blocked_until FROM users WHERE phone = ?');
+    $stmt = $db->prepare('SELECT id, name, email, otp_attempts, otp_blocked_until FROM users WHERE phone = ?');
     $stmt->bind_param('s', $phone);
     $stmt->execute();
     $user = $stmt->get_result()->fetch_assoc();
@@ -92,9 +113,24 @@ if ($method === 'POST' && $action === 'send-otp') {
         $stmt->execute();
     }
     
-    sendOTP($phone, $otp);
-    
-    echo json_encode(['success' => true, 'message' => 'OTP sent successfully']);
+    $delivery = sendOTP($phone, $otp, $user['email'] ?? null, $user['name'] ?? null);
+    if (!$delivery['sent']) {
+        http_response_code(503);
+        echo json_encode(['error' => 'Could not send OTP. Configure SMS or email in server settings.']);
+        exit;
+    }
+
+    $response = [
+        'success' => true,
+        'message' => $delivery['method'] === 'email'
+            ? 'OTP sent to your registered email'
+            : 'OTP sent to your mobile number',
+        'delivery' => $delivery['method'],
+    ];
+    if (!empty($delivery['dev_otp'])) {
+        $response['dev_otp'] = $delivery['dev_otp'];
+    }
+    echo json_encode($response);
     exit;
 }
 
@@ -266,24 +302,43 @@ if ($method === 'POST' && $action === 'login') {
         exit;
     }
 
-    // For admin users, require OTP (disabled until SMTP is configured)
-    if (false && $user['role'] === 'admin') {
+    // Admin users require email OTP when SMTP is configured
+    if ($user['role'] === 'admin' && isMailConfigured()) {
+        if (!columnExists($db, 'users', 'admin_otp') || !columnExists($db, 'users', 'admin_otp_expires')) {
+            error_log('Admin login: users.admin_otp columns missing — run schema migration');
+            http_response_code(503);
+            echo json_encode(['error' => 'Admin OTP is not configured on the server. Please contact support.']);
+            exit;
+        }
+
         if (!$otp) {
             // Generate and send OTP
             $adminOtp = generateOTP();
             $otpExpires = date('Y-m-d H:i:s', strtotime('+5 minutes'));
             $stmt = $db->prepare('UPDATE users SET admin_otp = ?, admin_otp_expires = ?, login_attempts = 0, login_blocked_until = NULL WHERE id = ?');
             $stmt->bind_param('ssi', $adminOtp, $otpExpires, $user['id']);
-            $stmt->execute();
-
-            // Send OTP email
-            $mailSent = sendOTPEmail($email, $user['name'], $adminOtp);
-            if (!$mailSent) {
-                error_log("Admin OTP for $email: $adminOtp (mail not sent - check mail config)");
+            if (!$stmt->execute()) {
+                error_log('Admin OTP store failed: ' . $stmt->error);
+                http_response_code(500);
+                echo json_encode(['error' => 'Could not prepare OTP. Please try again.']);
+                exit;
             }
 
-            // TEMPORARY: Return OTP in response for dev/testing (remove once real email works)
-            echo json_encode(['success' => true, 'requires_otp' => true, 'message' => 'OTP sent to admin email', 'dev_otp' => $adminOtp]);
+            $mailSent = sendAdminOTPEmail($email, $user['name'] ?? 'Admin', $adminOtp);
+            if (!$mailSent) {
+                error_log("Admin OTP email failed for $email (SMTP send returned false)");
+                http_response_code(503);
+                echo json_encode(['error' => 'Could not send OTP email. Check server mail settings or try again.']);
+                exit;
+            }
+
+            error_log("Admin OTP emailed to $email");
+            echo json_encode([
+                'success' => true,
+                'requires_otp' => true,
+                'message' => 'OTP sent to your admin email. Check inbox and spam folder.',
+                'otp_email' => mask_email($email),
+            ]);
             exit;
         }
         
@@ -419,10 +474,11 @@ if ($method === 'POST' && $action === 'forgot-password') {
     $stmt->bind_param('sss', $email, $token, $expires);
     $stmt->execute();
 
-    // In production, send email with reset link
-    // For now, we'll log it
-    $resetLink = (env('APP_URL', 'http://localhost:8888/MoiApp') . '/reset-password?token=' . $token);
-    error_log("Password reset link for $email: $resetLink");
+    $resetLink = rtrim(env('APP_URL', 'http://localhost:8888/MoiApp'), '/') . '/reset-password?token=' . $token;
+    $mailSent = sendPasswordResetEmail($email, $user['name'], $resetLink);
+    if (!$mailSent) {
+        error_log("Password reset link for $email: $resetLink (mail not sent)");
+    }
 
     echo json_encode(['success' => true, 'message' => 'If the email exists, a reset link has been sent']);
     exit;

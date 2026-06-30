@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import { Event, MoiEntry } from '@/lib/api';
+import { formatMoiEntryAmount } from '@/lib/moiFormat';
 
 interface ModulePaymentsProps {
   entries: MoiEntry[];
@@ -199,13 +200,7 @@ export default function ModulePayments({ entries, events }: ModulePaymentsProps)
                            )}
                          </td>
                          <td className="px-3 py-3 text-right font-bold text-tn-text">
-                           {e.gift_type === 'gold' ? (
-                             <span className="text-tn-gold">{e.gold_weight}g Gold</span>
-                           ) : e.gift_type === 'gift' ? (
-                             <span className="text-tn-error truncate max-w-[150px] inline-block">{e.gift_description}</span>
-                          ) : (
-                            <span>₹{Number(e.amount).toLocaleString('en-IN')}</span>
-                          )}
+                           <span>{formatMoiEntryAmount(e)}</span>
                         </td>
                         <td className="px-3 py-3 text-right text-tn-subtle text-xs hidden lg:table-cell whitespace-nowrap">
                           {new Date(e.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -277,13 +272,7 @@ export default function ModulePayments({ entries, events }: ModulePaymentsProps)
 
                      {/* Amount */}
                      <div className="pt-2 border-t border-tn-border">
-                       {e.gift_type === 'gold' ? (
-                         <p className="text-sm font-bold text-tn-gold">{e.gold_weight}g Gold</p>
-                       ) : e.gift_type === 'gift' ? (
-                         <p className="text-sm font-bold text-tn-error truncate">{e.gift_description}</p>
-                      ) : (
-                        <p className="text-sm font-bold text-tn-text">₹{Number(e.amount).toLocaleString('en-IN')}</p>
-                      )}
+                       <p className="text-sm font-bold text-tn-text">{formatMoiEntryAmount(e)}</p>
                     </div>
                   </div>
                 </div>

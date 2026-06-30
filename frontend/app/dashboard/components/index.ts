@@ -13,6 +13,7 @@ export { default as ModuleAdminRevenue } from './ModuleAdminRevenue';
 export { default as ModuleAdminSupport } from './ModuleAdminSupport';
 export { default as ModuleAdminApprovals } from './ModuleAdminApprovals';
 export { default as ModuleAdminPrivateEvents } from './ModuleAdminPrivateEvents';
+export { default as ModuleAdminLoginLogs } from './ModuleAdminLoginLogs';
 export { default as NewEventModal } from './NewEventModal';
 export { default as EditEventModal } from './EditEventModal';
 export { default as BulkImportModal } from './BulkImportModal';

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { contactApi } from '@/lib/api';
 import Icon from '@/components/ui/Icon';
 import toast from 'react-hot-toast';
+import { assetUrl } from '@/lib/assetUrl';
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -65,7 +66,7 @@ export default function ContactPage() {
               <Link href="/">
                 <div className="relative w-[110px] h-[24px] cursor-pointer">
                   <Image
-                    src="/logo.png"
+                    src={assetUrl('/logo.png')}
                     alt="MoiApp Logo"
                     fill
                     className="object-contain"

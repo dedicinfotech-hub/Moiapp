@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import { eventsApi, Event } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { assetUrl } from '@/lib/assetUrl';
 
 export default function HomePage() {
   const router = useRouter();
@@ -130,7 +131,7 @@ export default function HomePage() {
             ) : (
               <div className="bg-white rounded-2xl shadow-2xl shadow-black/10 overflow-hidden border border-[#F0E8C8]">
                 <img 
-                  src="/hero-image.webp" 
+                  src={assetUrl('/hero-image.webp')} 
                   alt="MoiApp Hero" 
                   className="w-full h-auto object-cover" 
                 />
@@ -215,10 +216,10 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
-              { icon: 'check' as IconName, title: '100% Free', desc: 'No hidden charges', image: '/feature-1.webp' },
-              { icon: 'lock' as IconName, title: 'Secure Data', desc: 'Your data is safe', image: '/feature-2.webp' },
-              { icon: 'wallet' as IconName, title: 'UPI Supported', desc: 'Direct payments', image: '/feature-3.webp' },
-              { icon: 'wedding' as IconName, title: 'Made for Tamil Weddings', desc: 'Cultural touch', image: '/feature-4.webp' },
+              { icon: 'check' as IconName, title: '100% Free', desc: 'No hidden charges', image: assetUrl('/feature-1.webp') },
+              { icon: 'lock' as IconName, title: 'Secure Data', desc: 'Your data is safe', image: assetUrl('/feature-2.webp') },
+              { icon: 'wallet' as IconName, title: 'UPI Supported', desc: 'Direct payments', image: assetUrl('/feature-3.webp') },
+              { icon: 'wedding' as IconName, title: 'Made for Tamil Weddings', desc: 'Cultural touch', image: assetUrl('/feature-4.webp') },
             ].map((item) => (
               <div key={item.title} className="bg-[#FFFCF5] border border-[#FFE082] rounded-xl p-5 text-center hover:shadow-md transition-all overflow-hidden">
                 <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden">
@@ -476,13 +477,13 @@ export default function HomePage() {
               <h3 className="font-bold text-white text-sm mb-4 uppercase tracking-wider">Support</h3>
               <ul className="space-y-2 text-sm text-[#888]">
                 <li>
-                  <a href="/help-center" className="hover:text-[#FFC107] transition-colors">Help Center</a>
+                  <Link href="/help-center" className="hover:text-[#FFC107] transition-colors">Help Center</Link>
                 </li>
                 <li>
-                  <a href="/privacy-policy" className="hover:text-[#FFC107] transition-colors">Privacy Policy</a>
+                  <Link href="/privacy-policy" className="hover:text-[#FFC107] transition-colors">Privacy Policy</Link>
                 </li>
                 <li>
-                  <a href="/terms-of-service" className="hover:text-[#FFC107] transition-colors">Terms of Service</a>
+                  <Link href="/terms-of-service" className="hover:text-[#FFC107] transition-colors">Terms of Service</Link>
                 </li>
                 <li>
                   <Link href="/contact" className="hover:text-[#FFC107] transition-colors">
