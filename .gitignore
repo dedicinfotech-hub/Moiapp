@@ -1,8 +1,8 @@
 # ── PHP secrets ───────────────────────────────────────────────────────────────
-config/.env
-config/.env.production
-uploads/
-vendor/
+backend/config/.env
+backend/config/.env.production
+backend/uploads/
+backend/vendor/
 
 # ── Next.js ───────────────────────────────────────────────────────────────────
 frontend/.env.local
@@ -13,7 +13,7 @@ frontend/e2e/node_modules/
 frontend/out/
 
 # ── Scripts output ────────────────────────────────────────────────────────────
-scripts/*.sql
+backend/scripts/*.sql
 
 # ── Android signing ───────────────────────────────────────────────────────────
 frontend/android/app/*.keystore

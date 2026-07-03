@@ -1,6 +1,6 @@
 <?php
 /**
- * Minimal .env loader — reads config/.env into $_ENV and putenv().
+ * Minimal .env loader — reads backend/config/.env into $_ENV and putenv().
  * Call loadEnv() once at the top of any entry point, or include this file.
  * Already-set environment variables (from the server) take precedence.
  */

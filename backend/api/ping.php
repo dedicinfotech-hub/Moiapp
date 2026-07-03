@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config/bootstrap.php';
 require_once __DIR__ . '/../config/cors.php';
 
-// Quick health check — visit https://dsitesai.com/moiapp/api/ping.php
+// Quick health check — visit https://moipassbook.com/api/ping.php
 // to verify PHP, DB connection, and env loading all work.
 
 $db_ok  = false;

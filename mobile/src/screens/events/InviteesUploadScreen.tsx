@@ -15,12 +15,13 @@ import { useScreenSlug } from '../../hooks/useScreenSlug';
 import { useEvent } from '../../hooks/useEvent';
 import { useAppSettings } from '../../context/AppSettingsContext';
 import { invitationsApi } from '../../api';
+import { APP_BASE_URL } from '../../api/client';
 import type { Invitation } from '../../api/invitations';
 import type { EventStackParamList } from '../../navigation/types';
 import { colors, fontSize, radius, spacing } from '../../theme';
 
 const CSV_TEMPLATE = 'name,phone,relation,city\nRavi Kumar,9876543210,friend,Chennai\nPriya Sharma,9123456789,family,Madurai';
-const GUEST_BASE = 'https://dsitesai.com/moiapp/g';
+const GUEST_BASE = `${APP_BASE_URL}/g`;
 
 type UploadSummary = { valid: number; invalid: number; total: number; errors: string[] };
 

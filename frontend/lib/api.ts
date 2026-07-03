@@ -5,7 +5,7 @@
 //   No CORS issues — browser only talks to localhost:3000.
 //
 // PRODUCTION (npm run build + static export):
-//   NEXT_PUBLIC_API_URL = https://dsitesai.com/moiapp/api
+//   NEXT_PUBLIC_API_URL = https://moipassbook.com/api
 //   Browser calls the PHP backend directly.
 import toast from 'react-hot-toast';
 
@@ -31,7 +31,7 @@ async function request<T>(
   if (token) headers['X-Auth-Token'] = `Bearer ${token}`;
 
   // Build the URL. BASE is always an absolute URL in APK/production
-  // (NEXT_PUBLIC_API_URL = https://dsitesai.com/moiapp/api).
+  // (NEXT_PUBLIC_API_URL = https://moipassbook.com/api).
   // In local dev BASE = '/api' (relative), so we fall back to window.location.origin.
   const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
   const url = new URL(`${BASE}${path}`, origin);

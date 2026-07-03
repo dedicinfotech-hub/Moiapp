@@ -5,7 +5,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { PublicStackParamList } from '../../navigation/types';
-import { navigateToPublicHome, navigateToAuth } from '../../navigation/navigationRef';
+import { navigateToPublicHome, navigateToAuth, navigateToModule } from '../../navigation/navigationRef';
+import { useAuthStore } from '../../store/authStore';
 import { useAppSettings } from '../../context/AppSettingsContext';
 import { useScaledTheme } from '../../theme/useScaledTheme';
 import { colors, fontSize, radius, spacing } from '../../theme';
@@ -22,6 +23,7 @@ export function PublicGuestHeader({ showBack, onBack, variant = 'default' }: Pub
   const navigation = useNavigation<NativeStackNavigationProp<PublicStackParamList>>();
   const insets = useSafeAreaInsets();
   const { t } = useAppSettings();
+  const user = useAuthStore((s) => s.user);
   const { scaledFontSize: fs } = useScaledTheme();
   const isHome = variant === 'home';
 
@@ -54,15 +56,27 @@ export function PublicGuestHeader({ showBack, onBack, variant = 'default' }: Pub
             <Text style={[styles.ghostText, { fontSize: fs.xs }]}>{t('publicNavHome')}</Text>
           </TouchableOpacity>
         )}
-        <TouchableOpacity
-          onPress={() => navigateToAuth('Login')}
-          style={isHome ? styles.loginPrimary : styles.ghostBtn}
-          activeOpacity={0.85}
-        >
-          <Text style={[isHome ? styles.loginPrimaryText : styles.ghostText, { fontSize: fs.xs }]}>
-            {t('login')}
-          </Text>
-        </TouchableOpacity>
+        {user ? (
+          <TouchableOpacity
+            onPress={() => navigateToModule('dashboard')}
+            style={isHome ? styles.loginPrimary : styles.ghostBtn}
+            activeOpacity={0.85}
+          >
+            <Text style={[isHome ? styles.loginPrimaryText : styles.ghostText, { fontSize: fs.xs }]}>
+              {t('dashboard')}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={() => navigateToAuth('Login')}
+            style={isHome ? styles.loginPrimary : styles.ghostBtn}
+            activeOpacity={0.85}
+          >
+            <Text style={[isHome ? styles.loginPrimaryText : styles.ghostText, { fontSize: fs.xs }]}>
+              {t('login')}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer, LinkingOptions, Theme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator } from 'react-native';
@@ -7,7 +7,7 @@ import { SidebarProvider, useSidebar } from '../context/SidebarContext';
 import { AppSidebarDrawer } from '../components/layout/AppSidebarContent';
 import { useIsGuestLink } from '../hooks/useIsGuestLink';
 import type { RootStackParamList } from './types';
-import { navigationRef, resetToMain } from './navigationRef';
+import { navigationRef } from './navigationRef';
 import { PublicStack } from './PublicStack';
 import { AuthStack } from './AuthStack';
 import { MainTabs } from './MainTabs';
@@ -19,7 +19,7 @@ import { colors } from '../theme';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: ['moiapp://', 'https://dsitesai.com/moiapp', 'http://localhost:8081'],
+  prefixes: ['moiapp://', 'https://moipassbook.com', 'https://dsitesai.com/moiapp', 'http://localhost:8081'],
   config: {
     screens: {
       PublicFlow: {
@@ -38,7 +38,14 @@ const linking: LinkingOptions<RootStackParamList> = {
       },
       Main: {
         screens: {
-          Home: 'home',
+          PublicBrowse: {
+            screens: {
+              PublicHome: 'home',
+              PublicEventsList: 'events',
+              PublicEventDetail: 'e/:slug',
+            },
+          },
+          Dashboard: 'dashboard',
           Functions: 'my-events',
         },
       },
@@ -66,14 +73,6 @@ function AppShell() {
   const logout = useAuthStore((s) => s.logout);
   const isGuestLink = useIsGuestLink();
 
-  useEffect(() => {
-    if (!sessionActive || !initialized) return;
-    const route = navigationRef.getCurrentRoute();
-    if (route?.name === 'GuestFlow' || route?.name === 'PublicFlow') {
-      resetToMain();
-    }
-  }, [sessionActive, initialized]);
-
   if (!initialized) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary }}>
@@ -91,6 +90,7 @@ function AppShell() {
           <>
             <Stack.Screen name="Main" component={MainTabs} />
             <Stack.Screen name="EventFlow" component={EventStack} />
+            <Stack.Screen name="GuestFlow" component={GuestStack} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
           </>
         ) : (

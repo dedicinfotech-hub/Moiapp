@@ -2,15 +2,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { ScreenHeader } from '../../components/layout/ScreenHeader';
 import { SafeScreen } from '../../components/layout/SafeScreen';
 import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
-import { InfoBanner } from '../../components/ui/InfoBanner';
 import {
   SettingsInfoRow,
   SettingsSelectRow,
@@ -42,36 +39,12 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 
 export function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MoreStackParamList>>();
-  const { user, logout, setUser } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { t, updateSettings: patchContextSettings } = useAppSettings();
 
-  const [name, setName] = useState(user?.name || '');
-  const [city, setCity] = useState(user?.city || '');
-  const [phone, setPhone] = useState(user?.phone || '');
-  const [upiId, setUpiId] = useState(user?.upi_id || '');
-  const [bankName, setBankName] = useState(user?.bank_name || '');
-  const [accountHolder, setAccountHolder] = useState(user?.account_holder || '');
-  const [accountNumber, setAccountNumber] = useState(user?.account_number || '');
-  const [ifscCode, setIfscCode] = useState(user?.ifsc_code || '');
-
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-    setName(user.name || '');
-    setCity(user.city || '');
-    setPhone(user.phone || '');
-    setUpiId(user.upi_id || '');
-    setBankName(user.bank_name || '');
-    setAccountHolder(user.account_holder || '');
-    setAccountNumber(user.account_number || '');
-    setIfscCode(user.ifsc_code || '');
-  }, [user?.id]);
 
   useEffect(() => {
     loadAppSettings().then(setAppSettings);
@@ -85,7 +58,6 @@ export function SettingsScreen() {
       partial.notifFunctionReminder !== undefined ||
       partial.notifFunctionToday !== undefined ||
       partial.notifReturnGift !== undefined ||
-      partial.notifReturnGift !== undefined ||
       partial.notifTime !== undefined
     ) {
       Promise.all([
@@ -97,41 +69,9 @@ export function SettingsScreen() {
     }
   }, [patchContextSettings]);
 
-  const hasPaymentDetails = Boolean(upiId.trim() || accountNumber.trim());
-
-  const handleSaveProfile = async () => {
-    if (!name.trim()) {
-      setError('Display name is required');
-      return;
-    }
-    setError('');
-    setLoading(true);
-    try {
-      const res = await authApi.updateProfile({
-        name: name.trim(),
-        city: city.trim(),
-        phone: phone.trim(),
-        upi_id: upiId.trim(),
-        bank_name: bankName.trim(),
-        account_holder: accountHolder.trim(),
-        account_number: accountNumber.trim(),
-        ifsc_code: ifscCode.trim(),
-      });
-      setUser(res.user);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to save');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLogout = async () => {
     await logout();
   };
-
-  const handleDeleteAccount = () => setShowDeleteConfirm(true);
 
   const confirmDeleteAccount = async () => {
     setDeleting(true);
@@ -159,64 +99,16 @@ export function SettingsScreen() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScreenHeader title={t('settings')} onBack={() => navigation.goBack()} />
       <SafeScreen>
-        {/* Profile */}
-        <Card style={styles.card} padding={0}>
-          <SectionHeader title="Profile" subtitle="Your name and contact details" />
-          <View style={styles.cardBody}>
-            {saved ? <InfoBanner message="Changes saved" variant="success" /> : null}
-            {error ? <InfoBanner message={error} variant="warning" /> : null}
-
-            <Input label="Display Name" icon="person-outline" value={name} onChangeText={setName} required />
-            <Input label="City" icon="business-outline" placeholder="Your city" value={city} onChangeText={setCity} />
-            <Input
-              label="Phone"
-              icon="call-outline"
-              placeholder="+91 98765 43210"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
-            <Input label="Email" icon="mail-outline" value={user?.email || ''} editable={false} />
-            <Text style={styles.fieldHint}>Email cannot be changed</Text>
-
-            <View style={styles.paymentHeader}>
-              <View style={styles.paymentTitleRow}>
-                <Ionicons name="wallet-outline" size={16} color={colors.text} />
-                <Text style={styles.paymentTitle}>Payment Details</Text>
-                {hasPaymentDetails ? (
-                  <View style={styles.savedBadge}>
-                    <Text style={styles.savedBadgeText}>Saved</Text>
-                  </View>
-                ) : null}
-              </View>
-              <Text style={styles.paymentDesc}>
-                Add your UPI ID or bank account so guests know where to transfer moi. The UPI ID is used for Scan & Pay on guest payment pages.
-              </Text>
+        <Card style={styles.linkCard} padding={0}>
+          <TouchableOpacity style={styles.profileLink} onPress={() => navigation.navigate('Profile')}>
+            <View>
+              <Text style={styles.profileLinkTitle}>{t('profile')}</Text>
+              <Text style={styles.profileLinkSub}>{t('profileDetailsSub')}</Text>
             </View>
-
-            <Input label="UPI ID" icon="wallet-outline" placeholder="yourname@upi" value={upiId} onChangeText={setUpiId} />
-
-            <View style={styles.bankBox}>
-              <Text style={styles.bankBoxTitle}>Bank Account (optional)</Text>
-              <Input label="Account Holder Name" placeholder="As per bank records" value={accountHolder} onChangeText={setAccountHolder} />
-              <Input label="Bank Name" placeholder="SBI / HDFC / etc." value={bankName} onChangeText={setBankName} />
-              <Input label="Account Number" placeholder="XXXXXXXXXXXX" value={accountNumber} onChangeText={setAccountNumber} keyboardType="numeric" />
-              <Input label="IFSC Code" placeholder="SBIN0001234" value={ifscCode} onChangeText={setIfscCode} autoCapitalize="characters" />
-            </View>
-
-            <View style={styles.infoBox}>
-              <Text style={styles.infoBoxTitle}>How moi transfer works</Text>
-              <Text style={styles.infoBullet}>• Guests who pay UPI / online — transfer directly to your UPI ID shown on the event page</Text>
-              <Text style={styles.infoBullet}>• Guests who pay cash — hand it over in person; you record it manually in the dashboard</Text>
-              <Text style={styles.infoBullet}>• Guests who pay bank transfer — use the account number above</Text>
-              <Text style={styles.infoBullet}>• MoiApp does not hold or process any money — all transfers go directly to you</Text>
-            </View>
-
-            <Button title={loading ? 'Saving…' : 'Save Changes'} onPress={handleSaveProfile} loading={loading} />
-          </View>
+            <Text style={styles.profileLinkArrow}>›</Text>
+          </TouchableOpacity>
         </Card>
 
-        {/* App Settings */}
         <Card style={styles.card} padding={0}>
           <SectionHeader title="App Settings" subtitle="Customize your app experience" />
           <View style={styles.cardBody}>
@@ -288,7 +180,6 @@ export function SettingsScreen() {
           </View>
         </Card>
 
-        {/* Account */}
         <Card style={styles.card} padding={0}>
           <SectionHeader title="Account" />
           <View style={styles.cardBodyTight}>
@@ -306,7 +197,6 @@ export function SettingsScreen() {
           </View>
         </Card>
 
-        {/* Danger Zone */}
         <Card style={styles.dangerCardWrap} padding={0}>
           <View style={styles.dangerHeader}>
             <Text style={styles.dangerTitle}>Danger Zone</Text>
@@ -323,7 +213,7 @@ export function SettingsScreen() {
             <View style={styles.dangerBlock}>
               <Text style={[styles.rowTitle, { color: colors.error }]}>Delete Account</Text>
               <Text style={styles.rowSub}>Account will be deleted after 30-day grace period</Text>
-              <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteAccount} activeOpacity={0.85}>
+              <TouchableOpacity style={styles.deleteBtn} onPress={() => setShowDeleteConfirm(true)} activeOpacity={0.85}>
                 <Text style={styles.deleteText}>Delete Account</Text>
               </TouchableOpacity>
             </View>
@@ -345,6 +235,16 @@ export function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  linkCard: { marginBottom: spacing.lg, overflow: 'hidden' },
+  profileLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: spacing.lg,
+  },
+  profileLinkTitle: { fontSize: fontSize.md, fontWeight: '700', color: colors.text },
+  profileLinkSub: { fontSize: fontSize.xs, color: colors.textSecondary, marginTop: 2 },
+  profileLinkArrow: { fontSize: 24, color: colors.textMuted, fontWeight: '300' },
   card: { marginBottom: spacing.lg, overflow: 'hidden' },
   sectionHeader: {
     paddingHorizontal: spacing.lg,
@@ -357,38 +257,6 @@ const styles = StyleSheet.create({
   sectionSub: { fontSize: fontSize.xs, color: colors.textSecondary, marginTop: 2 },
   cardBody: { padding: spacing.lg },
   cardBodyTight: { paddingHorizontal: spacing.lg },
-  fieldHint: { fontSize: fontSize.xs, color: colors.textMuted, marginTop: -spacing.sm, marginBottom: spacing.md },
-  paymentHeader: { marginTop: spacing.sm, marginBottom: spacing.md },
-  paymentTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
-  paymentTitle: { fontSize: fontSize.sm, fontWeight: '700', color: colors.text, flex: 1 },
-  savedBadge: {
-    backgroundColor: colors.successBg,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: radius.full,
-  },
-  savedBadgeText: { fontSize: 10, fontWeight: '700', color: colors.success },
-  paymentDesc: { fontSize: fontSize.xs, color: colors.textSecondary, lineHeight: 18 },
-  bankBox: {
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
-  bankBoxTitle: { fontSize: fontSize.xs, fontWeight: '700', color: colors.textSecondary, marginBottom: spacing.sm },
-  infoBox: {
-    backgroundColor: colors.primaryLight,
-    borderWidth: 1,
-    borderColor: colors.primaryBorder,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  infoBoxTitle: { fontSize: fontSize.xs, fontWeight: '700', color: colors.gold, marginBottom: spacing.sm },
-  infoBullet: { fontSize: fontSize.xs, color: colors.textSecondary, lineHeight: 18, marginBottom: 4 },
-  rowText: { flex: 1 },
   rowTitle: { fontSize: fontSize.sm, fontWeight: '600', color: colors.text },
   rowSub: { fontSize: fontSize.xs, color: colors.textSecondary, marginTop: 2 },
   planBadge: {

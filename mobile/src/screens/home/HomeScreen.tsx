@@ -27,7 +27,7 @@ import { useScaledTheme } from '../../theme/useScaledTheme';
 import { colors, fontSize, radius, spacing, shadow } from '../../theme';
 
 type HomeNav = CompositeNavigationProp<
-  BottomTabNavigationProp<MainTabParamList, 'Home'>,
+  BottomTabNavigationProp<MainTabParamList, 'Dashboard'>,
   NativeStackNavigationProp<RootStackParamList>
 >;
 
@@ -107,13 +107,13 @@ export function HomeScreen() {
     >
       <AppHeader
         variant="hero"
-        title={t('home')}
+        title={t('dashboard')}
         onMenuPress={open}
         rightElement={(
           <View style={styles.headerRight}>
             <TouchableOpacity
               style={styles.profileChip}
-              onPress={() => navigateToModule('settings')}
+              onPress={() => navigateToModule('profile')}
               hitSlop={8}
             >
               <View style={[styles.profileAvatar, { backgroundColor: getAvatarColor(0).bg }]}>

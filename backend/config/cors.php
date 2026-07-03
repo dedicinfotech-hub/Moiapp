@@ -2,7 +2,7 @@
 require_once __DIR__ . '/env.php';
 
 // Allowed origins — supports multiple comma-separated values in CORS_ORIGIN
-// e.g. CORS_ORIGIN=https://dsitesai.com,https://www.dsitesai.com
+// e.g. CORS_ORIGIN=https://moipassbook.com,https://www.moipassbook.com
 $allowedOrigins = array_map('trim', explode(',', env('CORS_ORIGIN', 'http://localhost:3000')));
 
 $requestOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';

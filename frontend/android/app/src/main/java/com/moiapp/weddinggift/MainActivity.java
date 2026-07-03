@@ -21,7 +21,7 @@ public class MainActivity extends BridgeActivity {
                 }
             });
             // Load the webapp from the server directly
-            webView.loadUrl("https://dsitesai.com/moiapp");
+            webView.loadUrl("https://moipassbook.com");
         }
     }
 }

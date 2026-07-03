@@ -1,6 +1,6 @@
 import { CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { navigationRef, navigateToPublicHome } from './navigationRef';
+import { navigationRef, navigateToPublicHome, isLoggedInSession } from './navigationRef';
 import type { GuestStackParamList } from './types';
 
 type GuestNav = NativeStackNavigationProp<GuestStackParamList>;
@@ -17,18 +17,32 @@ export function navigateToGuestForm(token: string, opts?: { eventSlug?: string }
     ],
   };
 
-  const routes = opts?.eventSlug
-    ? [
-        {
-          name: 'PublicFlow' as const,
-          state: {
-            index: 1,
-            routes: [
-              { name: 'PublicHome' as const },
-              { name: 'PublicEventDetail' as const, params: { slug: opts.eventSlug } },
-            ],
-          },
+  if (isLoggedInSession()) {
+    navigationRef.dispatch(
+      CommonActions.navigate({
+        name: 'GuestFlow',
+        params: {
+          screen: 'GuestForm',
+          params: { token },
         },
+      })
+    );
+    return;
+  }
+
+  const publicBrowseState = opts?.eventSlug
+    ? {
+        index: 1,
+        routes: [
+          { name: 'PublicHome' as const },
+          { name: 'PublicEventDetail' as const, params: { slug: opts.eventSlug } },
+        ],
+      }
+    : undefined;
+
+  const routes = publicBrowseState
+    ? [
+        { name: 'PublicFlow' as const, state: publicBrowseState },
         { name: 'GuestFlow' as const, state: guestFlowState },
       ]
     : [{ name: 'GuestFlow' as const, state: guestFlowState }];

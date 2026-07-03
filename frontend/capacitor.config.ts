@@ -6,9 +6,9 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     // Load webapp from server directly - simplest and most reliable solution
-    url: 'https://dsitesai.com/moiapp',
+    url: 'https://moipassbook.com',
     // Allow navigation to the same origin
-    allowNavigation: ['dsitesai.com'],
+    allowNavigation: ['moipassbook.com'],
     androidScheme: 'https',
     cleartext: false,
   },

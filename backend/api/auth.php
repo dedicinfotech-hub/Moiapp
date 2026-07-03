@@ -381,7 +381,15 @@ if ($method === 'GET' && $action === 'me') {
     if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
     $db   = getDB();
-    $stmt = $db->prepare('SELECT id, name, email, phone, upi_id, bank_name, account_number, ifsc_code, account_holder, role FROM users WHERE id = ?');
+    $userCols = ['id', 'name', 'email', 'phone'];
+    if (columnExists($db, 'users', 'city')) {
+        $userCols[] = 'city';
+    }
+    if (columnExists($db, 'users', 'language')) {
+        $userCols[] = 'language';
+    }
+    $userCols = array_merge($userCols, ['upi_id', 'bank_name', 'account_number', 'ifsc_code', 'account_holder', 'role']);
+    $stmt = $db->prepare('SELECT ' . implode(', ', $userCols) . ' FROM users WHERE id = ?');
     $stmt->bind_param('i', $user['id']);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
@@ -407,11 +415,32 @@ if ($method === 'PUT' && $action === 'profile') {
 
     if (!$name) { http_response_code(400); echo json_encode(['error' => 'Name is required']); exit; }
 
-    $db   = getDB();
-    $stmt = $db->prepare(
-        'UPDATE users SET name=?, phone=?, city=?, language=?, upi_id=?, bank_name=?, account_number=?, ifsc_code=?, account_holder=? WHERE id=?'
-    );
-    $stmt->bind_param('sssssssssi', $name, $phone, $city, $language, $upi_id, $bank_name, $account_number, $ifsc_code, $account_holder, $user['id']);
+    $db = getDB();
+
+    $setParts = ['name=?', 'phone=?'];
+    $params = [$name, $phone];
+    $types = 'ss';
+
+    if (columnExists($db, 'users', 'city')) {
+        $setParts[] = 'city=?';
+        $params[] = $city;
+        $types .= 's';
+    }
+    if (columnExists($db, 'users', 'language')) {
+        $setParts[] = 'language=?';
+        $params[] = $language ?: 'en';
+        $types .= 's';
+    }
+
+    $setParts = array_merge($setParts, ['upi_id=?', 'bank_name=?', 'account_number=?', 'ifsc_code=?', 'account_holder=?']);
+    $params = array_merge($params, [$upi_id, $bank_name, $account_number, $ifsc_code, $account_holder]);
+    $types .= 'sssss';
+
+    $params[] = $user['id'];
+    $types .= 'i';
+
+    $stmt = $db->prepare('UPDATE users SET ' . implode(', ', $setParts) . ' WHERE id=?');
+    $stmt->bind_param($types, ...$params);
     $stmt->execute();
 
     // Fetch the role from database
@@ -426,8 +455,8 @@ if ($method === 'PUT' && $action === 'profile') {
         'name'           => $name,
         'email'          => $user['email'],
         'phone'          => $phone,
-        'city'           => $city,
-        'language'       => $language,
+        'city'           => columnExists($db, 'users', 'city') ? $city : null,
+        'language'       => columnExists($db, 'users', 'language') ? ($language ?: 'en') : null,
         'upi_id'         => $upi_id,
         'bank_name'      => $bank_name,
         'account_number' => $account_number,

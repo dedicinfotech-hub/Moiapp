@@ -17,10 +17,10 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import Constants from 'expo-constants';
 import { Button } from '../../components/ui/Button';
 import { InfoBanner } from '../../components/ui/InfoBanner';
 import { eventsApi, photosApi } from '../../api';
+import { APP_BASE_URL } from '../../api/client';
 import type { Photo } from '../../api/photos';
 import type { Event } from '../../api/types';
 import { canAcceptGuestMoi } from '../../utils/eventHelpers';
@@ -36,9 +36,6 @@ import type { PublicStackParamList } from '../../navigation/types';
 import { useAppSettings } from '../../context/AppSettingsContext';
 import { useScaledTheme } from '../../theme/useScaledTheme';
 import { colors, fontSize, radius, spacing } from '../../theme';
-
-const API_BASE =
-  (Constants.expoConfig?.extra?.apiUrl as string)?.replace(/\/api$/, '') || 'https://dsitesai.com/moiapp';
 
 const SCREEN_W = Dimensions.get('window').width;
 const PHOTO_COL = (SCREEN_W - spacing.lg * 2 - spacing.sm * 2) / 3;
@@ -104,7 +101,7 @@ export function PublicEventDetailScreen() {
       .finally(() => setLoading(false));
   }, [slug]));
 
-  const shareUrl = `${API_BASE}/e/${slug}`;
+  const shareUrl = `${APP_BASE_URL}/e/${slug}`;
   const guestCount = parseAmount(event?.stats?.guest_count ?? event?.guest_count);
   const canPay = event ? canAcceptGuestMoi(event) : false;
   const primaryTitle = event ? getEventPrimaryTitle(event) : '';

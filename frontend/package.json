@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:subdomain": "cp .env.production.subdomain .env.production && next build",
+    "build:moipassbook": "cp .env.production.subdomain .env.production && next build",
+    "build:main": "cp .env.production.main .env.production && next build",
     "start": "npx serve@latest out",
     "start:next": "next start",
     "lint": "next lint",

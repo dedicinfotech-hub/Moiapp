@@ -6,6 +6,7 @@ export type AppModule =
   | 'users'
   | 'analytics'
   | 'features'
+  | 'profile'
   | 'settings'
   | 'admin-dashboard'
   | 'admin-users'
@@ -32,6 +33,7 @@ export const APP_NAV: AppNavItem[] = [
   { id: 'users', label: 'Guests' },
   { id: 'analytics', label: 'Analytics' },
   { id: 'features', label: 'Features', adminOnly: true },
+  { id: 'profile', label: 'Profile' },
   { id: 'settings', label: 'Settings' },
 ];
 
@@ -55,6 +57,7 @@ export const MODULE_LABELS: Record<AppModule, string> = {
   users: 'Guests',
   analytics: 'Analytics',
   features: 'Features',
+  profile: 'Profile',
   settings: 'Settings',
   'admin-dashboard': 'Admin Dashboard',
   'admin-approvals': 'Approvals',
@@ -75,7 +78,8 @@ export const MODULE_SUBTITLES: Record<AppModule, string> = {
   users: 'Guest & user management',
   analytics: 'Performance & insights',
   features: 'Enable or disable app features',
-  settings: 'Account & preferences',
+  profile: 'Your name, contact and payment details',
+  settings: 'App preferences and account',
   'admin-dashboard': 'Admin overview and statistics',
   'admin-users': 'Manage all users',
   'admin-analytics': 'Platform analytics and insights',

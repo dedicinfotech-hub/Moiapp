@@ -16,6 +16,7 @@ import { useModuleLabels } from '../../i18n/useModuleLabels';
 import { useScaledTheme } from '../../theme/useScaledTheme';
 import { navigateToModule, registerModuleNavigateListener } from '../../navigation/navigationRef';
 import { useSidebar } from '../../context/SidebarContext';
+import { LogoImage } from '../ui/LogoImage';
 import { colors, fontSize, radius, spacing } from '../../theme';
 
 interface AppSidebarContentProps {
@@ -47,9 +48,7 @@ export function AppSidebarContent({ activeModule, onItemPress, onLogout }: AppSi
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.brandRow}>
-        <Text style={styles.brand}>
-          Moi<Text style={styles.brandAccent}>App</Text>
-        </Text>
+        <LogoImage width={110} height={28} />
         {isAdmin ? (
           <View style={styles.adminBadge}>
             <Text style={styles.adminBadgeText}>{adminBadge}</Text>

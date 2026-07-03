@@ -10,6 +10,7 @@ import { ScreenHeader } from '../../components/layout/ScreenHeader';
 import { SafeScreen } from '../../components/layout/SafeScreen';
 import { Button } from '../../components/ui/Button';
 import { eventsApi } from '../../api';
+import { APP_BASE_URL } from '../../api/client';
 import type { Event } from '../../api/types';
 import { getEventDisplayName, formatDate } from '../../utils/format';
 import { useGuestStore } from '../../store/guestStore';
@@ -20,7 +21,7 @@ import { goBackInGuestStack } from '../../navigation/guestNavigation';
 import type { GuestStackParamList } from '../../navigation/types';
 import { colors, fontSize, radius, spacing } from '../../theme';
 
-const GUEST_BASE = 'https://dsitesai.com/moiapp/g';
+const GUEST_BASE = `${APP_BASE_URL}/g`;
 
 export function GuestLandingScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<GuestStackParamList>>();

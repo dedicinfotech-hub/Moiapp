@@ -26,11 +26,12 @@ import { useAppSettings } from '../../context/AppSettingsContext';
 import { useScaledTheme } from '../../theme/useScaledTheme';
 import { colors, fontSize, radius, spacing } from '../../theme';
 import { LogoImage } from '../../components/ui/LogoImage';
+import { ILLUSTRATIONS } from '../../assets/illustrations';
 
 const SCREEN_W = Dimensions.get('window').width;
 
 type StepItem = { n: string; title: string; desc: string };
-type WhyItem = { icon: 'checkmark-circle' | 'shield-checkmark' | 'wallet' | 'heart'; title: string; desc: string };
+type WhyItem = { image: number; title: string; desc: string };
 
 function SectionLabel({ children, fontSize: fs }: { children: string; fontSize: number }) {
   return <Text style={[styles.sectionLabel, { fontSize: fs }]}>{children}</Text>;
@@ -148,10 +149,10 @@ export function PublicHomeScreen() {
   ], [t]);
 
   const whyItems = useMemo<WhyItem[]>(() => [
-    { icon: 'checkmark-circle', title: t('publicWhyFree'), desc: t('publicWhyFreeDesc') },
-    { icon: 'shield-checkmark', title: t('publicWhySecure'), desc: t('publicWhySecureDesc') },
-    { icon: 'wallet', title: t('publicWhyUpi'), desc: t('publicWhyUpiDesc') },
-    { icon: 'heart', title: t('publicWhyTamil'), desc: t('publicWhyTamilDesc') },
+    { image: ILLUSTRATIONS.feature1, title: t('publicWhyFree'), desc: t('publicWhyFreeDesc') },
+    { image: ILLUSTRATIONS.feature2, title: t('publicWhySecure'), desc: t('publicWhySecureDesc') },
+    { image: ILLUSTRATIONS.feature3, title: t('publicWhyUpi'), desc: t('publicWhyUpiDesc') },
+    { image: ILLUSTRATIONS.feature4, title: t('publicWhyTamil'), desc: t('publicWhyTamilDesc') },
   ], [t]);
 
   useFocusEffect(useCallback(() => {
@@ -190,6 +191,12 @@ export function PublicHomeScreen() {
           <Text style={[styles.heroTitle, { fontSize: fs.hero }]}>{t('publicHeroTitle')}</Text>
           {lang === 'en' ? (
             <Text style={[styles.heroTa, { fontSize: fs.md }]}>{t('publicHeroTa')}</Text>
+          ) : null}
+
+          {!loading && !featured ? (
+            <View style={styles.heroIllustrationWrap}>
+              <Image source={ILLUSTRATIONS.hero} style={styles.heroIllustration} resizeMode="cover" />
+            </View>
           ) : null}
 
           <View style={styles.heroActions}>
@@ -308,9 +315,7 @@ export function PublicHomeScreen() {
               <View style={styles.whyGrid}>
                 {whyItems.map((item) => (
                   <View key={item.title} style={styles.whyCard}>
-                    <View style={styles.whyIconWrap}>
-                      <Ionicons name={item.icon} size={22} color={colors.gold} />
-                    </View>
+                    <Image source={item.image} style={styles.whyImage} resizeMode="cover" />
                     <Text style={[styles.whyTitle, { fontSize: fs.sm }]}>{item.title}</Text>
                     <Text style={styles.whyDesc}>{item.desc}</Text>
                   </View>
@@ -379,6 +384,14 @@ const styles = StyleSheet.create({
   },
   heroTa: { fontSize: fontSize.md, color: colors.textSecondary, marginBottom: spacing.xl, lineHeight: 22 },
   heroActions: { gap: spacing.md, marginBottom: spacing.lg },
+  heroIllustrationWrap: {
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.primaryBorder,
+  },
+  heroIllustration: { width: '100%', height: 180 },
   statsCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -532,15 +545,12 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryBorder,
     borderRadius: radius.lg,
     padding: spacing.md,
-    alignItems: 'center',
+    overflow: 'hidden',
   },
-  whyIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
+  whyImage: {
+    width: '100%',
+    height: WHY_W - spacing.md,
+    borderRadius: radius.md,
     marginBottom: spacing.sm,
   },
   whyTitle: { fontSize: fontSize.sm, fontWeight: '700', color: colors.text, textAlign: 'center' },

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
 # export-db.sh  –  Dump local MAMP database ready for Hostinger import
-# Usage:  bash scripts/export-db.sh
-# Output: scripts/moiapp_export_<timestamp>.sql
+# Usage:  bash backend/scripts/export-db.sh
+# Output: backend/scripts/moiapp_export_<timestamp>.sql
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 

@@ -219,7 +219,7 @@ Open an **approved New Event** or **Past Event**.
 
 ## F. Guest flow (no login)
 
-Guest URL: `https://dsitesai.com/moiapp/g/{token}` (or in-app Guest stack)
+Guest URL: `https://moipassbook.com/g/{token}` (or in-app Guest stack)
 
 | # | Mockup | Screen | File | UI | Logic | Pass/Fail | Notes |
 |---|--------|--------|------|----|-------|-----------|-------|

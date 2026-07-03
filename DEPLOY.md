@@ -1,15 +1,34 @@
 # MoiApp — Deployment Guide
-**Target:** `https://dsitesai.com/moiapp`  
+**Target:** `https://moipassbook.com`  
 **Host:** Hostinger shared hosting  
 **Stack:** PHP 8+ backend · Next.js 14 frontend (static export)
+
+---
+
+## Project layout
+
+```
+MoiApp/
+  backend/          ← PHP API, config, uploads, scripts (upload this + frontend/out)
+    api/
+    config/
+    uploads/
+    scripts/
+    vendor/
+  frontend/         ← Next.js source (build locally, upload out/)
+  mobile/           ← React Native / Expo app
+  .htaccess         ← routes /api/* → backend/api/*, serves Next.js static files
+```
+
+Public URLs stay the same: `/api/*` and `/uploads/*` (`.htaccess` maps them into `backend/`).
 
 ---
 
 ## 1. Export your local database
 
 ```bash
-bash scripts/export-db.sh
-# Creates: scripts/moiapp_export_YYYYMMDD_HHMMSS.sql
+bash backend/scripts/export-db.sh
+# Creates: backend/scripts/moiapp_export_YYYYMMDD_HHMMSS.sql
 ```
 
 ---
@@ -32,22 +51,26 @@ bash scripts/export-db.sh
 
 ## 4. Upload the PHP backend
 
-Upload the entire project **except** `frontend/` to Hostinger via **File Manager** or FTP.
+Upload the **`backend/`** folder to Hostinger via **File Manager** or FTP.
 
-Target path on server:
+Also upload the root **`.htaccess`** (same folder as `backend/` and `index.html`).
+
+Target path on server (docroot for `moipassbook.com`):
 ```
-public_html/moiapp/
-  api/
-  config/
-  uploads/
+public_html/
+  backend/
+    api/
+    config/
+    uploads/
+    vendor/
   .htaccess
 ```
 
-> **Tip:** Use Hostinger File Manager → Upload → select a zip, then Extract.
+> **Tip:** Zip `backend/` + `.htaccess`, upload, then Extract.
 
 ### 4a. Create the production `.env`
 
-On the server, create `public_html/moiapp/config/.env` with:
+On the server, create `public_html/backend/config/.env` with:
 
 ```ini
 DB_HOST=localhost
@@ -55,8 +78,15 @@ DB_USER=u123456_moiapp        # your Hostinger DB user
 DB_PASS=your_db_password
 DB_NAME=u123456_moiapp        # your Hostinger DB name
 
-APP_URL=https://dsitesai.com/moiapp
-CORS_ORIGIN=https://dsitesai.com
+APP_URL=https://moipassbook.com
+CORS_ORIGIN=https://moipassbook.com,https://www.moipassbook.com,http://localhost:3000,capacitor://localhost,https://localhost,null
+
+MAIL_FROM_EMAIL=noreply@moipassbook.com
+MAIL_SMTP_HOST=smtp.hostinger.com
+MAIL_SMTP_PORT=587
+MAIL_SMTP_USER=noreply@moipassbook.com
+MAIL_SMTP_PASS=your-email-account-password
+MAIL_SMTP_SECURE=tls
 
 AWS_ACCESS_KEY=               # leave blank if not using S3
 AWS_SECRET_KEY=
@@ -64,16 +94,20 @@ AWS_REGION=ap-south-1
 AWS_BUCKET=moiapp-photos
 ```
 
-> You can also edit `config/.env.production` locally, fill in the values,
-> then upload it renamed to `config/.env`.
+> Pick **one** canonical host (`moipassbook.com` or `www.moipassbook.com`) and redirect the other in hPanel.
 
-### 4b. Protect the config directory
+### 4b. Install PHP dependencies (if `vendor/` not uploaded)
 
-Add `public_html/moiapp/config/.htaccess`:
+```bash
+cd public_html/backend && composer install --no-dev
+```
+
+### 4c. Protect the config directory
+
+`backend/config/.htaccess` should contain:
 ```apache
 Deny from all
 ```
-This prevents anyone from downloading your `.env` file via the browser.
 
 ---
 
@@ -85,118 +119,97 @@ cd frontend
 # Install deps
 npm install
 
-# Build for production (uses .env.production automatically)
-npm run build
+# Build for moipassbook.com (root domain, no /moiapp prefix)
+npm run build:moipassbook
 ```
 
-This produces `frontend/out/` — a fully static site.
+This uses `frontend/.env.production.subdomain` and produces `frontend/out/` — a fully static site.
 
 ---
 
 ## 6. Upload the frontend
 
-Upload the contents of `frontend/out/` to:
-```
-public_html/moiapp/   ← merge with the PHP files already there
-```
+Upload the contents of `frontend/out/` to `public_html/` (merge with `backend/` and `.htaccess`).
 
-The final structure on the server should look like:
+Final structure:
 ```
-public_html/moiapp/
+public_html/
   _next/              ← Next.js static assets
-  api/                ← PHP endpoints
-  config/             ← PHP config (with .env)
-  uploads/            ← writable by PHP
+  backend/            ← PHP (not browsable directly)
+    api/
+    config/
+    uploads/
   .htaccess
-  index.html          ← Next.js home page
-  dashboard.html      ← (etc.)
-  404.html
+  index.html
+  dashboard.html
+  ...
 ```
 
 ---
 
-## 7. Fix the `.htaccess` for static Next.js + PHP API
+## 7. Make `backend/uploads/` writable
 
-Replace `public_html/moiapp/.htaccess` with:
-
-```apache
-Options -Indexes
-RewriteEngine On
-
-# Pass auth headers to PHP
-RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-RewriteRule .* - [E=HTTP_X_AUTH_TOKEN:%{HTTP:X-Auth-Token}]
-SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
-SetEnvIf X-Auth-Token "(.*)" HTTP_X_AUTH_TOKEN=$1
-
-# CORS preflight
-RewriteCond %{REQUEST_METHOD} OPTIONS
-RewriteRule ^(.*)$ $1 [R=200,L]
-
-# Route /moiapp/api/* → PHP files (already in api/ folder, no rewrite needed)
-
-# Route everything else to Next.js static files
-# Serve real files first
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ - [L]
-
-# Fix 403: /events/ → events.html when Next.js created both file and folder
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteCond $1.html -f
-RewriteRule ^(.+?)/?$ $1.html [L]
-
-# Remaining directories (_next/, uploads/)
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-
-# Otherwise try .html extension (Next.js static export)
-RewriteCond %{REQUEST_FILENAME}.html -f
-RewriteRule ^(.*)$ $1.html [L]
-
-# Fallback to index.html for client-side routing
-RewriteRule ^ index.html [L]
-```
+In Hostinger File Manager, right-click `backend/uploads/` → **Permissions** → set to `755`.
 
 ---
 
-## 8. Make `uploads/` writable
-
-In Hostinger File Manager, right-click `moiapp/uploads/` → **Permissions** → set to `755`.
-
----
-
-## 9. Verify
+## 8. Verify
 
 | Check | URL |
 |-------|-----|
-| Home page | `https://dsitesai.com/moiapp` |
-| API health | `https://dsitesai.com/moiapp/api/auth.php?action=ping` |
-| Login | `https://dsitesai.com/moiapp/login` |
-| Dashboard | `https://dsitesai.com/moiapp/dashboard` |
+| Home page | `https://moipassbook.com/` |
+| API health | `https://moipassbook.com/api/ping.php` |
+| Login | `https://moipassbook.com/login` |
+| Dashboard | `https://moipassbook.com/dashboard` |
+| Guest link | `https://moipassbook.com/g/{token}` |
+
+---
+
+## 9. Third-party services
+
+| Service | URL / setting |
+|---------|----------------|
+| **Razorpay webhook** | `https://moipassbook.com/api/payment.php?action=webhook` |
+| **MSG91** | Whitelist server outbound IP (`/api/health.php?outbound_ip=1`) |
+| **SMTP** | `noreply@moipassbook.com` mailbox in hPanel |
 
 ---
 
 ## Local ↔ Production quick reference
 
-| Setting | Local (MAMP) | Production (Hostinger) |
-|---------|-------------|----------------------|
-| `config/.env` | `DB_HOST=localhost`, `DB_USER=root` | Hostinger DB credentials |
-| `CORS_ORIGIN` | `http://localhost:3000` | `https://dsitesai.com` |
-| `frontend/.env` | `.env.local` | `.env.production` |
-| `NEXT_PUBLIC_BASE_PATH` | *(empty)* | `/moiapp` |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8888/MoiApp/api` | `https://dsitesai.com/moiapp/api` |
-| Build command | `npm run dev` | `npm run build` |
+| Setting | Local (MAMP) | Production (`moipassbook.com`) |
+|---------|-------------|-------------------------------|
+| `backend/config/.env` | `DB_HOST=localhost`, `DB_USER=root` | Hostinger DB credentials |
+| `APP_URL` | `http://localhost:8888/MoiApp` | `https://moipassbook.com` |
+| `CORS_ORIGIN` | `http://localhost:3000` | `https://moipassbook.com,https://www.moipassbook.com,...` |
+| `frontend/.env` | `.env.local` | `.env.production.subdomain` |
+| `NEXT_PUBLIC_BASE_PATH` | *(empty)* | *(empty)* |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8888/MoiApp/api` | `https://moipassbook.com/api` |
+| Build command | `npm run dev` | `npm run build:moipassbook` |
+| Dev API proxy | `next.config.mjs` → `MoiApp/backend/api` | N/A (static export) |
 
 ---
 
 ## Updating after changes
 
 ```bash
-# 1. Build
-cd frontend && npm run build
+# 1. Build frontend
+cd frontend && npm run build:moipassbook
 
-# 2. Upload frontend/out/* to public_html/moiapp/ (overwrite)
+# 2. Upload frontend/out/* to public_html/ (overwrite)
 
-# 3. Upload changed PHP files to public_html/moiapp/api/ or config/
-#    (never overwrite config/.env on the server)
+# 3. Upload changed PHP files to public_html/backend/api/ or backend/config/
+#    (never overwrite backend/config/.env on the server)
 ```
+
+---
+
+## Legacy: `dsitesai.com/moiapp` redirects
+
+If you still serve the old domain, add 301 redirects so guest QR links keep working:
+
+```
+https://dsitesai.com/moiapp/g/{token}  →  https://moipassbook.com/g/{token}
+```
+
+The root `.htaccess` also strips `/moiapp/` from paths for old bookmarks.

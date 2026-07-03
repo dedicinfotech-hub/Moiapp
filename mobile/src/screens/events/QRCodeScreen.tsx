@@ -16,12 +16,13 @@ import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { useAppSettings } from '../../context/AppSettingsContext';
 import { useApprovalGuard } from '../../hooks/useApprovalGuard';
 import { eventsApi } from '../../api';
+import { APP_BASE_URL } from '../../api/client';
 import { getEventDisplayName, formatDate } from '../../utils/format';
 import { showEventQr } from '../../utils/eventHelpers';
 import type { EventStackParamList } from '../../navigation/types';
 import { colors, fontSize, radius, spacing } from '../../theme';
 
-const GUEST_BASE = 'https://dsitesai.com/moiapp/g';
+const GUEST_BASE = `${APP_BASE_URL}/g`;
 
 export function QRCodeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<EventStackParamList>>();

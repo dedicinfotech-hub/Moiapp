@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  Linking,
   ActivityIndicator,
   Image,
 } from 'react-native';
@@ -21,7 +20,6 @@ import { OfflineBanner } from '../../components/ui/OfflineBanner';
 import { useSidebar } from '../../context/SidebarContext';
 import { useAppSettings } from '../../context/AppSettingsContext';
 import { eventsApi, exportCSV, emailPDF } from '../../api';
-import { APP_BASE_URL } from '../../api/client';
 import type { Event } from '../../api/types';
 import { formatCurrency, formatDate, getEventDisplayName } from '../../utils/format';
 import { EventModeBadge, ApprovalBadge } from '../../components/event/EventModeBadge';
@@ -82,6 +80,13 @@ export function FunctionsScreen() {
     setActiveModule('events');
     load();
   }, [setActiveModule, load]));
+
+  const openPublicEvent = (slug: string) => {
+    navigation.navigate('PublicBrowse', {
+      screen: 'PublicEventDetail',
+      params: { slug },
+    });
+  };
 
   const openEvent = (item: Event) => {
     navigation.navigate('EventFlow', {
@@ -197,10 +202,10 @@ export function FunctionsScreen() {
                   />
                   <EventActionButton
                     icon="open-outline"
-                    onPress={() => Linking.openURL(`${APP_BASE_URL}/e/${item.slug}`)}
+                    onPress={() => openPublicEvent(item.slug)}
                   />
                   <EventActionButton
-                    icon="settings-outline"
+                    icon="create-outline"
                     onPress={() => navigation.navigate('EventFlow', { screen: 'EventSettings', params: { slug: item.slug } })}
                   />
                   <EventActionButton icon="download-outline" onPress={() => handleExport(item)} />

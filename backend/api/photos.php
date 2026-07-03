@@ -97,7 +97,7 @@ if ($method === 'POST') {
     }
 
     // ── Build public URL ──────────────────────────────────────────────────────
-    // APP_URL = e.g. https://dsitesai.com/moiapp  (no trailing slash)
+    // APP_URL = e.g. https://moipassbook.com  (no trailing slash)
     $appUrl   = rtrim(env('APP_URL', 'http://localhost:8888/MoiApp'), '/');
     $fileKey  = 'uploads/photos/' . $subDir . '/' . $filename;
     $fileUrl  = $appUrl . '/' . $fileKey;

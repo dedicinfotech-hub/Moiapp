@@ -43,7 +43,7 @@ npm run build:apk
 
 - Profile: **preview** (`eas.json`)
 - Output: **`.apk`** (install directly on device)
-- API: `https://dsitesai.com/moiapp/api` (from `app.json`)
+- API: `https://moipassbook.com/api` (from `app.json`)
 
 When the build finishes, EAS prints a download URL. Open it on your phone or run:
 

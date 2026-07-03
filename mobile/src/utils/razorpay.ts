@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import type { RazorpayOrderResponse } from '../api/types';
+import { APP_BASE_URL } from '../api/client';
 
 type RazorpaySuccess = {
   razorpay_payment_id: string;
@@ -72,7 +73,7 @@ export async function openRazorpayCheckout(
     return;
   }
 
-  const paymentUrl = `https://dsitesai.com/moiapp/g/${order.order.receipt}/payment`;
+  const paymentUrl = `${APP_BASE_URL}/g/${order.order.receipt}/payment`;
   await WebBrowser.openBrowserAsync(paymentUrl);
   onError('Complete payment in browser, then return to the app.');
 }

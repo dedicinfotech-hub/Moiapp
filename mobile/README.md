@@ -18,7 +18,7 @@ Edit `app.json` → `expo.extra.apiUrl`:
 
 ```json
 "extra": {
-  "apiUrl": "https://dsitesai.com/moiapp/api"
+  "apiUrl": "https://moipassbook.com/api"
 }
 ```
 
@@ -72,7 +72,7 @@ Primary yellow: `#FFC107` — matches the web app's `tn-yellow` tokens.
 7. From **More:** Add Moi Entry, QR Code, Reports, Invitation Upload, Event Settings
 
 ### Guest Flow (no login required)
-1. Open link `https://dsitesai.com/moiapp/g/{token}` or scan QR
+1. Open link `https://moipassbook.com/g/{token}` or scan QR
 2. **Guest Landing** → **Guest Form** → **Payment**
 3. **Razorpay** (UPI/Card/NetBanking/Wallet) or **Scan & Pay** (direct UPI)
 4. **Payment Success** → **Receipt**

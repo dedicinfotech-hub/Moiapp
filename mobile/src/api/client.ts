@@ -6,7 +6,7 @@ const TOKEN_KEY = 'moi_token';
 const isWeb = Platform.OS === 'web';
 
 export const API_BASE: string =
-  (Constants.expoConfig?.extra?.apiUrl as string) || 'https://dsitesai.com/moiapp/api';
+  (Constants.expoConfig?.extra?.apiUrl as string) || 'https://moipassbook.com/api';
 
 /** Web app base URL (no /api suffix) */
 export const APP_BASE_URL = API_BASE.replace(/\/api\/?$/, '');

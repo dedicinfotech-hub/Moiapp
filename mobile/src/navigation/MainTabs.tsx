@@ -6,6 +6,7 @@ import { HomeScreen } from '../screens/home/HomeScreen';
 import { FunctionsScreen } from '../screens/home/FunctionsScreen';
 import { GlobalMoiListScreen, GlobalReportsScreen } from '../screens/home/GlobalScreens';
 import { MoreStack } from './MoreStack';
+import { PublicStack } from './PublicStack';
 import { useAppSettings } from '../context/AppSettingsContext';
 import { useScaledTheme } from '../theme/useScaledTheme';
 import { colors } from '../theme';
@@ -18,6 +19,7 @@ export function MainTabs() {
 
   return (
     <Tab.Navigator
+      initialRouteName="Dashboard"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
@@ -32,7 +34,8 @@ export function MainTabs() {
         tabBarLabelStyle: { fontSize: scaledFontSize.xs, fontWeight: '600' },
         tabBarIcon: ({ color, size }) => {
           const icons: Record<keyof MainTabParamList, keyof typeof Ionicons.glyphMap> = {
-            Home: 'home-outline',
+            PublicBrowse: 'home-outline',
+            Dashboard: 'grid-outline',
             Functions: 'calendar-outline',
             MoiList: 'list-outline',
             ReportsTab: 'bar-chart-outline',
@@ -42,7 +45,8 @@ export function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: t('home') }} />
+      <Tab.Screen name="PublicBrowse" component={PublicStack} options={{ tabBarLabel: t('home') }} />
+      <Tab.Screen name="Dashboard" component={HomeScreen} options={{ tabBarLabel: t('dashboard') }} />
       <Tab.Screen name="Functions" component={FunctionsScreen} options={{ tabBarLabel: t('events') }} />
       <Tab.Screen name="MoiList" component={GlobalMoiListScreen} options={{ tabBarLabel: t('moiNotebook') }} />
       <Tab.Screen name="ReportsTab" component={GlobalReportsScreen} options={{ tabBarLabel: t('analytics') }} />

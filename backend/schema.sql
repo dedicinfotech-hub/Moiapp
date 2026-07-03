@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(150) UNIQUE,
     password VARCHAR(255),
     phone VARCHAR(20),
+    city VARCHAR(100),
+    language VARCHAR(10) DEFAULT 'en',
     otp_code VARCHAR(6),
     otp_expires TIMESTAMP NULL,
     otp_attempts INT DEFAULT 0,

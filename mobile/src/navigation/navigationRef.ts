@@ -5,6 +5,11 @@ import type { AdminStackParamList, RootStackParamList } from './types';
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
+export function isLoggedInSession(): boolean {
+  if (!navigationRef.isReady()) return false;
+  return navigationRef.getRootState().routes.some((r) => r.name === 'Main');
+}
+
 let onModuleNavigate: ((module: AppModule) => void) | null = null;
 
 /** Sidebar can register to update active module highlight after navigation. */
@@ -30,14 +35,15 @@ export function resetToMain() {
   }
 }
 
-const TAB_MODULES: Partial<Record<AppModule, 'Home' | 'Functions' | 'MoiList' | 'ReportsTab'>> = {
-  dashboard: 'Home',
+const TAB_MODULES: Partial<Record<AppModule, 'Dashboard' | 'Functions' | 'MoiList' | 'ReportsTab'>> = {
+  dashboard: 'Dashboard',
   events: 'Functions',
   'moi-notebook': 'MoiList',
   analytics: 'ReportsTab',
 };
 
 const MORE_STACK_SCREENS: Partial<Record<AppModule, keyof import('./types').MoreStackParamList>> = {
+  profile: 'Profile',
   organizers: 'Organizers',
   users: 'Guests',
   features: 'Features',
@@ -120,6 +126,16 @@ export function navigateNewEvent() {
 
 export function navigateToPublicEvents() {
   if (!navigationRef.isReady()) return;
+  const hasMain = navigationRef.getRootState().routes.some((r) => r.name === 'Main');
+  if (hasMain) {
+    navigationRef.dispatch(
+      CommonActions.navigate({
+        name: 'Main',
+        params: { screen: 'PublicBrowse', params: { screen: 'PublicEventsList' } },
+      })
+    );
+    return;
+  }
   navigationRef.dispatch(
     CommonActions.navigate({
       name: 'PublicFlow',
@@ -130,17 +146,22 @@ export function navigateToPublicEvents() {
 
 export function navigateToPublicHome() {
   if (!navigationRef.isReady()) return;
-
+  const hasMain = navigationRef.getRootState().routes.some((r) => r.name === 'Main');
+  if (hasMain) {
+    navigationRef.dispatch(
+      CommonActions.navigate({
+        name: 'Main',
+        params: { screen: 'PublicBrowse', params: { screen: 'PublicHome' } },
+      })
+    );
+    return;
+  }
   navigationRef.dispatch(
-    CommonActions.reset({
-      index: 0,
-      routes: [{ name: 'PublicFlow', params: { screen: 'PublicHome' } }],
+    CommonActions.navigate({
+      name: 'PublicFlow',
+      params: { screen: 'PublicHome' },
     })
   );
-
-  if (Platform.OS === 'web' && typeof globalThis.history !== 'undefined') {
-    globalThis.history.replaceState({}, '', '/');
-  }
 }
 
 export function navigateToAuth(screen: 'Login' | 'Register' | 'Splash') {

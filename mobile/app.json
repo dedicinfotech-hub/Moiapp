@@ -32,7 +32,7 @@
     },
     "scheme": "moiapp",
     "extra": {
-      "apiUrl": "https://dsitesai.com/moiapp/api",
+      "apiUrl": "https://moipassbook.com/api",
       "eas": {
         "projectId": "b2dc0972-561f-4483-b33c-2dc0eac8f464"
       }

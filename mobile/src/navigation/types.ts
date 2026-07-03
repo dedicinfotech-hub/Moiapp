@@ -10,6 +10,7 @@ export type PublicStackParamList = {
 
 export type MoreStackParamList = {
   MoreMenu: undefined;
+  Profile: undefined;
   Settings: undefined;
   Organizers: undefined;
   Guests: undefined;
@@ -39,7 +40,8 @@ export type AuthStackParamList = {
 };
 
 export type MainTabParamList = {
-  Home: undefined;
+  PublicBrowse: NavigatorScreenParams<PublicStackParamList> | undefined;
+  Dashboard: undefined;
   Functions: undefined;
   MoiList: undefined;
   ReportsTab: undefined;
@@ -118,5 +120,10 @@ export interface GuestFormData {
   occupation: string;
   gift_type: 'cash' | 'gold' | 'silver' | 'gift';
   amount: string;
+  gold_weight: string;
+  gold_unit: 'g' | 'lb';
+  silver_weight: string;
+  silver_unit: 'g' | 'lb';
+  gift_description: string;
   note: string;
 }
