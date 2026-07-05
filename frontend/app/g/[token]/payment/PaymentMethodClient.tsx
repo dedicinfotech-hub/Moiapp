@@ -6,6 +6,7 @@ import { eventsApi, moiApi, Event, paymentApi, RazorpayPaymentMethod } from '@/l
 import GuestFlowHeader from '@/components/guest/GuestFlowHeader';
 import Icon from '@/components/ui/Icon';
 import { useSlug } from '@/lib/useSlug';
+import { useTranslation } from '@/lib/i18n';
 
 declare global {
   interface Window {
@@ -73,6 +74,7 @@ function loadRazorpayScript(): Promise<void> {
 
 export default function PaymentMethodScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const token = useSlug(1); // /g/[token]/payment → skip 1 segment
 
   const [event, setEvent] = useState<Event | null>(null);
@@ -205,7 +207,7 @@ export default function PaymentMethodScreen() {
         key: order.razorpay_key_id,
         amount: order.order.amount,
         currency: order.order.currency,
-        name: 'MoiApp',
+        name: 'Moi PassBook',
         description: `Moi contribution for ${order.event_title}`,
         order_id: order.order.id,
         handler: handleRazorpaySuccess,
@@ -315,7 +317,7 @@ export default function PaymentMethodScreen() {
 
   return (
     <div className="min-h-screen bg-tn-light">
-      <GuestFlowHeader title="Payment" subtitle={title} backHref={`/g/${token}/form`} badge="Secure Payment" />
+      <GuestFlowHeader title={t('paymentTitle')} subtitle={title} backHref={`/g/${token}/form`} badge={t('secure')} />
       <main className="max-w-md mx-auto px-4 py-4 pb-8">
         {error && <div className="bg-tn-error-bg text-tn-error rounded-xl px-4 py-3 text-sm mb-4">{error}</div>}
 
@@ -326,9 +328,9 @@ export default function PaymentMethodScreen() {
                 <Icon name="gift" size={20} />
               </div>
               <div>
-                <p className="text-sm font-bold text-tn-text">Moi (Gift)</p>
-                <p className="text-[10px] text-tn-muted">From: {guestData.guest_name || 'Guest'}</p>
-                <p className="text-[10px] text-tn-muted capitalize">Gift Type: {guestData.gift_type || 'cash'}</p>
+                <p className="text-sm font-bold text-tn-text">{t('moiGift')}</p>
+                <p className="text-[10px] text-tn-muted">{t('from')}: {guestData.guest_name || 'Guest'}</p>
+                <p className="text-[10px] text-tn-muted capitalize">{t('giftTypeLabel')}: {guestData.gift_type || 'cash'}</p>
               </div>
             </div>
             <button type="button" onClick={() => router.push(`/g/${token}/form`)} className="text-[10px] font-semibold text-tn-yellow">Edit Details</button>
@@ -336,7 +338,7 @@ export default function PaymentMethodScreen() {
           <p className="text-2xl font-bold text-tn-yellow text-center">₹ {amount.toLocaleString('en-IN')}</p>
         </div>
 
-        <p className="text-xs font-bold text-tn-text mb-3">Select Payment Method</p>
+        <p className="text-xs font-bold text-tn-text mb-3">{t('selectPaymentMethod')}</p>
         <div className="space-y-2 mb-4">
           {methods.map((m) => (
             <button key={m.id} type="button" onClick={() => setSelectedMethod(m.id)} className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left ${selectedMethod === m.id ? 'border-tn-yellow bg-tn-yellow/10' : 'border-tn-border bg-white'}`}>
@@ -390,21 +392,21 @@ export default function PaymentMethodScreen() {
 
         <div className="bg-tn-yellow/10 rounded-xl p-3 mb-4 flex gap-2 text-[11px] text-tn-text">
           <Icon name="shield" size={16} />
-          <p>100% Secure Payments. Your payment details are encrypted and safe with us.</p>
+          <p>{t('securePaymentsNote')}</p>
         </div>
 
         <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4 space-y-2 text-sm">
-          <div className="flex justify-between text-tn-muted"><span>Gift Amount</span><span>₹ {amount.toFixed(2)}</span></div>
-          <div className="flex justify-between text-tn-muted"><span>Convenience Fee</span><span>₹ {fee.toFixed(2)}</span></div>
-          <div className="border-t border-dashed border-tn-border pt-2 flex justify-between font-bold text-tn-yellow"><span>Total Amount</span><span>₹ {total.toFixed(2)}</span></div>
+          <div className="flex justify-between text-tn-muted"><span>{t('giftAmount')}</span><span>₹ {amount.toFixed(2)}</span></div>
+          <div className="flex justify-between text-tn-muted"><span>{t('convenienceFee')}</span><span>₹ {fee.toFixed(2)}</span></div>
+          <div className="border-t border-dashed border-tn-border pt-2 flex justify-between font-bold text-tn-yellow"><span>{t('totalAmount')}</span><span>₹ {total.toFixed(2)}</span></div>
         </div>
 
         <div className="bg-tn-green-bg border border-tn-success/30 rounded-xl p-3 mb-5 text-[11px] text-tn-success/80">
-          Thank you for your contribution! Your generosity makes this celebration even more special.
+          {t('paymentThanks')}
         </div>
 
         <button type="button" onClick={handlePay} disabled={processing || amount <= 0 || !isCashContribution || (selectedMethod === 'scan' && (!hostUpiId || !scanRef.trim()))} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
-          <Icon name="lock" size={16} /> {processing ? 'Processing…' : selectedMethod === 'scan' ? `Confirm Scan & Pay ₹ ${total.toFixed(2)}` : `Pay ₹ ${total.toFixed(2)}`}
+          <Icon name="lock" size={16} /> {processing ? t('pleaseWait') : selectedMethod === 'scan' ? `${t('payNow')} ₹ ${total.toFixed(2)}` : `${t('payNow')} ₹ ${total.toFixed(2)}`}
         </button>
         <p className="text-center text-[10px] text-tn-subtle mt-3">{selectedMethod === 'scan' ? 'Direct UPI payment to host' : 'Secured by Razorpay'}</p>
       </main>

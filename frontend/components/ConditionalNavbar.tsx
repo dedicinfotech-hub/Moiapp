@@ -1,9 +1,12 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState, type MouseEvent } from 'react';
 import Navbar from './Navbar';
 import BottomNavigation from './BottomNavigation';
+import { useAuth } from '@/lib/auth';
+import { buildLoginUrl } from '@/lib/authNavigation';
+import { useTranslation } from '@/lib/i18n';
 
 // Deferred mount guard — used only for the top Navbar which renders
 // auth-dependent content (user name, avatar). Without this guard the
@@ -20,7 +23,7 @@ function useMounted() {
 function isEventSubPage(pathname: string): boolean {
   // /events/[slug] — top-level event page: show bottom nav
   // /events/[slug]/anything — sub-pages with their own shell: hide bottom nav
-  const parts = pathname.replace(/^\/moiapp/, '').split('/').filter(Boolean);
+  const parts = pathname.split('/').filter(Boolean);
   // parts: ['events', '<slug>', '<subpage>'] → length 3 means sub-page
   return parts[0] === 'events' && parts.length >= 3;
 }
@@ -29,8 +32,7 @@ function isEventSubPage(pathname: string): boolean {
 export default function ConditionalNavbar() {
   const mounted = useMounted();
   const rawPathname = usePathname();
-  // Strip optional basePath prefix for consistent matching
-  const pathname = rawPathname.replace(/^\/moiapp/, '');
+  const pathname = rawPathname;
 
   // Hold until mounted — avoids auth-state hydration mismatch
   if (!mounted) return null;
@@ -52,7 +54,18 @@ export default function ConditionalNavbar() {
 // immediately on first paint with no flash-of-missing-content.
 export function ConditionalBottomNav() {
   const rawPathname = usePathname();
-  const pathname = rawPathname.replace(/^\/moiapp/, '');
+  const pathname = rawPathname;
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
+
+  const requireAuthNav = (href: string) => {
+    if (authLoading || user) return undefined;
+    return (e: MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      router.push(buildLoginUrl(href));
+    };
+  };
 
   // ── Pages that manage their own bottom area — hide global nav ──────────────
 
@@ -88,10 +101,28 @@ export function ConditionalBottomNav() {
   return (
     <BottomNavigation
       items={[
-        { id: 'home',    label: 'Home',      href: '/dashboard',          icon: 'dashboard' },
-        { id: 'events',  label: 'Functions', href: '/events',             icon: 'wedding'   },
-        { id: 'create',  label: 'Create',    href: '/dashboard?module=events', icon: 'plus'      },
-        { id: 'entries', label: 'Moi List',  href: '/dashboard?module=moi-notebook',            icon: 'list'      },
+        { id: 'home',    label: t('home'),      href: user ? '/dashboard' : '/', icon: 'dashboard' },
+        {
+          id: 'events',
+          label: t('modEvents'),
+          href: '/dashboard?module=events',
+          icon: 'wedding',
+          onClick: requireAuthNav('/dashboard?module=events'),
+        },
+        {
+          id: 'create',
+          label: t('create'),
+          href: '/dashboard?module=events',
+          icon: 'plus',
+          onClick: requireAuthNav('/dashboard?module=events'),
+        },
+        {
+          id: 'entries',
+          label: t('modMoiNotebook'),
+          href: '/dashboard?module=moi-notebook',
+          icon: 'list',
+          onClick: requireAuthNav('/dashboard?module=moi-notebook'),
+        },
       ]}
     />
   );

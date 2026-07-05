@@ -106,7 +106,7 @@ npx playwright test -g "AUTH-001"
 php scripts/create_admin.php
 
 # Migrate database
-php scripts/migrate.php
+php backend/scripts/migrate.php
 
 # Create test event
 # Use admin panel or direct API call
@@ -173,7 +173,7 @@ jobs:
 
 ### API Tests Return 401
 - Ensure PHP backend is running on port 8888
-- Check CORS configuration in `config/cors.php`
+- Check CORS configuration in `backend/config/cors.php`
 
 ### OTP Tests Fail
 - Mock OTP service or use test OTP `123456`

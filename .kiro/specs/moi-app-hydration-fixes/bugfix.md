@@ -2,11 +2,11 @@
 
 ## Summary
 
-Three distinct runtime errors are thrown in production on `dsitesai.com`:
+Three distinct runtime errors were thrown in production on `moipassbook.com`:
 
 1. **React error #418** (repeated 3×) — Hydration mismatch: server-rendered HTML does not match client-rendered output.
 2. **React error #423** — A hook or context was read before its Provider finished mounting (or was read conditionally).
-3. **manifest.json 404** — The PWA manifest is fetched from `https://dsitesai.com/manifest.json` instead of `https://dsitesai.com/moiapp/manifest.json`.
+3. **manifest.json 404** — The PWA manifest was fetched from the wrong path (missing basePath prefix).
 
 ---
 
@@ -40,7 +40,7 @@ The app is deployed at `/moiapp/` (basePath = `/moiapp`). The layout hardcodes:
 <link rel="manifest" href="/manifest.json" />
 ```
 
-And the Next.js `metadata.manifest` is set to `'/manifest.json'`. Both resolve to `https://dsitesai.com/manifest.json` — missing the basePath prefix — resulting in a 404.
+And the Next.js `metadata.manifest` was set to `'/manifest.json'`. Without the basePath prefix this resulted in a 404.
 
 The `manifest.json` itself already has the correct `start_url: "/moiapp/"` and `scope: "/moiapp/"`, but the `<link>` tag must point to `/moiapp/manifest.json`.
 

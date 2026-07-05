@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { eventsApi, Event } from '@/lib/api';
 import Icon from '@/components/ui/Icon';
 import { useSlug } from '@/lib/useSlug';
+import { useTranslation } from '@/lib/i18n';
 
 export default function LinkExpiredScreen() {
   const router = useRouter();
-  const token = useSlug(1); // /g/[token]/expired → skip 1 segment
+  const { t } = useTranslation();
+  const token = useSlug(1);
 
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,14 +33,14 @@ export default function LinkExpiredScreen() {
         <div className="w-24 h-24 bg-tn-red-bg rounded-full flex items-center justify-center mx-auto mb-5 relative">
           <Icon name="download" size={32} className="text-tn-error" />
         </div>
-        <h1 className="text-2xl font-bold text-tn-text mb-2">Link Expired</h1>
-        <p className="text-sm text-tn-muted mb-6">This link has expired or is no longer valid. Please request a new link to continue.</p>
+        <h1 className="text-2xl font-bold text-tn-text mb-2">{t('linkExpired')}</h1>
+        <p className="text-sm text-tn-muted mb-6">{t('linkExpiredSub')}</p>
 
         <div className="bg-tn-red-bg border border-tn-border rounded-2xl p-4 mb-5 text-left flex gap-3">
           <div className="w-8 h-8 rounded-full bg-tn-error text-white flex items-center justify-center text-sm font-bold shrink-0">i</div>
           <div>
-            <p className="text-sm font-bold text-tn-text">Why did this happen?</p>
-            <p className="text-xs text-tn-muted mt-1">For your security, invitation links are valid only for a limited time. Please contact the host to get a new link.</p>
+            <p className="text-sm font-bold text-tn-text">{t('linkExpiredWhy')}</p>
+            <p className="text-xs text-tn-muted mt-1">{t('linkExpiredWhySub')}</p>
           </div>
         </div>
 
@@ -55,18 +57,17 @@ export default function LinkExpiredScreen() {
               </div>
             </div>
             <div className="border-t border-tn-border pt-3">
-              <p className="text-xs font-bold text-tn-text">Need Help?</p>
-              <p className="text-[11px] text-tn-muted mt-0.5">Contact the host or event organizer for a new invitation link.</p>
+              <p className="text-xs font-bold text-tn-text">{t('guestHelpFooter')}</p>
             </div>
           </div>
         )}
 
         <div className="space-y-3">
-          <button type="button" onClick={() => alert('Request sent to host')} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
-            <Icon name="list" size={16} /> Request New Link
+          <button type="button" onClick={() => alert(t('requestLinkMessage'))} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
+            <Icon name="list" size={16} /> {t('requestNewLink')}
           </button>
           <button type="button" onClick={() => router.push('/')} className="w-full h-12 border-2 border-tn-yellow text-tn-yellow rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
-            <Icon name="venue" size={16} /> Back to Home
+            <Icon name="venue" size={16} /> {t('backToHome')}
           </button>
         </div>
       </div>

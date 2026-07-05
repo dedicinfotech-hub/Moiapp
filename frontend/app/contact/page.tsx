@@ -2,11 +2,10 @@
 
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { contactApi } from '@/lib/api';
 import Icon from '@/components/ui/Icon';
+import BrandWordmark from '@/components/ui/BrandWordmark';
 import toast from 'react-hot-toast';
-import { assetUrl } from '@/lib/assetUrl';
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -64,15 +63,7 @@ export default function ContactPage() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
               <Link href="/">
-                <div className="relative w-[110px] h-[24px] cursor-pointer">
-                  <Image
-                    src={assetUrl('/logo.png')}
-                    alt="MoiApp Logo"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
+                <BrandWordmark size="lg" className="cursor-pointer" />
               </Link>
             </div>
             <h1 className="text-2xl font-bold text-tn-text">Contact Us</h1>

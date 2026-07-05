@@ -1,46 +1,70 @@
 // ── API base URL ──────────────────────────────────────────────────────────────
 // LOCAL DEV  (npm run dev):
 //   Both env vars are empty. BASE = '/api'
-//   Next.js dev server rewrites /api/* → http://localhost:8888/MoiApp/api/*
+//   Next.js dev server rewrites /api/* → http://localhost:8888/MoiApp/backend/api/*
 //   No CORS issues — browser only talks to localhost:3000.
 //
 // PRODUCTION (npm run build + static export):
-//   NEXT_PUBLIC_API_URL = https://moipassbook.com/api
-//   Browser calls the PHP backend directly.
+//   NEXT_PUBLIC_API_URL empty — browser uses relative /api on the same host.
 import toast from 'react-hot-toast';
+import { isAuthAttemptPath } from './sessionAuth';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 const BASE: string = process.env.NEXT_PUBLIC_API_URL || `${basePath}/api`;
 export const API_BASE = BASE;
+
+type RequestOptions = RequestInit & { skipAuthRedirect?: boolean };
+
+let unauthorizedHandler: (() => void) | null = null;
+
+export function registerUnauthorizedHandler(handler: (() => void) | null): void {
+  unauthorizedHandler = handler;
+}
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('moi_token');
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = getToken();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-  };
-  // Use X-Auth-Token — MAMP's Apache strips the Authorization header
-  if (token) headers['X-Auth-Token'] = `Bearer ${token}`;
+function maybeHandleUnauthorized(status: number, path: string, skipAuthRedirect?: boolean): void {
+  if (status !== 401 || skipAuthRedirect || isAuthAttemptPath(path)) return;
+  unauthorizedHandler?.();
+}
 
-  // Build the URL. BASE is always an absolute URL in APK/production
-  // (NEXT_PUBLIC_API_URL = https://moipassbook.com/api).
-  // In local dev BASE = '/api' (relative), so we fall back to window.location.origin.
+async function authFetch(path: string, options: RequestOptions = {}): Promise<Response> {
+  const { skipAuthRedirect, ...fetchOptions } = options;
+  const token = getToken();
+  const headers = new Headers(fetchOptions.headers);
+  if (token) headers.set('X-Auth-Token', `Bearer ${token}`);
+
   const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
   const url = new URL(`${BASE}${path}`, origin);
   url.searchParams.set('_t', Date.now().toString());
 
-  // Debug logging for mobile API troubleshooting
+  const res = await fetch(url.toString(), { ...fetchOptions, headers, cache: 'no-store' });
+  maybeHandleUnauthorized(res.status, path, skipAuthRedirect);
+  return res;
+}
+
+async function request<T>(
+  path: string,
+  options: RequestOptions = {}
+): Promise<T> {
+  const { skipAuthRedirect, ...fetchOptions } = options;
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(fetchOptions.headers as Record<string, string>),
+  };
+  if (token) headers['X-Auth-Token'] = `Bearer ${token}`;
+
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+  const url = new URL(`${BASE}${path}`, origin);
+  url.searchParams.set('_t', Date.now().toString());
+
   console.log('[API_REQUEST]', {
     url: url.toString(),
-    method: options.method || 'GET',
+    method: fetchOptions.method || 'GET',
     headers: { ...headers, 'X-Auth-Token': token ? 'Bearer ***' : 'none' },
     base: BASE,
     path,
@@ -48,7 +72,7 @@ async function request<T>(
 
   let res: Response;
   try {
-    res = await fetch(url.toString(), { ...options, headers, cache: 'no-store' });
+    res = await fetch(url.toString(), { ...fetchOptions, headers, cache: 'no-store' });
   } catch (networkError) {
     console.error('[API_NETWORK_ERROR]', {
       url: url.toString(),
@@ -86,14 +110,19 @@ async function request<T>(
   });
 
   if (!res.ok) {
+    const sessionExpired = res.status === 401 && !skipAuthRedirect && !isAuthAttemptPath(path);
+    if (sessionExpired) {
+      maybeHandleUnauthorized(res.status, path, skipAuthRedirect);
+    }
+
     const errorMsg = (isJson && typeof data === 'object' && data !== null && 'error' in data)
       ? (data as { error?: string }).error || 'Request failed'
       : (typeof data === 'string' ? data : 'Request failed');
     console.error('[API_ERROR]', { url: url.toString(), status: res.status, error: errorMsg, data });
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !sessionExpired) {
       toast.error(errorMsg);
     }
-    throw new Error(errorMsg);
+    throw new Error(sessionExpired ? 'Session expired' : errorMsg);
   }
 
   return (isJson ? data : { raw: data }) as T;
@@ -147,7 +176,7 @@ export const authApi = {
       body: JSON.stringify({ phone, otp }),
     }),
 
-  me: () => request<{ user: User }>('/auth.php?action=me'),
+  me: () => request<{ user: User }>('/auth.php?action=me', { skipAuthRedirect: true }),
 
   updateProfile: (body: Partial<User>) =>
     request<{ success: boolean; user: User }>('/auth.php?action=profile', {
@@ -172,6 +201,12 @@ export const authApi = {
       '/auth.php?action=account',
       { method: 'DELETE' }
     ),
+
+  logout: () =>
+    request<{ success: boolean }>('/auth.php?action=logout', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
 };
 
 // ── Features ───────────────────────────────────────────────────────────────────
@@ -305,6 +340,23 @@ export const eventsApi = {
 
   delete: (id: number) =>
     request<{ success: boolean }>(`/events.php?id=${id}`, { method: 'DELETE' }),
+
+  uploadCover: async (eventId: number, file: File): Promise<{ success: boolean; url: string }> => {
+    const fd = new FormData();
+    fd.append('event_id', String(eventId));
+    fd.append('cover', file);
+
+    const res = await authFetch('/events.php?action=cover', {
+      method: 'POST',
+      body: fd,
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error((data as { error?: string }).error || 'Failed to upload cover photo');
+    }
+    return data as { success: boolean; url: string };
+  },
 };
 
 // ── Organizers ──────────────────────────────────────────────────────────────────
@@ -478,16 +530,11 @@ export const photosApi = {
     request<Photo[]>(`/photos.php?event_id=${eventId}`),
 
   upload: (eventId: number, file: File, caption?: string) => {
-    const token = getToken();
     const form = new FormData();
     form.append('event_id', String(eventId));
     form.append('photo', file);
     if (caption) form.append('caption', caption);
-    return fetch(`${BASE}/photos.php`, {
-      method: 'POST',
-      headers: { 'X-Auth-Token': `Bearer ${token}` },
-      body: form,
-    }).then((r) => r.json());
+    return authFetch('/photos.php', { method: 'POST', body: form }).then((r) => r.json());
   },
 
   delete: (id: number) =>
@@ -500,15 +547,10 @@ export const invitationsApi = {
     request<{ invitations: Invitation[] }>(`/invitations.php?action=list&event_id=${eventId}`),
 
   upload: (eventId: number, file: File) => {
-    const token = getToken();
     const form = new FormData();
     form.append('event_id', String(eventId));
     form.append('csv_file', file);
-    return fetch(`${BASE}/invitations.php?action=csv`, {
-      method: 'POST',
-      headers: { 'X-Auth-Token': `Bearer ${token}` },
-      body: form,
-    }).then((r) => r.json());
+    return authFetch('/invitations.php?action=csv', { method: 'POST', body: form }).then((r) => r.json());
   },
 
   update: (id: number, status: string) =>
@@ -570,10 +612,11 @@ export interface Notification {
 
 // ── Export ────────────────────────────────────────────────────────────────────
 export function exportCSV(eventId: number) {
-  const token = getToken();
-  const url = `${BASE}/export.php?event_id=${eventId}&format=csv`;
-  fetch(url, { headers: { 'X-Auth-Token': `Bearer ${token}` } })
-    .then((r) => r.blob())
+  authFetch(`/export.php?event_id=${eventId}&format=csv`)
+    .then((r) => {
+      if (!r.ok) throw new Error('Export failed');
+      return r.blob();
+    })
     .then((blob) => {
       const a = document.createElement('a');
       const blobUrl = URL.createObjectURL(blob);
@@ -581,6 +624,9 @@ export function exportCSV(eventId: number) {
       a.download = `moi-export-${eventId}.csv`;
       a.click();
       URL.revokeObjectURL(blobUrl);
+    })
+    .catch(() => {
+      toast.error('Export failed');
     });
 }
 
@@ -593,15 +639,10 @@ export function emailPDF(eventId: number): Promise<{ success: boolean; message: 
 
 // ── Bulk Import ────────────────────────────────────────────────────────────────
 export function bulkImportCSV(eventId: number, file: File): Promise<{ success: boolean; imported: number; errors: string[]; message: string }> {
-  const token = getToken();
   const form = new FormData();
   form.append('event_id', String(eventId));
   form.append('csv_file', file);
-  return fetch(`${BASE}/bulk-import.php?action=csv`, {
-    method: 'POST',
-    headers: { 'X-Auth-Token': `Bearer ${token}` },
-    body: form,
-  }).then((r) => r.json());
+  return authFetch('/bulk-import.php?action=csv', { method: 'POST', body: form }).then((r) => r.json());
 }
 
 export function addDigitizedEntry(eventId: number, data: Record<string, unknown>): Promise<{ success: boolean; id: number }> {
@@ -898,7 +939,7 @@ export const adminApi = {
         role: string | null;
         ip_address: string | null;
         user_agent: string | null;
-        status: 'success' | 'failed' | 'blocked';
+        status: 'success' | 'failed' | 'blocked' | 'logout';
         created_at: string;
       }>;
       pagination: { page: number; limit: number; total: number; pages: number };

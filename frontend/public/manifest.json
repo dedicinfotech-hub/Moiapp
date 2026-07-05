@@ -1,6 +1,6 @@
 {
-  "name": "MoiApp - Wedding Gift Tracker",
-  "short_name": "MoiApp",
+  "name": "Moi PassBook - Wedding Gift Tracker",
+  "short_name": "Moi PassBook",
   "description": "Track wedding moi (gift money) easily. Share with family and friends.",
   "start_url": ".",
   "display": "standalone",

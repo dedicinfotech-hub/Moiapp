@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { request } from './api';
+import { FEATURE_LANGUAGE_CONVERSION } from '@/lib/featureKeys';
 
 interface FeatureToggle {
   feature_key: string;
@@ -13,16 +14,29 @@ interface FeaturesContextValue {
   toggles: FeatureToggle[];
   isEnabled: (key: string) => boolean;
   loading: boolean;
+  reload: () => void;
 }
 
 const FeaturesContext = createContext<FeaturesContextValue | undefined>(undefined);
 
+/** When a toggle row is missing, match migrate defaults (language on by default). */
+function defaultEnabled(key: string): boolean {
+  if (key === FEATURE_LANGUAGE_CONVERSION) return true;
+  return false;
+}
+
 export function FeaturesProvider({ children }: { children: ReactNode }) {
   const [toggles, setToggles] = useState<FeatureToggle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  const reload = useCallback(() => {
+    setReloadToken((n) => n + 1);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     (async () => {
       try {
         const res = await request<{ toggles: FeatureToggle[] }>('/features.php');
@@ -40,15 +54,16 @@ export function FeaturesProvider({ children }: { children: ReactNode }) {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadToken]);
 
   const isEnabled = (key: string): boolean => {
     const toggle = toggles.find((t) => t.feature_key === key);
-    return toggle ? toggle.is_enabled === 1 : false;
+    if (!toggle) return defaultEnabled(key);
+    return toggle.is_enabled === 1;
   };
 
   return (
-    <FeaturesContext.Provider value={{ toggles, isEnabled, loading }}>
+    <FeaturesContext.Provider value={{ toggles, isEnabled, loading, reload }}>
       {children}
     </FeaturesContext.Provider>
   );
@@ -57,8 +72,7 @@ export function FeaturesProvider({ children }: { children: ReactNode }) {
 export function useFeatures(): FeaturesContextValue {
   const context = useContext(FeaturesContext);
   if (!context) {
-    // Return safe defaults if used outside provider
-    return { toggles: [], isEnabled: () => false, loading: false };
+    return { toggles: [], isEnabled: defaultEnabled, loading: false, reload: () => {} };
   }
   return context;
 }

@@ -517,6 +517,12 @@ if ($method === 'GET' && $action === 'private_events') {
     exit;
 }
 
+// Helper: check if a column exists (login_logs may predate role/email columns)
+function adminColumnExists(mysqli $db, string $table, string $column): bool {
+    $result = $db->query("SHOW COLUMNS FROM `$table` LIKE '$column'");
+    return $result && $result->num_rows > 0;
+}
+
 // ── Login audit logs ─────────────────────────────────────────────────────────────
 if ($method === 'GET' && $action === 'login-logs') {
     requireAdmin();
@@ -528,18 +534,24 @@ if ($method === 'GET' && $action === 'login-logs') {
     $status = trim($_GET['status'] ?? '');
     $search = trim($_GET['search'] ?? '');
 
+    $hasRoleCol = adminColumnExists($db, 'login_logs', 'role');
+    $roleSelect = $hasRoleCol ? 'll.role' : 'u.role';
+    $fromClause = $hasRoleCol
+        ? 'login_logs ll'
+        : 'login_logs ll LEFT JOIN users u ON u.id = ll.user_id';
+
     $where = '1=1';
     $types = '';
     $params = [];
 
-    if ($status !== '' && in_array($status, ['success', 'failed', 'blocked'], true)) {
-        $where .= ' AND status = ?';
+    if ($status !== '' && in_array($status, ['success', 'failed', 'blocked', 'logout'], true)) {
+        $where .= ' AND ll.status = ?';
         $types .= 's';
         $params[] = $status;
     }
 
     if ($search !== '') {
-        $where .= ' AND (email LIKE ? OR ip_address LIKE ? OR user_agent LIKE ?)';
+        $where .= ' AND (ll.email LIKE ? OR ll.ip_address LIKE ? OR ll.user_agent LIKE ?)';
         $types .= 'sss';
         $like = "%{$search}%";
         $params[] = $like;
@@ -547,7 +559,7 @@ if ($method === 'GET' && $action === 'login-logs') {
         $params[] = $like;
     }
 
-    $countSql = "SELECT COUNT(*) AS total FROM login_logs WHERE {$where}";
+    $countSql = "SELECT COUNT(*) AS total FROM {$fromClause} WHERE {$where}";
     $countStmt = $db->prepare($countSql);
     if ($types !== '') {
         $countStmt->bind_param($types, ...$params);
@@ -555,10 +567,10 @@ if ($method === 'GET' && $action === 'login-logs') {
     $countStmt->execute();
     $total = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
 
-    $sql = "SELECT id, user_id, email, role, ip_address, user_agent, status, created_at
-            FROM login_logs
+    $sql = "SELECT ll.id, ll.user_id, ll.email, {$roleSelect} AS role, ll.ip_address, ll.user_agent, ll.status, ll.created_at
+            FROM {$fromClause}
             WHERE {$where}
-            ORDER BY created_at DESC
+            ORDER BY ll.created_at DESC
             LIMIT ? OFFSET ?";
     $stmt = $db->prepare($sql);
     $typesWithPage = $types . 'ii';

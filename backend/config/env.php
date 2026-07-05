@@ -53,6 +53,8 @@ function env(string $key, string $default = ''): string {
 function normalizeCoverUrl(?string $url): ?string {
     if (!$url) return null;
     $appUrl = rtrim(env('APP_URL', 'http://localhost:8888/MoiApp'), '/');
+    // Strip www so cover images match apex host (www uploads often 403 on Hostinger)
+    $appUrl = preg_replace('#^https://www\.#i', 'https://', $appUrl);
     if (preg_match('/uploads\/(.+)$/i', $url, $matches)) {
         return $appUrl . '/uploads/' . $matches[1];
     }

@@ -7,6 +7,8 @@ import Icon, { type IconName } from '@/components/ui/Icon';
 import { eventsApi, moiApi, photosApi, Event, Photo, paymentApi, RazorpayPaymentMethod } from '@/lib/api';
 import { useFeatures } from '@/lib/features';
 import { canAcceptGuestMoi } from '@/lib/eventHelpers';
+import { mediaUrl } from '@/lib/assetUrl';
+import { useTranslation, eventTypeLabel } from '@/lib/i18n';
 
 // In static export useParams() always returns the placeholder slug '_'.
 // Read the real slug from the URL path instead.
@@ -102,29 +104,21 @@ function getEventIcon(eventType: string): IconName {
   return icons[eventType] || 'wedding';
 }
 
-function getEventLabel(eventType: string): string {
-  const labels: Record<string, string> = {
-    wedding: 'Wedding',
-    birthday: 'Birthday',
-    engagement: 'Engagement',
-    valakaappu: 'Valakaappu',
-    housewarming: 'Housewarming',
-    graduation: 'Graduation',
-    custom: 'Custom Event',
-  };
-  return labels[eventType] || 'Event';
+function getEventLabel(eventType: string, t: (key: string) => string): string {
+  return eventTypeLabel(eventType, t);
 }
 
 function PublicGuestNavbar() {
+  const { t } = useTranslation();
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-tn-border">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-extrabold text-tn-text">
           <span className="w-8 h-8 rounded-xl bg-tn-yellow text-white flex items-center justify-center shadow-sm">M</span>
-          <span className="text-sm">MoiApp</span>
+          <span className="text-sm">{t('appName')}</span>
         </Link>
         <Link href="/" className="text-xs font-semibold text-tn-text bg-tn-light border border-tn-border px-3 py-2 rounded-full hover:bg-tn-yellow-bg transition-colors">
-          Home
+          {t('home')}
         </Link>
       </div>
     </nav>
@@ -133,6 +127,7 @@ function PublicGuestNavbar() {
 
 export default function PublicEventPage() {
   const slug = useSlug();
+  const { t } = useTranslation();
   const [event, setEvent]       = useState<Event | null>(null);
   const [photos, setPhotos]     = useState<Photo[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -161,7 +156,7 @@ export default function PublicEventPage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
-        <p className="text-tn-muted text-sm">Loading event…</p>
+        <p className="text-tn-muted text-sm">{t('loadingEvent')}</p>
       </div>
     </div>
     </>
@@ -175,9 +170,9 @@ export default function PublicEventPage() {
           <div className="mb-4 text-tn-gold">
             <Icon name="sad" size={48} />
           </div>
-          <h1 className="text-xl font-bold text-tn-text">Event not found</h1>
+          <h1 className="text-xl font-bold text-tn-text">{t('eventNotFound')}</h1>
         <p className="text-tn-muted text-sm mt-2">This link may be invalid or the event has been removed.</p>
-        <Link href="/events" className="mt-4 inline-block text-tn-yellow font-semibold underline text-sm">Browse all events</Link>
+        <Link href="/" className="mt-4 inline-block text-tn-yellow font-semibold underline text-sm">Go to home</Link>
       </div>
     </div>
     </>
@@ -198,6 +193,7 @@ export default function PublicEventPage() {
 
 // ── Event Detail View (TicketNadu layout) ─────────────────────────────────────
 function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }: { event: Event; photos: Photo[]; onGiveMoi: () => void; guestMoiClosed?: boolean; shareUrl?: string }) {
+  const { t } = useTranslation();
   const [showMore, setShowMore]   = useState(false);
   const [copied, setCopied]       = useState(false);
   const guestCount = Number(event.stats?.guest_count || 0);
@@ -234,7 +230,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
 
       {/* ── Mobile top bar ── */}
       <div className="lg:hidden px-4 py-3 flex justify-between items-center gap-3 border-b border-tn-border">
-          <Link href="/events" className="p-1 text-tn-text shrink-0">
+          <Link href="/" className="p-1 text-tn-text shrink-0">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7.37 13.25L13.06 18.95L12 20L4.5 12.5L12 5L13.06 6.05L7.37 11.75H19.5V13.25H7.37Z" fill="currentColor"/></svg>
           </Link>
           <h3 className="font-semibold text-base line-clamp-1 text-center flex-1">
@@ -264,7 +260,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
         {event.cover_photo ? (
           <>
             <Image
-              src={event.cover_photo}
+              src={mediaUrl(event.cover_photo)}
               alt={`${event.bride_name || ''} & ${event.groom_name || ''}`}
               width={1250}
               height={400}
@@ -272,7 +268,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
             />
             <div
               className="hidden lg:block absolute w-full -z-10 inset-0"
-              style={{ backgroundImage: `url(${event.cover_photo})`, backgroundSize: 'cover', backgroundPosition: 'center top', filter: 'blur(10px)' }}
+              style={{ backgroundImage: `url(${mediaUrl(event.cover_photo)})`, backgroundSize: 'cover', backgroundPosition: 'center top', filter: 'blur(10px)' }}
             />
           </>
         ) : (
@@ -281,7 +277,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
               <div className="mb-2 text-tn-gold">
                 <Icon name={getEventIcon(event.event_type)} size={44} />
               </div>
-              <p className="text-tn-gold font-semibold text-sm">{getEventLabel(event.event_type)} Event</p>
+              <p className="text-tn-gold font-semibold text-sm">{getEventLabel(event.event_type, t)} Event</p>
             </div>
           </div>
         )}
@@ -298,7 +294,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
             <div className="pb-6 pt-4 lg:pt-0">
               <div className="flex items-center gap-1 border border-tn-yellow bg-tn-yellow-bg ps-2 pe-3 py-1.5 rounded-full w-fit text-sm font-semibold text-tn-yellow mb-3">
                  <Icon name={getEventIcon(event.event_type)} size={16} />
-                <span>{getEventLabel(event.event_type)}</span>
+                <span>{getEventLabel(event.event_type, t)}</span>
               </div>
               <h1 className="font-bold text-xl lg:text-[32px] leading-tight">
                 {event.bride_name || ''} &amp; {event.groom_name || ''}
@@ -522,8 +518,8 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
             {/* Desktop: Give Moi card */}
             <div className="hidden lg:flex flex-col border border-tn-border rounded-xl p-6 gap-5">
               <div>
-                <p className="text-sm text-tn-muted mb-1">{getEventLabel(event.event_type)} Gift</p>
-               <h3 className="text-2xl font-bold text-tn-text flex items-center gap-2">Give Moi <Icon name={getEventIcon(event.event_type)} size={24} /></h3>
+                <p className="text-sm text-tn-muted mb-1">{getEventLabel(event.event_type, t)} Gift</p>
+               <h3 className="text-2xl font-bold text-tn-text flex items-center gap-2">{t('publicGiveMoi')} <Icon name={getEventIcon(event.event_type)} size={24} /></h3>
                 <p className="text-sm text-tn-muted mt-1">மொய் கொடுக்க இங்கே அழுத்துங்கள்</p>
               </div>
               {guestMoiClosed ? (
@@ -543,7 +539,7 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
                     onClick={onGiveMoi}
                     className="bg-tn-yellow border border-tn-yellow h-[50px] flex justify-center items-center text-center text-black font-semibold rounded-lg cursor-pointer hover:bg-tn-yellow-2 transition-colors"
                   >
-                    Give Moi Now
+                    {t('publicGiveMoiNow')}
                   </button>
                 </>
               )}
@@ -557,14 +553,14 @@ function EventDetailView({ event, photos, onGiveMoi, guestMoiClosed, shareUrl }:
       {!guestMoiClosed && (
         <div className="sticky bottom-0 left-0 flex justify-between bg-white py-4 px-4 items-center border-t border-tn-border shadow-lg lg:hidden">
           <div className="flex-1">
-            <p className="text-xs text-tn-muted">{getEventLabel(event.event_type)} Gift</p>
-             <h3 className="text-lg font-bold text-tn-text flex items-center gap-1">Give Moi <Icon name={getEventIcon(event.event_type)} size={18} /></h3>
+            <p className="text-xs text-tn-muted">{getEventLabel(event.event_type, t)} Gift</p>
+             <h3 className="text-lg font-bold text-tn-text flex items-center gap-1">{t('publicGiveMoi')} <Icon name={getEventIcon(event.event_type)} size={18} /></h3>
           </div>
           <button
             onClick={onGiveMoi}
             className="bg-tn-yellow border border-tn-yellow flex-1 h-[50px] flex justify-center items-center rounded-xl font-semibold text-tn-text hover:bg-tn-yellow-2 transition-colors"
           >
-            Give Moi Now
+            {t('publicGiveMoiNow')}
           </button>
         </div>
       )}
@@ -911,7 +907,7 @@ function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () 
         key: order.razorpay_key_id,
         amount: order.order.amount,
         currency: order.order.currency,
-        name: 'MoiApp',
+        name: 'Moi PassBook',
         description: `Moi contribution for ${order.event_title}`,
         order_id: order.order.id,
         handler: handleRazorpaySuccess,
@@ -1077,6 +1073,7 @@ function PaymentMethod({ event, onBack, onSuccess }: { event: Event; onBack: () 
 function SuccessView({ event, onBack, onContinue, txn }: { event: Event; onBack: () => void; onContinue: () => void; txn?: { transactionId: string; amount: number; method: string; date: string } }) {
   const [copied, setCopied] = useState('');
   const { isEnabled } = useFeatures();
+  const { t } = useTranslation();
   const isWedding = event.event_type === 'wedding';
   const eventNames = isWedding
     ? `${event.bride_name || ''} & ${event.groom_name || ''}`
@@ -1109,8 +1106,8 @@ function SuccessView({ event, onBack, onContinue, txn }: { event: Event; onBack:
         <div className="w-20 h-20 bg-tn-yellow-bg border-2 border-tn-gold-border rounded-full flex items-center justify-center mx-auto mb-5 text-tn-gold">
           <Icon name="check" size={40} />
         </div>
-        <h1 className="text-2xl font-bold text-tn-text mb-1">Payment Successful!</h1>
-        <p className="text-sm text-tn-subtle">Your moi has been recorded successfully</p>
+        <h1 className="text-2xl font-bold text-tn-text mb-1">{t('paymentSuccessful')}</h1>
+        <p className="text-sm text-tn-subtle">{t('moiRecordedSuccess')}</p>
         <p className="text-xs text-tn-muted mt-2">
           For <span className="font-semibold text-tn-text">{eventNames}</span>
         </p>
@@ -1124,11 +1121,11 @@ function SuccessView({ event, onBack, onContinue, txn }: { event: Event; onBack:
       )}
 
       <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4 text-left">
-        <h3 className="text-sm font-bold text-tn-text mb-3">Payment Summary</h3>
+        <h3 className="text-sm font-bold text-tn-text mb-3">{t('paymentSummary')}</h3>
         <div className="space-y-2 text-sm text-tn-muted">
-          <div className="flex justify-between"><span>Amount</span><span className="font-semibold text-tn-text">₹ {txn ? txn.amount.toLocaleString('en-IN') : '0'}</span></div>
-          <div className="flex justify-between"><span>Payment Method</span><span className="font-semibold text-tn-text capitalize">{txn ? txn.method : ''}</span></div>
-          <div className="flex justify-between"><span>Date</span><span className="font-semibold text-tn-text">{txn ? txn.date : ''}</span></div>
+          <div className="flex justify-between"><span>{t('amount')}</span><span className="font-semibold text-tn-text">₹ {txn ? txn.amount.toLocaleString('en-IN') : '0'}</span></div>
+          <div className="flex justify-between"><span>{t('selectPaymentMethod')}</span><span className="font-semibold text-tn-text capitalize">{txn ? txn.method : ''}</span></div>
+          <div className="flex justify-between"><span>{t('dateTimeLabel')}</span><span className="font-semibold text-tn-text">{txn ? txn.date : ''}</span></div>
         </div>
       </div>
 
@@ -1137,7 +1134,7 @@ function SuccessView({ event, onBack, onContinue, txn }: { event: Event; onBack:
           <div className="flex items-center gap-3 mb-3">
             <span className="text-2xl text-tn-gold"><Icon name="arrow-right" size={24} /></span>
             <div>
-              <p className="font-bold text-tn-text">Share on WhatsApp</p>
+              <p className="font-bold text-tn-text">{t('whatsappShare')}</p>
               <p className="text-xs text-tn-subtle">Send a thank you note to the family</p>
             </div>
           </div>
@@ -1157,6 +1154,7 @@ function SuccessView({ event, onBack, onContinue, txn }: { event: Event; onBack:
 
 // ── Thank You Screen ───────────────────────────────────────────────────────────
 function ThankYouScreen({ event, onBack, txn }: { event: Event; onBack: () => void; txn?: { transactionId: string; amount: number; method: string; date: string } }) {
+  const { t } = useTranslation();
   const isWedding = event.event_type === 'wedding';
   const eventNames = isWedding
     ? `${event.bride_name || ''} & ${event.groom_name || ''}`
@@ -1183,8 +1181,8 @@ function ThankYouScreen({ event, onBack, txn }: { event: Event; onBack: () => vo
         <div className="w-20 h-20 bg-tn-yellow-bg border-2 border-tn-gold-border rounded-full flex items-center justify-center mx-auto mb-5 text-tn-gold">
           <Icon name="gift" size={40} />
         </div>
-        <h1 className="text-2xl font-bold text-tn-text mb-1">Thank You!</h1>
-        <p className="text-sm text-tn-subtle">Your moi has been received successfully.</p>
+        <h1 className="text-2xl font-bold text-tn-text mb-1">{t('thankYouTitle')}</h1>
+        <p className="text-sm text-tn-subtle">{t('moiReceivedSuccess')}</p>
       </div>
 
       <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4 shadow-sm">
@@ -1215,7 +1213,7 @@ function ThankYouScreen({ event, onBack, txn }: { event: Event; onBack: () => vo
       <div className="space-y-3">
         <button type="button" onClick={() => window.print()} className="w-full h-12 bg-tn-yellow text-white rounded-xl font-semibold text-sm hover:bg-tn-yellow-2 transition-colors">Download Receipt</button>
         <button type="button" onClick={handleShare} className="w-full h-12 border-2 border-tn-yellow text-tn-gold rounded-xl font-semibold text-sm hover:bg-tn-yellow-bg transition-colors">Share Confirmation</button>
-        <button type="button" onClick={onBack} className="w-full h-12 border-2 border-tn-yellow text-tn-gold rounded-xl font-semibold text-sm hover:bg-tn-yellow-bg transition-colors">Back to Home</button>
+        <button type="button" onClick={onBack} className="w-full h-12 border-2 border-tn-yellow text-tn-gold rounded-xl font-semibold text-sm hover:bg-tn-yellow-bg transition-colors">{t('backToHome')}</button>
       </div>
     </div>
   );

@@ -7,6 +7,13 @@ export function getGuestPaymentUrl(token: string): string {
   return `${basePath}/g/${token}`;
 }
 
+export function getPublicEventUrl(slug: string): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}${basePath}/e/${slug}`;
+  }
+  return `${basePath}/e/${slug}`;
+}
+
 /** Print-ready QR (black & white friendly via qrserver API) */
 export function getQrImageUrl(paymentUrl: string, size = 512): string {
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(paymentUrl)}&format=png&margin=12&color=000000&bgcolor=ffffff`;

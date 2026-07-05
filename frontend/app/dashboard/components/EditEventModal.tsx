@@ -4,6 +4,8 @@ import { useState, useRef } from 'react';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import { Event, eventsApi, showSuccess } from '@/lib/api';
 import ApprovalBanner from '@/components/ApprovalBanner';
+import { mediaUrl } from '@/lib/assetUrl';
+import { useTranslation } from '@/lib/i18n';
 
 interface EditEventModalProps {
   event: Event;
@@ -29,9 +31,11 @@ export default function EditEventModal({
   onClose,
   onUpdated,
 }: EditEventModalProps) {
-  const [step, setStep] = useState<Step>(1);
+  const { t } = useTranslation();
+  const [step, setStep] = useState<Step>(2);
   const [form, setForm] = useState({
     event_type: event.event_type || 'wedding',
+    function_name: event.custom_title || '',
     custom_title: event.custom_title || '',
     bride_name: event.bride_name || '',
     groom_name: event.groom_name || '',
@@ -52,13 +56,15 @@ export default function EditEventModal({
     description: event.description || '',
   });
   const [coverFile,    setCoverFile]    = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(event.cover_photo);
+  const [coverPreview, setCoverPreview] = useState<string | null>(mediaUrl(event.cover_photo) || null);
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const inp = 'w-full border border-tn-border rounded-lg px-3 py-2.5 text-sm text-tn-text placeholder-tn-text-secondary focus:outline-none focus:border-tn-yellow transition-colors bg-white';
+  const nameInp = `${inp} py-3 text-base`;
   const lbl = 'block text-xs font-semibold text-tn-muted mb-1.5';
+  const nameGrid = 'grid grid-cols-1 sm:grid-cols-2 gap-3';
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,8 +73,6 @@ export default function EditEventModal({
     setCoverPreview(URL.createObjectURL(file));
   };
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
-
   const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -76,6 +80,7 @@ export default function EditEventModal({
     try {
       const submitData: Record<string, unknown> = {
         event_type: form.event_type,
+        custom_title: form.function_name.trim(),
         wedding_date: form.wedding_date,
         city: form.city,
         venue: form.venue,
@@ -90,8 +95,6 @@ export default function EditEventModal({
       } else if (form.event_type === 'birthday') {
         submitData.birthday_person_name = form.birthday_person_name;
         submitData.birthday_person_age = form.birthday_person_age ? parseInt(form.birthday_person_age) : null;
-      } else if (form.event_type === 'custom') {
-        submitData.custom_title = form.custom_title;
       } else if (form.event_type === 'engagement') {
         submitData.bride_name = form.bride_name;
         submitData.groom_name = form.groom_name;
@@ -113,26 +116,14 @@ export default function EditEventModal({
       if (res.resubmitted) {
         showSuccess('Changes saved and resubmitted for approval');
       } else {
-        showSuccess('Event updated');
+        showSuccess(t('eventUpdated'));
       }
       if (coverFile) {
-        const token = localStorage.getItem('moi_token');
-        const fd = new FormData();
-        fd.append('event_id', String(event.id));
-        fd.append('cover', coverFile);
-        const coverRes = await fetch(`${BASE_URL}/events.php?action=cover`, {
-          method: 'POST',
-          headers: { 'X-Auth-Token': `Bearer ${token}` },
-          body: fd,
-        });
-        if (!coverRes.ok) {
-          const errorData = await coverRes.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to upload cover photo');
-        }
+        await eventsApi.uploadCover(event.id, coverFile);
       }
       setStep(3);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to update event');
+      setError(err instanceof Error ? err.message : 'Failed to update function');
     } finally {
       setLoading(false);
     }
@@ -165,9 +156,9 @@ export default function EditEventModal({
   const nameLabels = getNameFieldLabels();
 
   const steps = [
-    { num: 1, label: 'Event Type' },
-    { num: 2, label: 'Event Details' },
-    { num: 3, label: 'Review' },
+    { num: 1, label: t('stepFunctionType') },
+    { num: 2, label: t('functionDetailsTitle') },
+    { num: 3, label: t('stepReview') },
   ] as const;
 
   return (
@@ -180,9 +171,9 @@ export default function EditEventModal({
             <div>
               <h2 className="font-bold text-tn-text text-base leading-tight">{eventTitle}</h2>
               <p className="text-[11px] text-tn-text-secondary">
-                {step === 1 && 'Select event type'}
-                {step === 2 && 'Edit event details'}
-                {step === 3 && 'Review & save'}
+                {step === 1 && t('cfSelectFunctionSub')}
+                {step === 2 && t('functionDetailsTitle')}
+                {step === 3 && t('stepReview')}
               </p>
             </div>
           </div>
@@ -234,7 +225,7 @@ export default function EditEventModal({
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <label className={lbl}>Event Type <span className="text-tn-yellow">*</span></label>
+                <label className={lbl}>{t('stepFunctionType')} <span className="text-tn-yellow">*</span></label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {EVENT_TYPES.map((type) => (
                     <button
@@ -257,11 +248,11 @@ export default function EditEventModal({
               {/* Custom Title - only for custom events */}
               {form.event_type === 'custom' && (
                 <div>
-                  <label className={lbl}>Event Title <span className="text-tn-yellow">*</span></label>
+                  <label className={lbl}>{t('lblFunctionName')} <span className="text-tn-yellow">*</span></label>
                   <input
                     required
-                    value={form.custom_title}
-                    onChange={(e) => setForm({ ...form, custom_title: e.target.value })}
+                    value={form.function_name}
+                    onChange={(e) => setForm({ ...form, function_name: e.target.value, custom_title: e.target.value })}
                     className={inp}
                     placeholder="e.g., Anniversary, Naming Ceremony"
                   />
@@ -280,15 +271,36 @@ export default function EditEventModal({
           {/* Step 2: Event Details */}
           {step === 2 && (
             <form onSubmit={handleStep2Submit} className="space-y-4">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="text-xs font-semibold text-tn-yellow hover:underline"
+              >
+                {t('cfEventType')}: {selectedType?.label || form.event_type} — {t('edit')}
+              </button>
+
+              <div>
+                <label className={lbl}>{t('lblFunctionName')} <span className="text-tn-yellow">*</span></label>
+                <input
+                  required
+                  autoFocus
+                  value={form.function_name}
+                  onChange={(e) => setForm({ ...form, function_name: e.target.value })}
+                  className={nameInp}
+                  placeholder="e.g., Arun & Priya Wedding Reception"
+                />
+                <p className="text-[10px] text-tn-text-secondary mt-1">{t('cfFunctionNameHint')}</p>
+              </div>
+
               {form.event_type === 'wedding' ? (
-                <div className="grid grid-cols-2 gap-3">
+                <div className={`${nameGrid} bg-tn-light border border-tn-border rounded-xl p-4`}>
                   <div>
-                    <label className={lbl}>Bride Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={inp} placeholder="Priya" />
+                    <label className={lbl}>{t('lblBrideName')} <span className="text-tn-yellow">*</span></label>
+                    <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={nameInp} placeholder="Priya" />
                   </div>
                   <div>
-                    <label className={lbl}>Groom Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={inp} placeholder="Ravi" />
+                    <label className={lbl}>{t('lblGroomName')} <span className="text-tn-yellow">*</span></label>
+                    <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={nameInp} placeholder="Ravi" />
                   </div>
                 </div>
               ) : form.event_type === 'birthday' ? (
@@ -304,17 +316,17 @@ export default function EditEventModal({
                 </div>
               ) : form.event_type === 'engagement' ? (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className={`${nameGrid} bg-tn-light border border-tn-border rounded-xl p-4`}>
                     <div>
                       <label className={lbl}>Partner 1 Name <span className="text-tn-yellow">*</span></label>
-                      <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={inp} placeholder="Priya" />
+                      <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={nameInp} placeholder="Priya" />
                     </div>
                     <div>
                       <label className={lbl}>Partner 2 Name <span className="text-tn-yellow">*</span></label>
-                      <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={inp} placeholder="Ravi" />
+                      <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={nameInp} placeholder="Ravi" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className={nameGrid}>
                     <div>
                       <label className={lbl}>Mother Name <span className="text-tn-yellow">*</span></label>
                       <input required value={form.mother_name} onChange={(e) => setForm({ ...form, mother_name: e.target.value })} className={inp} placeholder="Lakshmi" />
@@ -326,18 +338,18 @@ export default function EditEventModal({
                   </div>
                 </div>
               ) : form.event_type === 'valakaappu' ? (
-                <div className="grid grid-cols-2 gap-3">
+                <div className={`${nameGrid} bg-tn-light border border-tn-border rounded-xl p-4`}>
                   <div>
                     <label className={lbl}>{nameLabels.name1} <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={inp} placeholder={nameLabels.placeholder1} />
+                    <input required value={form.bride_name} onChange={(e) => setForm({ ...form, bride_name: e.target.value })} className={nameInp} placeholder={nameLabels.placeholder1} />
                   </div>
                   <div>
                     <label className={lbl}>{nameLabels.name2} <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={inp} placeholder={nameLabels.placeholder2} />
+                    <input required value={form.groom_name} onChange={(e) => setForm({ ...form, groom_name: e.target.value })} className={nameInp} placeholder={nameLabels.placeholder2} />
                   </div>
                 </div>
               ) : form.event_type === 'housewarming' ? (
-                <div className="grid grid-cols-2 gap-3">
+                <div className={nameGrid}>
                   <div>
                     <label className={lbl}>Host Name <span className="text-tn-yellow">*</span></label>
                     <input required value={form.host_name} onChange={(e) => setForm({ ...form, host_name: e.target.value })} className={inp} placeholder="Arun" />
@@ -354,7 +366,7 @@ export default function EditEventModal({
                 </div>
               ) : null}
               <div>
-                <label className={lbl}>Event Date <span className="text-tn-yellow">*</span></label>
+                <label className={lbl}>{t('lblDate')} <span className="text-tn-yellow">*</span></label>
                 <input required type="date" value={form.wedding_date} onChange={(e) => setForm({ ...form, wedding_date: e.target.value })} className={inp} />
               </div>
               <div>
@@ -377,7 +389,7 @@ export default function EditEventModal({
               </div>
               <div>
                 <label className={lbl}>Description</label>
-                <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={`${inp} resize-none`} placeholder="A brief note about the event…" />
+                <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={`${inp} resize-none`} placeholder={t('lblDescription')} />
               </div>
 
               {/* Cover Photo */}
@@ -407,9 +419,9 @@ export default function EditEventModal({
               </div>
 
               <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setStep(1)} className="flex-1 border border-tn-border text-tn-text-secondary py-2.5 rounded-lg text-sm font-semibold hover:border-tn-border-alt transition-colors">← Back</button>
+                <button type="button" onClick={onClose} className="flex-1 border border-tn-border text-tn-text-secondary py-2.5 rounded-lg text-sm font-semibold hover:border-tn-border-alt transition-colors">Cancel</button>
                 <button type="submit" disabled={loading} className="flex-1 bg-tn-yellow text-black py-2.5 rounded-lg text-sm font-bold hover:bg-tn-gold transition-colors disabled:opacity-50">
-                  {loading ? 'Saving…' : 'Save Changes →'}
+                  {loading ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
             </form>
@@ -422,14 +434,10 @@ export default function EditEventModal({
                 ✓
               </div>
               <div>
-                <h3 className="text-lg font-bold text-tn-text mb-1">Event Updated!</h3>
-                <p className="text-xs text-tn-text-secondary leading-relaxed">
-                  Your event has been successfully updated.<br />
-                  Changes are now saved.
-                </p>
+                <h3 className="text-lg font-bold text-tn-text mb-1">{t('eventUpdated')}</h3>
               </div>
               <button type="button" onClick={onUpdated} className="w-full bg-tn-yellow text-black py-2.5 rounded-lg text-sm font-bold hover:bg-tn-gold transition-colors">
-                Done
+                {t('done')}
               </button>
             </div>
           )}

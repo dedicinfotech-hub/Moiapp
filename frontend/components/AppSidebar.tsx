@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ReactNode, useState, useEffect } from 'react';
 import Icon, { type IconName } from '@/components/ui/Icon';
+import LogoImage from '@/components/ui/LogoImage';
 
 export interface AppSidebarItem {
   id: string;
@@ -140,8 +141,8 @@ export default function AppSidebar({
   return (
     <aside className={baseClasses.join(' ')}>
       <div className="h-14 flex items-center gap-2 px-5 border-b border-tn-border shrink-0">
-        <Link href="/" className="font-extrabold text-lg text-tn-text leading-none">
-          Moi<span className="text-tn-yellow">App</span>
+        <Link href="/" className="leading-none min-w-0">
+          <LogoImage variant="sidebar" />
         </Link>
         {adminBadge && (
           <span className="text-[9px] font-bold bg-tn-yellow text-black px-1.5 py-0.5 rounded uppercase tracking-wider">
@@ -165,7 +166,7 @@ export default function AppSidebar({
               {user?.name ? user.name.charAt(0).toUpperCase() : 'M'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-tn-text truncate leading-tight">{user?.name || 'MoiApp User'}</p>
+              <p className="text-sm font-semibold text-tn-text truncate leading-tight">{user?.name || 'Moi PassBook User'}</p>
               <p className="text-[11px] text-tn-muted truncate">{user?.email || 'Account'}</p>
             </div>
             {onLogout && (

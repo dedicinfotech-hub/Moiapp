@@ -63,7 +63,6 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
     setCoverPreview(URL.createObjectURL(file));
   };
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
   const todayStr = new Date().toISOString().split('T')[0];
   const isPast = form.event_mode === 'past';
 
@@ -145,20 +144,16 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
       }
 
       const res = await eventsApi.create(submitData);
-      setStep(3);
       if (coverFile) {
-        const token = localStorage.getItem('moi_token');
-        const fd = new FormData();
-        fd.append('event_id', String(res.id));
-        fd.append('cover', coverFile);
-        await fetch(`${BASE_URL}/events.php?action=cover`, {
-          method: 'POST',
-          headers: { 'X-Auth-Token': `Bearer ${token}` },
-          body: fd,
-        });
+        await eventsApi.uploadCover(res.id, coverFile);
       }
+      if (form.event_mode === 'past' || res.approval_status === 'approved') {
+        onCreated();
+        return;
+      }
+      setStep(3);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to create event');
+      setError(err instanceof Error ? err.message : 'Failed to create function');
     } finally {
       setLoading(false);
     }
@@ -174,8 +169,8 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
 
   const selectedType = EVENT_TYPES.find(t => t.value === form.event_type);
   const eventTitle = form.event_type === 'custom'
-    ? (form.custom_title ? `New ${form.custom_title} Event` : 'New Custom Event')
-    : `New ${selectedType?.label || 'Event'}`;
+    ? (form.custom_title ? `New ${form.custom_title} Function` : 'New Custom Function')
+    : `New ${selectedType?.label || 'Function'}`;
   const eventIcon = selectedType?.icon || 'sparkle';
 
   // Get appropriate name field labels based on event type
@@ -195,7 +190,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
   const nameLabels = getNameFieldLabels();
 
   const steps = [
-    { num: 1, label: 'Event Type' },
+    { num: 1, label: 'Function Type' },
     { num: 2, label: 'Function Details' },
     { num: 3, label: 'Review' },
   ] as const;
@@ -300,7 +295,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
 
               {/* Event Type Selector */}
               <div>
-                <label className={lbl}>Event Type <span className="text-tn-yellow">*</span></label>
+                <label className={lbl}>Function Type <span className="text-tn-yellow">*</span></label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {EVENT_TYPES.map((type) => (
                     <button
@@ -323,7 +318,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               {/* Custom Title - only for custom events */}
               {form.event_type === 'custom' && (
                 <div>
-                  <label className={lbl}>Event Title <span className="text-tn-yellow">*</span></label>
+                  <label className={lbl}>Function Title <span className="text-tn-yellow">*</span></label>
                   <input
                     required
                     value={form.custom_title}
@@ -352,28 +347,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                 <input
                   required
                   value={form.function_name}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setForm((prev) => {
-                      const updates: Record<string, string> = { function_name: val };
-                      if (form.event_type === 'wedding' || form.event_type === 'engagement' || form.event_type === 'valakaappu') {
-                        const parts = val.split(' & ');
-                        updates.bride_name = parts[0] || '';
-                        updates.groom_name = parts[1] || '';
-                      } else if (form.event_type === 'birthday') {
-                        updates.birthday_person_name = val;
-                      } else if (form.event_type === 'housewarming') {
-                        const parts = val.split(' & ');
-                        updates.host_name = parts[0] || '';
-                        updates.spouse_name = parts[1] || '';
-                      } else if (form.event_type === 'graduation') {
-                        updates.graduate_name = val;
-                      } else if (form.event_type === 'custom') {
-                        updates.custom_title = val;
-                      }
-                      return { ...prev, ...updates };
-                    });
-                  }}
+                  onChange={(e) => setForm((prev) => ({ ...prev, function_name: e.target.value }))}
                   className={inp}
                   placeholder={
                     form.event_type === 'wedding' ? 'Arun & Priya Wedding' :
@@ -386,7 +360,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                     ''
                   }
                 />
-                <p className="text-[10px] text-tn-text-secondary mt-1">This name will be shown to guests. It syncs with the details you enter below.</p>
+                <p className="text-[10px] text-tn-text-secondary mt-1">Shown to guests. Name it however you like — separate from the names below.</p>
               </div>
 
               {/* Name fields for specific event types */}
@@ -394,23 +368,11 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={lbl}>{nameLabels.name1} <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.bride_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${val} & ${prev.groom_name} ${prev.event_type === 'wedding' ? 'Wedding' : prev.event_type === 'engagement' ? 'Engagement' : 'Valakaappu'}`;
-                        return { ...prev, bride_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder={nameLabels.placeholder1} />
+                    <input required value={form.bride_name} onChange={(e) => setForm((prev) => ({ ...prev, bride_name: e.target.value }))} className={inp} placeholder={nameLabels.placeholder1} />
                   </div>
                   <div>
                     <label className={lbl}>{nameLabels.name2} <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.groom_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${prev.bride_name} & ${val} ${prev.event_type === 'wedding' ? 'Wedding' : prev.event_type === 'engagement' ? 'Engagement' : 'Valakaappu'}`;
-                        return { ...prev, groom_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder={nameLabels.placeholder2} />
+                    <input required value={form.groom_name} onChange={(e) => setForm((prev) => ({ ...prev, groom_name: e.target.value }))} className={inp} placeholder={nameLabels.placeholder2} />
                   </div>
                 </div>
               )}
@@ -419,10 +381,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={lbl}>Person Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.birthday_person_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => ({ ...prev, birthday_person_name: val, function_name: `${val}'s Birthday Celebration` }));
-                    }} className={inp} placeholder="Arun" />
+                    <input required value={form.birthday_person_name} onChange={(e) => setForm((prev) => ({ ...prev, birthday_person_name: e.target.value }))} className={inp} placeholder="Arun" />
                   </div>
                   <div>
                     <label className={lbl}>Age</label>
@@ -435,23 +394,11 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={lbl}>Mother Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.mother_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${val} & ${prev.father_name} Engagement`;
-                        return { ...prev, mother_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder="Lakshmi" />
+                    <input required value={form.mother_name} onChange={(e) => setForm((prev) => ({ ...prev, mother_name: e.target.value }))} className={inp} placeholder="Lakshmi" />
                   </div>
                   <div>
                     <label className={lbl}>Father Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.father_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${prev.mother_name} & ${val} Engagement`;
-                        return { ...prev, father_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder="Ravi" />
+                    <input required value={form.father_name} onChange={(e) => setForm((prev) => ({ ...prev, father_name: e.target.value }))} className={inp} placeholder="Ravi" />
                   </div>
                 </div>
               )}
@@ -460,23 +407,11 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={lbl}>Host Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.host_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${val}${prev.spouse_name ? ' & ' + prev.spouse_name : ''} Housewarming`;
-                        return { ...prev, host_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder="Arun" />
+                    <input required value={form.host_name} onChange={(e) => setForm((prev) => ({ ...prev, host_name: e.target.value }))} className={inp} placeholder="Arun" />
                   </div>
                   <div>
                     <label className={lbl}>Spouse Name <span className="text-tn-yellow">*</span></label>
-                    <input required value={form.spouse_name} onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => {
-                        const fn = `${prev.host_name}${val ? ' & ' + val : ''} Housewarming`;
-                        return { ...prev, spouse_name: val, function_name: fn };
-                      });
-                    }} className={inp} placeholder="Priya" />
+                    <input required value={form.spouse_name} onChange={(e) => setForm((prev) => ({ ...prev, spouse_name: e.target.value }))} className={inp} placeholder="Priya" />
                   </div>
                 </div>
               )}
@@ -484,10 +419,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               {form.event_type === 'graduation' && (
                 <div>
                   <label className={lbl}>Graduate Name <span className="text-tn-yellow">*</span></label>
-                  <input required value={form.graduate_name} onChange={(e) => {
-                    const val = e.target.value;
-                    setForm((prev) => ({ ...prev, graduate_name: val, function_name: `${val}'s Graduation` }));
-                  }} className={inp} placeholder="Arun" />
+                  <input required value={form.graduate_name} onChange={(e) => setForm((prev) => ({ ...prev, graduate_name: e.target.value }))} className={inp} placeholder="Arun" />
                 </div>
               )}
 
@@ -568,7 +500,7 @@ export default function NewEventModal({ onClose, onCreated }: NewEventModalProps
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setStep(1)} className="flex-1 border border-tn-border text-tn-text-secondary py-2.5 rounded-lg text-sm font-semibold hover:border-tn-border-alt transition-colors">← Back</button>
                 <button type="submit" disabled={loading} className="flex-1 bg-tn-yellow text-black py-2.5 rounded-lg text-sm font-bold hover:bg-tn-gold transition-colors disabled:opacity-50">
-                  {loading ? 'Submitting…' : 'Submit for Approval →'}
+                  {loading ? 'Submitting…' : isPast ? 'Create Function' : 'Submit for Approval →'}
                 </button>
               </div>
             </form>

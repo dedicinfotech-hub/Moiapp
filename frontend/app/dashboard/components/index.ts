@@ -5,6 +5,7 @@ export { default as ModuleOrganizers } from './ModuleOrganizers';
 export { default as ModuleUsers } from './ModuleUsers';
 export { default as ModuleAnalytics } from './ModuleAnalytics';
 export { default as ModuleSettings } from './ModuleSettings';
+export { default as ModuleProfile } from './ModuleProfile';
 export { default as ModuleFeatures } from './ModuleFeatures';
 export { default as ModuleAdminDashboard } from './ModuleAdminDashboard';
 export { default as ModuleAdminUsers } from './ModuleAdminUsers';

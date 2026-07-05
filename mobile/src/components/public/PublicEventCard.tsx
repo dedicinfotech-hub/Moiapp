@@ -15,7 +15,8 @@ interface PublicEventCardProps {
 export function PublicEventCard({ event, onPress }: PublicEventCardProps) {
   const { t, settings } = useAppSettings();
   const { scaledFontSize: fs } = useScaledTheme();
-  const locale = settings.language === 'ta' ? 'ta-IN' : 'en-IN';
+  const locale =
+    settings.language === 'ta' ? 'ta-IN' : settings.language === 'hi' ? 'hi-IN' : 'en-IN';
   const date = new Date(event.wedding_date);
   const isPast = event.wedding_date < new Date().toISOString().split('T')[0];
   const day = date.toLocaleDateString(locale, { day: '2-digit' });

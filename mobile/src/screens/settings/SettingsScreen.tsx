@@ -16,6 +16,7 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { authApi, eventsApi, returnGiftsApi } from '../../api';
 import { useAppSettings } from '../../context/AppSettingsContext';
+import { useFeatures } from '../../hooks/useFeatures';
 import { scheduleEventReminders } from '../../services/localNotifications';
 import {
   loadAppSettings,
@@ -41,6 +42,8 @@ export function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MoreStackParamList>>();
   const { user, logout } = useAuthStore();
   const { t, updateSettings: patchContextSettings } = useAppSettings();
+  const { isEnabled, loading: featuresLoading } = useFeatures();
+  const languageEnabled = isEnabled('language_conversion');
 
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -155,16 +158,19 @@ export function SettingsScreen() {
               </>
             ) : null}
 
-            <SettingsSelectRow<AppLanguage>
-              title={t('language')}
-              subtitle="App language preference"
-              value={appSettings.language}
-              options={[
-                { value: 'en', label: 'English' },
-                { value: 'ta', label: 'Tamil' },
-              ]}
-              onChange={(v) => patchAppSettings({ language: v })}
-            />
+            {!featuresLoading && languageEnabled ? (
+              <SettingsSelectRow<AppLanguage>
+                title={t('language')}
+                subtitle="English, Tamil, or Hindi"
+                value={appSettings.language}
+                options={[
+                  { value: 'en', label: t('english') },
+                  { value: 'ta', label: t('tamil') },
+                  { value: 'hi', label: t('hindi') },
+                ]}
+                onChange={(v) => patchAppSettings({ language: v })}
+              />
+            ) : null}
 
             <SettingsSelectRow<AppFontSize>
               title={t('fontSize')}
@@ -193,7 +199,7 @@ export function SettingsScreen() {
                 </View>
               }
             />
-            <SettingsInfoRow label="App Version" subtitle="MoiApp dashboard" value={`v${APP_VERSION}`} />
+            <SettingsInfoRow label="App Version" subtitle={`${APP_NAME} dashboard`} value={`v${APP_VERSION}`} />
           </View>
         </Card>
 

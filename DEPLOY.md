@@ -201,15 +201,3 @@ cd frontend && npm run build:moipassbook
 # 3. Upload changed PHP files to public_html/backend/api/ or backend/config/
 #    (never overwrite backend/config/.env on the server)
 ```
-
----
-
-## Legacy: `dsitesai.com/moiapp` redirects
-
-If you still serve the old domain, add 301 redirects so guest QR links keep working:
-
-```
-https://dsitesai.com/moiapp/g/{token}  →  https://moipassbook.com/g/{token}
-```
-
-The root `.htaccess` also strips `/moiapp/` from paths for old bookmarks.

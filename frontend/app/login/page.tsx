@@ -1,25 +1,55 @@
 'use client';
 
-import { useState, type FormEvent, useEffect, useRef } from 'react';
+import { useState, type FormEvent, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { assetUrl } from '@/lib/assetUrl';
+import BrandWordmark from '@/components/ui/BrandWordmark';
+import { postLoginPath, sanitizeReturnTo } from '@/lib/authNavigation';
+import { getRememberedEmail, rememberEmail } from '@/lib/sessionAuth';
+import { useTranslation } from '@/lib/i18n';
 
 type LoginMode = 'email' | 'phone';
 type OtpStep = 'phone' | 'otp';
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-tn-yellow-bg via-white to-tn-yellow-bg flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginPageInner />
+    </Suspense>
+  );
+}
+
+function LoginPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading, login } = useAuth();
+  const { t } = useTranslation();
   const [mode, setMode] = useState<LoginMode>('phone');
+
+  const returnTo = searchParams.get('returnTo');
+  const backTarget = sanitizeReturnTo(returnTo) ?? '/';
+  const afterLoginTarget = postLoginPath(returnTo);
 
   // Redirect if already logged in
   useEffect(() => {
-    if (!authLoading && user) router.push('/dashboard');
-  }, [user, authLoading, router]);
+    if (!authLoading && user) router.replace(afterLoginTarget);
+  }, [user, authLoading, router, afterLoginTarget]);
+
+  // Browser back from login should return to the previous in-app page, not exit
+  useEffect(() => {
+    const handlePopState = () => {
+      router.replace(backTarget);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [router, backTarget]);
 
   // ── Email form ────────────────────────────────────────────────────────────
   const [emailForm, setEmailForm] = useState({ email: '', password: '' });
@@ -53,6 +83,11 @@ export default function LoginPage() {
   };
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+
+  useEffect(() => {
+    const saved = getRememberedEmail();
+    if (saved) setEmailForm((f) => ({ ...f, email: saved }));
+  }, []);
 
   const handleResendAdminOtp = async () => {
     setError('');
@@ -96,8 +131,9 @@ export default function LoginPage() {
         setError('Login failed');
         return;
       }
+      rememberEmail(emailForm.email);
       login(res.token, res.user);
-      router.push('/dashboard');
+      router.push(afterLoginTarget);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -154,7 +190,7 @@ export default function LoginPage() {
     try {
       const res = await authApi.verifyOTP(phone, otp);
       login(res.token, res.user);
-      router.push(res.needsProfile ? '/profile-setup' : '/dashboard');
+      router.push(res.needsProfile ? '/profile-setup' : afterLoginTarget);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'OTP verification failed');
     } finally {
@@ -164,6 +200,16 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-tn-yellow-bg via-white to-tn-yellow-bg relative overflow-hidden flex items-center justify-center px-4 py-8">
+      {/* <button
+        type="button"
+        onClick={() => router.push(backTarget)}
+        className="absolute top-4 left-4 z-20 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/80 border border-tn-border text-tn-text hover:bg-white transition-colors"
+        aria-label="Go back"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button> */}
       {/* Decorative background rings */}
       <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-tn-yellow/10 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-tn-yellow/8 blur-2xl pointer-events-none" />
@@ -172,28 +218,20 @@ export default function LoginPage() {
         <div className="bg-white border border-tn-yellow/45 rounded-2xl shadow-[0_0_12px_rgba(255,193,7,0.15)] p-8 transition-all duration-300 hover:shadow-[0_0_18px_rgba(255,193,7,0.25)]">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="relative w-[110px] h-[24px]">
-                <Image
-                  src={assetUrl('/logo.png')}
-                  alt="MoiApp Logo"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
+              <BrandWordmark size="lg" />
             </div>
-            <h1 className="text-2xl font-bold text-tn-text">Welcome back</h1>
-            <p className="text-tn-muted text-sm mt-1">Sign in to your MoiApp account</p>
+            <h1 className="text-2xl font-bold text-tn-text">{t('welcomeBack')}</h1>
+            <p className="text-tn-muted text-sm mt-1">{t('signInSubtitle')}</p>
           </div>
           {/* Login Mode Toggle */}
           <div className="flex border-b-2 border-tn-border mb-6">
             <button type="button" onClick={() => { setMode('phone'); setError(''); setOtpStep('phone'); }}
               className={`flex-1 pb-3 text-center font-bold text-sm border-b-[3px] transition-all duration-200 focus:outline-none ${mode === 'phone' ? 'border-tn-yellow text-tn-text' : 'border-transparent text-tn-muted hover:text-tn-text'}`}>
-              Phone Login
+              {t('phoneLogin')}
             </button>
             <button type="button" onClick={() => { setMode('email'); setError(''); }}
               className={`flex-1 pb-3 text-center font-bold text-sm border-b-[3px] transition-all duration-200 focus:outline-none ${mode === 'email' ? 'border-tn-yellow text-tn-text' : 'border-transparent text-tn-muted hover:text-tn-text'}`}>
-              Email Login
+              {t('emailLogin')}
             </button>
           </div>
           {error && (
@@ -206,13 +244,13 @@ export default function LoginPage() {
           {mode === 'email' && (
             <form onSubmit={handleEmailLogin} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-tn-muted mb-1.5">Email</label>
+                <label className="block text-sm font-semibold text-tn-muted mb-1.5">{t('email')}</label>
                 <input type="email" required value={emailForm.email}
                   onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
                   className={inputCls} placeholder="you@example.com" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-tn-muted mb-1.5">Password</label>
+                <label className="block text-sm font-semibold text-tn-muted mb-1.5">{t('password')}</label>
                 <input type="password" required value={emailForm.password}
                   onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
                   className={inputCls} placeholder="••••••••" />
@@ -241,11 +279,11 @@ export default function LoginPage() {
               ) : null}
               <button type="submit" disabled={loading}
                 className="w-full bg-tn-yellow text-tn-text py-3 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50 mt-2">
-                {loading ? 'Signing in…' : needsAdminOtp ? 'Verify & Sign In' : 'Sign In'}
+                {loading ? t('loading') : needsAdminOtp ? t('verifyAndSignIn') : t('signIn')}
               </button>
               <div className="text-right mt-2">
                 <Link href="/forgot-password" className="text-sm text-tn-gold font-semibold hover:underline">
-                  Forgot Password?
+                  {t('forgotPassword')}
                 </Link>
               </div>
             </form>
@@ -258,7 +296,7 @@ export default function LoginPage() {
               {otpStep === 'phone' && (
                 <form onSubmit={handleSendOTP} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-tn-muted mb-1.5">Mobile Number</label>
+                    <label className="block text-sm font-semibold text-tn-muted mb-1.5">{t('lblMobile')}</label>
                     <input type="tel" required value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       className={inputCls} placeholder="9876543210" maxLength={10}
@@ -266,7 +304,7 @@ export default function LoginPage() {
                   </div>
                   <button type="submit" disabled={loading || phone.length !== 10}
                     className="w-full bg-tn-yellow text-tn-text py-3 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50">
-                    {loading ? 'Sending OTP…' : 'Send OTP'}
+                    {loading ? t('loading') : t('sendOtp')}
                   </button>
                 </form>
               )}
@@ -287,7 +325,7 @@ export default function LoginPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-tn-muted mb-1.5">Enter OTP</label>
+                    <label className="block text-sm font-semibold text-tn-muted mb-1.5">{t('verifyOtp')}</label>
                     <input type="text" required value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       className={`${inputCls} text-center text-2xl font-bold tracking-[0.5em]`}

@@ -16,7 +16,7 @@ type LoginLog = {
   role: string | null;
   ip_address: string | null;
   user_agent: string | null;
-  status: 'success' | 'failed' | 'blocked';
+  status: 'success' | 'failed' | 'blocked' | 'logout';
   created_at: string;
 };
 
@@ -24,7 +24,7 @@ export default function ModuleAdminLoginLogs({ onNavigate }: ModuleAdminLoginLog
   const [logs, setLogs] = useState<LoginLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<'all' | 'success' | 'failed' | 'blocked'>('all');
+  const [status, setStatus] = useState<'all' | 'success' | 'failed' | 'blocked' | 'logout'>('all');
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -56,6 +56,7 @@ export default function ModuleAdminLoginLogs({ onNavigate }: ModuleAdminLoginLog
   const statusClass = (s: string) => {
     if (s === 'success') return 'text-green-600';
     if (s === 'blocked') return 'text-amber-600';
+    if (s === 'logout') return 'text-blue-600';
     return 'text-red-600';
   };
 
@@ -85,7 +86,7 @@ export default function ModuleAdminLoginLogs({ onNavigate }: ModuleAdminLoginLog
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(['all', 'success', 'failed', 'blocked'] as const).map((f) => (
+        {(['all', 'success', 'failed', 'blocked', 'logout'] as const).map((f) => (
           <button
             key={f}
             type="button"

@@ -41,7 +41,7 @@ export default function ChooseEventTypeScreen() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col pb-20 lg:pb-0">
-      <CreateFlowHeader title="Choose Event Type" onBack={() => router.push('/dashboard')} showHelp={false} />
+      <CreateFlowHeader title="Choose Function Type" onBack={() => router.push('/dashboard')} showHelp={false} />
 
       <div className="flex-1 flex flex-col px-6 pt-4 pb-8">
         <p className="text-sm text-tn-text-secondary text-center mb-6">This will set the flow for your function</p>

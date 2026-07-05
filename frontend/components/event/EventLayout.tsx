@@ -64,7 +64,7 @@ export function CreateFlowHeader({
 
 export function CreateStepProgress({ currentStep }: { currentStep: 1 | 2 | 3 | 4 }) {
   const steps = [
-    { num: 1, label: 'Event Type' },
+    { num: 1, label: 'Function Type' },
     { num: 2, label: 'Function Details' },
     { num: 3, label: 'Settings' },
     { num: 4, label: 'Review' },

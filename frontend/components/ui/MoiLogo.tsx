@@ -1,17 +1,20 @@
+import { APP_NAME } from '@/lib/brand';
+
 interface MoiLogoProps {
   variant?: 'light' | 'dark';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
+/** Stacked logo for splash / profile screens */
 export default function MoiLogo({ variant = 'light', size = 'md', className = '' }: MoiLogoProps) {
   const moiSize = size === 'lg' ? 'text-5xl' : size === 'md' ? 'text-4xl' : 'text-2xl';
-  const appSize = size === 'lg' ? 'text-2xl' : size === 'md' ? 'text-lg' : 'text-sm';
+  const subSize = size === 'lg' ? 'text-xl' : size === 'md' ? 'text-base' : 'text-xs';
   const moiColor = variant === 'light' ? 'text-white' : 'text-tn-purple';
-  const appColor = 'text-tn-yellow';
+  const subColor = 'text-tn-yellow';
 
   return (
-    <div className={`flex flex-col items-center leading-none ${className}`}>
+    <div className={`flex flex-col items-center leading-none ${className}`} aria-label={APP_NAME}>
       <span className={`${moiSize} font-extrabold ${moiColor} tracking-tight`}>
         M<span className="relative inline-block">o
           <svg className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-2 h-2" viewBox="0 0 10 10" fill="currentColor">
@@ -19,7 +22,7 @@ export default function MoiLogo({ variant = 'light', size = 'md', className = ''
           </svg>
         </span>i
       </span>
-      <span className={`${appSize} font-semibold italic ${appColor} -mt-1 ml-6`}>App</span>
+      <span className={`${subSize} font-semibold italic ${subColor} -mt-0.5 tracking-tight`}>PassBook</span>
     </div>
   );
 }

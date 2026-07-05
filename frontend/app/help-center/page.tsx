@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Help Center – Moi App',
-  description: 'Find answers to common questions about Moi App.',
+  title: 'Help Center – Moi PassBook',
+  description: 'Find answers to common questions about Moi PassBook.',
 };
 
 const categories = [
@@ -16,7 +16,7 @@ const categories = [
     faqs: [
       {
         q: 'How do I create an account?',
-        a: 'Download the Moi App, open it, and tap "Register". Enter your mobile number, verify with OTP, and complete your profile.',
+        a: 'Download the Moi PassBook, open it, and tap "Register". Enter your mobile number, verify with OTP, and complete your profile.',
       },
       {
         q: 'How do I reset my password?',
@@ -72,11 +72,11 @@ const categories = [
       },
       {
         q: 'Which payment methods are supported?',
-        a: 'Moi App supports all major UPI apps including GPay, PhonePe, Paytm, and bank UPI.',
+        a: 'Moi PassBook supports all major UPI apps including GPay, PhonePe, Paytm, and bank UPI.',
       },
       {
-        q: 'Does Moi App store my bank details?',
-        a: 'No. Moi App never stores your bank account numbers, UPI PIN, card details, or any banking credentials. Payments are handled by trusted payment gateways.',
+        q: 'Does Moi PassBook store my bank details?',
+        a: 'No. Moi PassBook never stores your bank account numbers, UPI PIN, card details, or any banking credentials. Payments are handled by trusted payment gateways.',
       },
       {
         q: 'What if my payment fails?',
@@ -115,16 +115,16 @@ const categories = [
     label: 'General',
     faqs: [
       {
-        q: 'Is Moi App free to use?',
+        q: 'Is Moi PassBook free to use?',
         a: 'Yes. Creating an account and listing events is free. Applicable payment gateway charges may apply on transactions.',
       },
       {
-        q: 'Is Moi App available on iOS?',
-        a: 'Currently Moi App is available on Android. iOS support is coming soon.',
+        q: 'Is Moi PassBook available on iOS?',
+        a: 'Currently Moi PassBook is available on Android. iOS support is coming soon.',
       },
       {
-        q: 'What languages does Moi App support?',
-        a: 'Moi App currently supports English and Tamil.',
+        q: 'What languages does Moi PassBook support?',
+        a: 'Moi PassBook currently supports English and Tamil.',
       },
     ],
   },
@@ -143,13 +143,13 @@ export default function HelpCenterPage() {
         <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-tn-yellow/10 blur-3xl pointer-events-none" />
         <div className="max-w-3xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 bg-tn-yellow/15 border border-tn-gold-border/40 text-tn-gold px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5">
-            Moi App · Support
+            Moi PassBook · Support
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-tn-text mb-4">
             Help Center
           </h1>
           <p className="text-tn-muted text-sm lg:text-base leading-relaxed max-w-xl mx-auto">
-            Find answers to the most common questions about Moi App.
+            Find answers to the most common questions about Moi PassBook.
           </p>
         </div>
       </div>
@@ -224,7 +224,7 @@ export default function HelpCenterPage() {
             Can't find what you're looking for? Our support team is happy to help.
           </p>
           <a
-            href="mailto:support@moiapp.in"
+            href="mailto:support@moipassbook.com"
             className="inline-flex items-center gap-2 bg-tn-yellow hover:bg-tn-yellow-2 text-tn-text text-sm font-bold px-6 py-2.5 rounded-xl transition-colors shadow-sm shadow-tn-yellow/30"
           >
             Contact Support

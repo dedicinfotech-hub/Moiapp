@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import type { RazorpayOrderResponse } from '../api/types';
 import { APP_BASE_URL } from '../api/client';
+import { APP_NAME } from '../constants/brand';
 
 type RazorpaySuccess = {
   razorpay_payment_id: string;
@@ -52,7 +53,7 @@ export async function openRazorpayCheckout(
       key: order.razorpay_key_id,
       amount: order.order.amount,
       currency: order.order.currency,
-      name: 'MoiApp',
+      name: APP_NAME,
       description: order.event_title,
       order_id: order.order.id,
       prefill: {

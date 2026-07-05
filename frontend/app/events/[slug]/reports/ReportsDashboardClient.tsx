@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { eventsApi, moiApi, Event, MoiEntry, showSuccess, showError } from '@/lib/api';
+import { getPublicEventUrl } from '@/lib/guestUrl';
 import EventLayout from '@/components/event/EventLayout';
 import { useSlug } from '@/lib/useSlug';
 
@@ -383,7 +384,7 @@ export default function ReportsDashboardScreen() {
             onClick={() => {
               if (!event) return;
               const text = `Moi Report for ${event.custom_title || event.event_type}\nTotal Collection: ₹${totalCollection.toLocaleString('en-IN')}\nTotal Contributors: ${totalContributors}`;
-              const url = event.guest_token ? `${window.location.origin}/g/${event.guest_token}/form` : window.location.href;
+              const url = event.slug ? getPublicEventUrl(event.slug) : window.location.href;
               if (navigator.share) {
                 navigator.share({ title: 'Moi Report', text, url }).catch(() => {});
               } else {

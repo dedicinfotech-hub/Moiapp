@@ -10,7 +10,7 @@ export interface BottomNavItem {
   label: string;
   href: string;
   icon: IconName;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 interface BottomNavigationProps {
@@ -44,10 +44,7 @@ function BottomNavigationContent({
           key={item.id}
           href={item.href}
           onClick={(e) => {
-            if (item.onClick) {
-              e.preventDefault();
-              item.onClick();
-            }
+            item.onClick?.(e);
           }}
           className={`flex flex-col items-center gap-0.5 px-2 py-1 min-w-[72px] ${
             resolvedActive === item.id ? 'text-tn-yellow' : 'text-tn-text-secondary'

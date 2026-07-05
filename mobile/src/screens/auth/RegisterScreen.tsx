@@ -8,7 +8,7 @@ import { authApi } from '../../api';
 import { useAuthStore } from '../../store/authStore';
 import { useAppSettings } from '../../context/AppSettingsContext';
 import type { AuthStackParamList } from '../../navigation/types';
-import { colors, fontSize, radius, spacing } from '../../theme';
+import { APP_NAME } from '../../constants/brand';
 
 export function RegisterScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -54,7 +54,7 @@ export function RegisterScreen() {
               {t('signIn')}
             </Text>
           </Text>
-          <Text style={styles.powered}>Powered by <Text style={styles.poweredBrand}>MoiApp</Text></Text>
+          <Text style={styles.powered}>Powered by <Text style={styles.poweredBrand}>{APP_NAME}</Text></Text>
         </>
       }
     >

@@ -28,6 +28,9 @@ if ($requestOrigin === '') {
     if ($isLocalhost || $isCapacitor) {
         $originHeader = $requestOrigin;
         error_log("[CORS_DEBUG] Allowing dynamic origin: {$requestOrigin}");
+    } elseif (preg_match('#^https://(www\.)?moipassbook\.com$#', $requestOrigin)) {
+        // Allow both www and apex when server .env is misconfigured
+        $originHeader = $requestOrigin;
     } else {
         // Unknown origin — still send the primary allowed origin so PHP runs,
         // but the browser will block it (correct CORS behaviour)

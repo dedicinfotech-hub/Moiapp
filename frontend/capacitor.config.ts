@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.moiapp.weddinggift',
-  appName: 'MoiApp',
+  appName: 'Moi PassBook',
   webDir: 'out',
   server: {
     // Load webapp from server directly - simplest and most reliable solution

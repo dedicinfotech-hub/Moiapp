@@ -599,12 +599,12 @@ export function AdminLoginLogsScreen() {
       role: string | null;
       ip_address: string | null;
       user_agent: string | null;
-      status: 'success' | 'failed' | 'blocked';
+      status: 'success' | 'failed' | 'blocked' | 'logout';
       created_at: string;
     }>
   >([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState<'all' | 'success' | 'failed' | 'blocked'>('all');
+  const [status, setStatus] = useState<'all' | 'success' | 'failed' | 'blocked' | 'logout'>('all');
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
@@ -637,6 +637,7 @@ export function AdminLoginLogsScreen() {
   const statusColor = (s: string) => {
     if (s === 'success') return colors.success;
     if (s === 'blocked') return colors.warning;
+    if (s === 'logout') return colors.primary;
     return colors.error;
   };
 
@@ -654,7 +655,7 @@ export function AdminLoginLogsScreen() {
         />
       </View>
       <View style={styles.filterRow}>
-        {(['all', 'success', 'failed', 'blocked'] as const).map((f) => (
+        {(['all', 'success', 'failed', 'blocked', 'logout'] as const).map((f) => (
           <TouchableOpacity
             key={f}
             style={[styles.filterChip, status === f && styles.filterActive]}

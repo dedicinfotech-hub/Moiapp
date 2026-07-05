@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-export type AppLanguage = 'en' | 'ta';
+export type AppLanguage = 'en' | 'ta' | 'hi';
 export type AppFontSize = 'small' | 'medium' | 'large';
 
 export interface AppSettings {
@@ -51,7 +51,11 @@ export async function loadAppSettings(): Promise<AppSettings> {
   const raw = await readRaw();
   if (!raw) return { ...DEFAULT_APP_SETTINGS };
   try {
-    return { ...DEFAULT_APP_SETTINGS, ...JSON.parse(raw) };
+    const parsed = { ...DEFAULT_APP_SETTINGS, ...JSON.parse(raw) };
+    if (!['en', 'ta', 'hi'].includes(parsed.language)) {
+      parsed.language = DEFAULT_APP_SETTINGS.language;
+    }
+    return parsed;
   } catch {
     return { ...DEFAULT_APP_SETTINGS };
   }

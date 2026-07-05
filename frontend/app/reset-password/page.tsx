@@ -4,10 +4,12 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/lib/api';
+import { useTranslation } from '@/lib/i18n';
 
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const token = searchParams.get('token');
 
   const [password, setPassword] = useState('');
@@ -30,7 +32,7 @@ function ResetPasswordContent() {
     setMessage('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('passwordsDoNotMatch'));
       return;
     }
 
@@ -61,12 +63,12 @@ function ResetPasswordContent() {
           <div className="bg-white border border-tn-border rounded-2xl shadow-card p-8">
             <div className="text-center mb-8">
               <div className="text-4xl mb-3">❌</div>
-              <h1 className="text-2xl font-bold text-tn-text">Invalid Link</h1>
-              <p className="text-tn-muted text-sm mt-1">The password reset link is invalid or has expired</p>
+              <h1 className="text-2xl font-bold text-tn-text">{t('invalidResetLink')}</h1>
+              <p className="text-tn-muted text-sm mt-1">{t('invalidResetLinkSub')}</p>
             </div>
             <p className="text-center text-sm text-tn-text-secondary mt-6">
               <Link href="/forgot-password" className="text-tn-gold font-semibold hover:underline">
-                Request a new reset link
+                {t('requestNewResetLink')}
               </Link>
             </p>
           </div>
@@ -81,8 +83,8 @@ function ResetPasswordContent() {
         <div className="bg-white border border-tn-border rounded-2xl shadow-card p-8">
           <div className="text-center mb-8">
             <div className="text-4xl mb-3">🔐</div>
-            <h1 className="text-2xl font-bold text-tn-text">Reset Password</h1>
-            <p className="text-tn-muted text-sm mt-1">Enter your new password</p>
+            <h1 className="text-2xl font-bold text-tn-text">{t('resetPassword')}</h1>
+            <p className="text-tn-muted text-sm mt-1">{t('resetPasswordSub')}</p>
           </div>
 
           {error && (
@@ -99,7 +101,7 @@ function ResetPasswordContent() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-tn-muted mb-1.5">New Password</label>
+              <label className="block text-sm font-semibold text-tn-muted mb-1.5">{t('newPassword')}</label>
               <input 
                 type="password" 
                 required 
@@ -111,7 +113,7 @@ function ResetPasswordContent() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-tn-muted mb-1.5">Confirm Password</label>
+              <label className="block text-sm font-semibold text-tn-muted mb-1.5">{t('confirmPassword')}</label>
               <input 
                 type="password" 
                 required 
@@ -127,21 +129,22 @@ function ResetPasswordContent() {
               disabled={loading} 
               className="w-full bg-tn-yellow text-tn-text py-3 rounded-xl font-bold hover:bg-tn-yellow-2 transition-colors disabled:opacity-50 mt-2"
             >
-              {loading ? 'Resetting…' : 'Reset Password'}
+              {loading ? t('resetting') : t('resetPassword')}
             </button>
           </form>
 
           <p className="text-center text-sm text-tn-text-secondary mt-6">
-            <Link href="/login" className="text-tn-gold font-semibold hover:underline">Back to Sign In</Link>
+            <Link href="/login" className="text-tn-gold font-semibold hover:underline">{t('backToSignIn')}</Link>
           </p>
         </div>
-        <p className="text-center text-xs text-tn-text-secondary mt-4">Powered by <span className="text-tn-yellow">MoiApp</span></p>
+        <p className="text-center text-xs text-tn-text-secondary mt-4">Powered by <span className="text-tn-yellow">Moi PassBook</span></p>
       </div>
     </div>
   );
 }
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-tn-yellow-bg flex items-center justify-center px-4">
@@ -149,7 +152,7 @@ export default function ResetPasswordPage() {
           <div className="bg-white border border-tn-border rounded-2xl shadow-card p-8">
             <div className="text-center mb-8">
               <div className="w-8 h-8 border-2 border-tn-border border-t-tn-yellow rounded-full animate-spin mx-auto" />
-              <p className="text-tn-muted text-sm mt-2">Loading…</p>
+              <p className="text-tn-muted text-sm mt-2">{t('loading')}</p>
             </div>
           </div>
         </div>

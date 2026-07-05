@@ -61,6 +61,7 @@ export default function PendingApprovalScreen() {
 
   const isPending = event.approval_status === 'pending';
   const isRejected = event.approval_status === 'rejected';
+  const isExpired = isRejected && (event.approval_reason || '').includes('Event date passed');
   const eventTitle = event.custom_title || event.event_type;
   const dateStr = event.wedding_date
     ? new Date(event.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', weekday: 'long' })
@@ -70,7 +71,7 @@ export default function PendingApprovalScreen() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <CreateFlowHeader title="Pending Approval" onBack={() => router.push('/dashboard')} showHelp={false} />
+      <CreateFlowHeader title={isExpired ? 'Approval Expired' : 'Pending Approval'} onBack={() => router.push('/dashboard')} showHelp={false} />
 
       <div className="flex-1 flex flex-col px-6 py-6 overflow-y-auto">
         {/* Illustration */}
@@ -88,9 +89,13 @@ export default function PendingApprovalScreen() {
               </svg>
             </div>
           </div>
-          <h2 className="text-xl font-bold text-tn-text mb-2">Your Function is Submitted!</h2>
+          <h2 className="text-xl font-bold text-tn-text mb-2">
+            {isExpired ? 'Approval window has passed' : 'Your Function is Submitted!'}
+          </h2>
           <p className="text-sm text-tn-muted max-w-xs mx-auto">
-            We are reviewing your details. You&apos;ll be notified once it&apos;s approved.
+            {isExpired
+              ? 'This event was not approved before the event date. Create a past event to record moi entries.'
+              : 'We are reviewing your details. You\'ll be notified once it\'s approved.'}
           </p>
           {isPending && (
             <div className="inline-flex items-center gap-2 bg-tn-yellow-light border border-tn-yellow-border rounded-full px-4 py-2 mt-4">

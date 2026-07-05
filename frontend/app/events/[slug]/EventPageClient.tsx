@@ -248,8 +248,8 @@ const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
                     <p className="text-lg font-bold text-tn-muted">{totalSilver}g</p>
                     <p className="text-[10px] text-tn-subtle mt-1 uppercase font-semibold">Total Silver</p>
                   </div>
-                  <div className="bg-tn-error border border-tn-error rounded-xl p-4 text-center">
-                    <p className="text-lg font-bold text-tn-error">{totalGifts}</p>
+                  <div className="bg-tn-light border border-tn-border rounded-xl p-4 text-center">
+                    <p className="text-lg font-bold text-tn-text">{totalGifts}</p>
                     <p className="text-[10px] text-tn-subtle mt-1 uppercase font-semibold">Total Gifts</p>
                   </div>
                   <div className="bg-tn-light border border-tn-border rounded-xl p-4 text-center">

@@ -115,7 +115,7 @@ export default function ProfileSetupPage() {
             </button>
           </form>
         </div>
-        <p className="text-center text-xs text-tn-subtle mt-4">Powered by <span className="text-tn-yellow">MoiApp</span></p>
+        <p className="text-center text-xs text-tn-subtle mt-4">Powered by <span className="text-tn-yellow">Moi PassBook</span></p>
       </div>
     </div>
   );

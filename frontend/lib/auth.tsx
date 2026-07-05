@@ -1,7 +1,10 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from './api';
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { User, authApi, registerUnauthorizedHandler } from './api';
+import { buildLoginUrl, sanitizeReturnTo } from './authNavigation';
+import { shouldRedirectToLogin } from './sessionAuth';
 
 interface AuthCtx {
   user: User | null;
@@ -19,52 +22,97 @@ const AuthContext = createContext<AuthCtx>({
   loading: true,
 });
 
+function readStoredSession(): { token: string; user: User } | null {
+  const t = localStorage.getItem('moi_token');
+  const u = localStorage.getItem('moi_user');
+  if (!t || t === 'undefined' || t === 'null') return null;
+  if (!u || u === 'undefined' || u === 'null') return null;
+  try {
+    const parsedUser = JSON.parse(u);
+    if (parsedUser && typeof parsedUser === 'object') {
+      return { token: t, user: parsedUser as User };
+    }
+  } catch {
+    // fall through
+  }
+  return null;
+}
+
+function clearStoredSession(): void {
+  localStorage.removeItem('moi_token');
+  localStorage.removeItem('moi_user');
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const t = localStorage.getItem('moi_token');
-    const u = localStorage.getItem('moi_user');
-
-    const invalidToken = !t || t === 'undefined' || t === 'null';
-    const invalidUser = !u || u === 'undefined' || u === 'null';
-
-    if (invalidToken || invalidUser) {
-      localStorage.removeItem('moi_token');
-      localStorage.removeItem('moi_user');
-    } else {
-      try {
-        const parsedUser = JSON.parse(u);
-        if (parsedUser && typeof parsedUser === 'object') {
-          setToken(t);
-          setUser(parsedUser as User);
-        } else {
-          throw new Error('Invalid stored user');
-        }
-      } catch {
-        localStorage.removeItem('moi_token');
-        localStorage.removeItem('moi_user');
-      }
+  const clearSession = useCallback((callServer: boolean) => {
+    if (callServer && localStorage.getItem('moi_token')) {
+      authApi.logout().catch(() => {});
     }
-
-    setLoading(false);
+    clearStoredSession();
+    setToken(null);
+    setUser(null);
   }, []);
 
-  const login = (t: string, u: User) => {
+  const logout = useCallback(() => {
+    clearSession(true);
+  }, [clearSession]);
+
+  const login = useCallback((t: string, u: User) => {
     localStorage.setItem('moi_token', t);
     localStorage.setItem('moi_user', JSON.stringify(u));
     setToken(t);
     setUser(u);
-  };
+  }, []);
 
-  const logout = () => {
-    localStorage.removeItem('moi_token');
-    localStorage.removeItem('moi_user');
-    setToken(null);
-    setUser(null);
-  };
+  useEffect(() => {
+    let cancelled = false;
+
+    async function bootstrap() {
+      const stored = readStoredSession();
+      if (!stored) {
+        clearStoredSession();
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await authApi.me();
+        if (cancelled) return;
+        setToken(stored.token);
+        setUser(res.user);
+        localStorage.setItem('moi_user', JSON.stringify(res.user));
+      } catch {
+        if (cancelled) return;
+        clearStoredSession();
+        setToken(null);
+        setUser(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    bootstrap();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    registerUnauthorizedHandler(() => {
+      clearSession(false);
+      const path = window.location.pathname;
+      const search = window.location.search;
+      if (!shouldRedirectToLogin(path)) return;
+      const returnTo = sanitizeReturnTo(path + search) ?? path;
+      router.replace(buildLoginUrl(returnTo));
+    });
+    return () => registerUnauthorizedHandler(null);
+  }, [clearSession, router]);
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, loading }}>

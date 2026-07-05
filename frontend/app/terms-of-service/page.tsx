@@ -1,14 +1,14 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Terms of Service – Moi App',
-  description: 'Read the Terms of Service governing your use of Moi App.',
+  title: 'Terms of Service – Moi PassBook',
+  description: 'Read the Terms of Service governing your use of Moi PassBook.',
 };
 
 const sections = [
   {
     title: '1. Eligibility',
-    content: 'To use Moi App, you must:',
+    content: 'To use Moi PassBook, you must:',
     list: [
       'Be at least 18 years old',
       'Provide accurate information',
@@ -40,7 +40,7 @@ const sections = [
   },
   {
     title: '4. Moi Payments',
-    content: 'Moi App facilitates digital gifting through supported payment providers.',
+    content: 'Moi PassBook facilitates digital gifting through supported payment providers.',
     listPrefix: 'We do not guarantee:',
     list: [
       'Instant payment processing',
@@ -68,7 +68,7 @@ const sections = [
   },
   {
     title: '6. Payment Responsibility',
-    content: 'Moi App only provides the platform to facilitate payments.',
+    content: 'Moi PassBook only provides the platform to facilitate payments.',
     listPrefix: 'Users are responsible for:',
     list: [
       'Verifying recipient details',
@@ -79,7 +79,7 @@ const sections = [
   },
   {
     title: '7. Intellectual Property',
-    content: 'All content within Moi App including:',
+    content: 'All content within Moi PassBook including:',
     list: [
       'Logo',
       'Brand Name',
@@ -89,7 +89,7 @@ const sections = [
       'Source Code',
       'Graphics',
     ],
-    note: 'is the intellectual property of Moi App unless otherwise stated. Unauthorized copying or distribution is prohibited.',
+    note: 'is the intellectual property of Moi PassBook unless otherwise stated. Unauthorized copying or distribution is prohibited.',
   },
   {
     title: '8. Account Suspension',
@@ -103,7 +103,7 @@ const sections = [
   },
   {
     title: '9. Limitation of Liability',
-    content: 'Moi App is provided on an "as available" and "as is" basis.',
+    content: 'Moi PassBook is provided on an "as available" and "as is" basis.',
     listPrefix: 'We are not liable for:',
     list: [
       'Payment delays',
@@ -116,12 +116,12 @@ const sections = [
   {
     title: '10. Service Availability',
     content:
-      'While we strive for uninterrupted service, we cannot guarantee that Moi App will always be available without maintenance or technical interruptions.',
+      'While we strive for uninterrupted service, we cannot guarantee that Moi PassBook will always be available without maintenance or technical interruptions.',
   },
   {
     title: '11. Privacy',
     content:
-      'Your use of Moi App is also governed by our Privacy Policy. Please read both documents carefully.',
+      'Your use of Moi PassBook is also governed by our Privacy Policy. Please read both documents carefully.',
     privacyLink: true,
   },
   {
@@ -129,7 +129,7 @@ const sections = [
     content: 'We may modify these Terms of Service at any time.',
     list: [
       'Updated versions will be published within the application.',
-      'Continued use of Moi App indicates acceptance of the revised Terms.',
+      'Continued use of Moi PassBook indicates acceptance of the revised Terms.',
     ],
   },
   {
@@ -152,18 +152,18 @@ export default function TermsOfServicePage() {
         <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-tn-yellow/10 blur-3xl pointer-events-none" />
         <div className="max-w-3xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 bg-tn-yellow/15 border border-tn-gold-border/40 text-tn-gold px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5">
-            Moi App · Legal
+            Moi PassBook · Legal
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-tn-text mb-3">
             Terms of Service
           </h1>
           <p className="text-tn-subtle text-xs font-medium mb-4">Effective Date: DD/MM/YYYY</p>
           <p className="text-tn-muted text-sm lg:text-base leading-relaxed max-w-2xl mx-auto">
-            Welcome to Moi App. These Terms of Service govern your use of the Moi App mobile
+            Welcome to Moi PassBook. These Terms of Service govern your use of the Moi PassBook mobile
             application and related services.
           </p>
           <p className="text-tn-subtle text-xs mt-3">
-            By using Moi App, you agree to comply with these Terms.
+            By using Moi PassBook, you agree to comply with these Terms.
           </p>
         </div>
       </div>
@@ -271,14 +271,14 @@ export default function TermsOfServicePage() {
                 For questions about these Terms of Service, please contact:
               </p>
               <div className="bg-tn-yellow-bg border border-tn-gold-border rounded-xl px-5 py-4 space-y-3">
-                <p className="text-sm font-bold text-tn-text">Moi App Support</p>
+                <p className="text-sm font-bold text-tn-text">Moi PassBook Support</p>
                 <div className="flex items-center gap-2.5">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-tn-gold">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                     <polyline points="22,6 12,13 2,6"/>
                   </svg>
-                  <a href="mailto:support@moiapp.com" className="text-sm text-tn-gold font-semibold hover:underline">
-                    support@moiapp.com
+                  <a href="mailto:support@moipassbook.com" className="text-sm text-tn-gold font-semibold hover:underline">
+                    support@moipassbook.com
                   </a>
                 </div>
                 <div className="flex items-center gap-2.5">
@@ -286,8 +286,8 @@ export default function TermsOfServicePage() {
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                   </svg>
-                  <a href="https://www.moiapp.com" target="_blank" rel="noopener noreferrer" className="text-sm text-tn-gold font-semibold hover:underline">
-                    www.moiapp.com
+                  <a href="https://moipassbook.com" target="_blank" rel="noopener noreferrer" className="text-sm text-tn-gold font-semibold hover:underline">
+                    www.moipassbook.com
                   </a>
                 </div>
               </div>
@@ -298,7 +298,7 @@ export default function TermsOfServicePage() {
         {/* Footer note */}
         <p className="text-center text-sm text-tn-subtle mt-8">
           Thank you for trusting{' '}
-          <span className="font-bold text-tn-gold">Moi App</span>.
+          <span className="font-bold text-tn-gold">Moi PassBook</span>.
         </p>
 
         {/* Back to Home */}

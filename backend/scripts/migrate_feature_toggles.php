@@ -28,12 +28,16 @@ $defaults = [
   ['pdf_export', 1, 'Enable PDF export via email'],
   ['whatsapp_share', 1, 'Enable WhatsApp thank you share'],
   ['qr_payment', 1, 'Enable QR code payment'],
+  ['language_conversion', 1, 'Enable app language switching (English, Tamil, Hindi)'],
 ];
 
-$stmt = $db->prepare("INSERT IGNORE INTO feature_toggles (feature_key, is_enabled, description) VALUES (?, ?, ?)");
+$insert = $db->prepare("INSERT IGNORE INTO feature_toggles (feature_key, is_enabled, description) VALUES (?, ?, ?)");
+$updateDesc = $db->prepare("UPDATE feature_toggles SET description = ? WHERE feature_key = ?");
 foreach ($defaults as $d) {
-  $stmt->bind_param('sis', $d[0], $d[1], $d[2]);
-  $stmt->execute();
+  $insert->bind_param('sis', $d[0], $d[1], $d[2]);
+  $insert->execute();
+  $updateDesc->bind_param('ss', $d[2], $d[0]);
+  $updateDesc->execute();
 }
 
-echo "Feature toggles defaults inserted.\n";
+echo "Feature toggles defaults inserted/updated.\n";

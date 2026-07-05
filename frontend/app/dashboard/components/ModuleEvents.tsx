@@ -7,6 +7,7 @@ import { Event, eventsApi, exportCSV, emailPDF, showSuccess, showError } from '@
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 import EventStatusBadges from '@/components/EventStatusBadges';
 import { canAddMoi, showEventQr } from '@/lib/eventHelpers';
+import { useTranslation } from '@/lib/i18n';
 
 interface ModuleEventsProps {
   events: Event[];
@@ -18,6 +19,7 @@ interface ModuleEventsProps {
 export default function ModuleEvents({
   events, onRefresh, onNewEvent, onEdit,
 }: ModuleEventsProps) {
+  const { t } = useTranslation();
   const [search,   setSearch]   = useState('');
   const [deleting, setDeleting] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,6 +40,7 @@ export default function ModuleEvents({
   };
 
   const getEventDisplayName = (ev: Event) => {
+    if (ev.custom_title?.trim()) return ev.custom_title.trim();
     const typeLabels: Record<string, string> = {
       wedding: 'Wedding',
       birthday: 'Birthday',
@@ -45,9 +48,9 @@ export default function ModuleEvents({
       valakaappu: 'Valakaappu',
       housewarming: 'Housewarming',
       graduation: 'Graduation',
-      custom: ev.custom_title || 'Custom Event',
+      custom: 'Custom Function',
     };
-    const typeName = typeLabels[ev.event_type] || 'Event';
+    const typeName = typeLabels[ev.event_type] || 'Function';
     const dateStr = ev.wedding_date
       ? new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
       : '';
@@ -81,7 +84,7 @@ export default function ModuleEvents({
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search events…"
+            placeholder={`${t('search')}…`}
             className="w-full sm:w-60 border border-tn-border rounded-xl pl-9 pr-3 py-2.5 text-sm text-tn-text placeholder-tn-muted focus:outline-none focus:border-tn-yellow transition-colors"
             inputMode="search"
           />
@@ -94,7 +97,7 @@ export default function ModuleEvents({
           className="flex items-center gap-1.5 bg-tn-yellow text-black px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-tn-yellow-2 transition-all active:scale-[0.98] whitespace-nowrap shadow-sm"
         >
           <Icon name="plus" size={14} />
-          New Event
+          {t('newEvent')}
         </button>
       </div>
 
@@ -104,7 +107,7 @@ export default function ModuleEvents({
         {filtered.length === 0 ? (
           <div className="py-16 text-center text-tn-muted text-sm">
             {events.length === 0 ? (
-              <>No events yet.{' '}<button onClick={onNewEvent} className="text-tn-yellow font-semibold hover:underline">Create one →</button></>
+              <>{t('noFunctionsYet')}{' '}<button onClick={onNewEvent} className="text-tn-yellow font-semibold hover:underline">{t('createFunction')} →</button></>
             ) : 'No results found.'}
           </div>
         ) : (
@@ -114,7 +117,7 @@ export default function ModuleEvents({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-tn-border bg-tn-light text-left">
-                    <th className="px-5 py-3 text-xs font-semibold text-tn-muted uppercase tracking-wide">Event</th>
+                    <th className="px-5 py-3 text-xs font-semibold text-tn-muted uppercase tracking-wide">{t('functions')}</th>
                     <th className="px-4 py-3 text-xs font-semibold text-tn-muted uppercase tracking-wide hidden md:table-cell">Date</th>
                     <th className="px-4 py-3 text-xs font-semibold text-tn-muted uppercase tracking-wide hidden lg:table-cell">Venue</th>
                     <th className="px-4 py-3 text-xs font-semibold text-tn-muted uppercase tracking-wide text-center">Status</th>
@@ -170,7 +173,7 @@ export default function ModuleEvents({
                           </Link>
                           <button
                             onClick={() => onEdit(ev)}
-                            title="Edit event"
+                            title={t('editFunction')}
                             className="p-1.5 text-tn-muted hover:text-tn-text transition-colors"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>

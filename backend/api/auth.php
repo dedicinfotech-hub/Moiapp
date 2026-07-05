@@ -46,7 +46,7 @@ function generateOTP(): string {
 }
 
 function sendOTP(string $phone, string $otp, ?string $email = null, ?string $name = null): array {
-    $smsMessage = "Your MoiApp OTP is {$otp}. Valid for 5 minutes. Do not share this code.";
+    $smsMessage = "Your Moi PassBook OTP is {$otp}. Valid for 5 minutes. Do not share this code.";
     $devFallback = env('DEV_OTP_FALLBACK', '0') === '1';
 
     if (isSmsConfigured()) {
@@ -195,7 +195,7 @@ if ($method === 'POST' && $action === 'verify-otp') {
     $stmt->bind_param('i', $user['id']);
     $stmt->execute();
     
-    $token = makeToken($user['id'], $user['email'] ?? $phone);
+    $token = makeToken($user['id'], $user['email'] ?? $phone, $user['role'] ?? 'user');
     $needsProfile = empty($user['name']);
     
     echo json_encode([
@@ -243,7 +243,7 @@ if ($method === 'POST' && $action === 'register') {
     $stmt->execute();
     $userId = $db->insert_id;
 
-    $token = makeToken($userId, $email);
+    $token = makeToken($userId, $email, 'user');
     echo json_encode(['success' => true, 'token' => $token, 'user' => ['id' => $userId, 'name' => $name, 'email' => $email, 'role' => 'user']]);
     exit;
 }
@@ -324,7 +324,9 @@ if ($method === 'POST' && $action === 'login') {
                 exit;
             }
 
-            $mailSent = sendAdminOTPEmail($email, $user['name'] ?? 'Admin', $adminOtp);
+            $mailSent = function_exists('sendAdminOTPEmail')
+                ? sendAdminOTPEmail($email, $user['name'] ?? 'Admin', $adminOtp)
+                : sendOTPEmail($email, $user['name'] ?? 'Admin', $adminOtp);
             if (!$mailSent) {
                 error_log("Admin OTP email failed for $email (SMTP send returned false)");
                 http_response_code(503);
@@ -370,7 +372,7 @@ if ($method === 'POST' && $action === 'login') {
     // Log successful login
     safeLoginLog($db, $user['id'], $email, $ipAddress, $userAgent, 'success', $user['role'] ?? 'user');
 
-    $token = makeToken($user['id'], $user['email']);
+    $token = makeToken($user['id'], $user['email'], $user['role'] ?? 'user');
     echo json_encode(['success' => true, 'token' => $token, 'user' => ['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email'], 'role' => $user['role'] ?? 'user']]);
     exit;
 }
@@ -467,9 +469,28 @@ if ($method === 'PUT' && $action === 'profile') {
     exit;
 }
 
-// ── Helper ────────────────────────────────────────────────────────────────────
-function makeToken(int $id, string $email): string {
-    return base64_encode(json_encode(['id' => $id, 'email' => $email, 'exp' => time() + 86400 * 7]));
+// ── Logout (revoke server session + audit log) ────────────────────────────────
+if ($method === 'POST' && $action === 'logout') {
+    $user = getAuthUser();
+    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '';
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
+    if ($user) {
+        if (!empty($user['jti'])) {
+            revokeAuthSession($user['jti']);
+        }
+        $db = getDB();
+        $stmt = $db->prepare('SELECT email, role FROM users WHERE id = ?');
+        $stmt->bind_param('i', $user['id']);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $email = $row['email'] ?? ($user['email'] ?? null);
+        $role = $row['role'] ?? ($user['role'] ?? 'user');
+        safeLoginLog($db, (int) $user['id'], $email, $ipAddress, $userAgent, 'logout', $role);
+    }
+
+    echo json_encode(['success' => true]);
+    exit;
 }
 
 // ── Forgot Password ─────────────────────────────────────────────────────────────
@@ -587,7 +608,23 @@ if ($method === 'DELETE' && $action === 'account') {
     $stmt->bind_param('i', $user['id']);
     $stmt->execute();
 
-    // Invalidate token by clearing it from localStorage on frontend
+    if (!empty($user['jti'])) {
+        revokeAuthSession($user['jti']);
+    }
+    $stmt = $db->prepare('SELECT email, role FROM users WHERE id = ?');
+    $stmt->bind_param('i', $user['id']);
+    $stmt->execute();
+    $acctRow = $stmt->get_result()->fetch_assoc();
+    safeLoginLog(
+        $db,
+        (int) $user['id'],
+        $acctRow['email'] ?? ($user['email'] ?? null),
+        $_SERVER['REMOTE_ADDR'] ?? '',
+        $_SERVER['HTTP_USER_AGENT'] ?? '',
+        'logout',
+        $acctRow['role'] ?? ($user['role'] ?? 'user')
+    );
+
     echo json_encode([
         'success' => true,
         'message' => 'Account scheduled for deletion. You have 30 days to restore it by logging in again.',
@@ -640,7 +677,7 @@ if ($method === 'POST' && $action === 'restore-account') {
     $stmt->bind_param('i', $user['id']);
     $stmt->execute();
 
-    $token = makeToken($user['id'], $email);
+    $token = makeToken($user['id'], $email, $user['role'] ?? 'user');
     echo json_encode([
         'success' => true,
         'message' => 'Account restored successfully',

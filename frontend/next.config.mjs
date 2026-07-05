@@ -54,6 +54,11 @@ const nextConfig = {
 
   images: { unoptimized: true },
 
+  // Strip noisy console output from production bundles (keeps console.error)
+  compiler: isProd
+    ? { removeConsole: { exclude: ['error'] } }
+    : undefined,
+
   // Keep false for both web and APK.
   // Capacitor 6 handles .html file routing correctly (dashboard.html serves /dashboard).
   // trailingSlash: true would break the existing working pages.

@@ -15,6 +15,7 @@ export default function ApprovalBanner({ event, onResubmit, onEdit, resubmitting
 
   const isPending = event.approval_status === 'pending';
   const isRejected = event.approval_status === 'rejected';
+  const isExpired = isRejected && (event.approval_reason || '').includes('Event date passed');
 
   return (
     <div
@@ -25,12 +26,16 @@ export default function ApprovalBanner({ event, onResubmit, onEdit, resubmitting
       }`}
     >
       <p className="font-semibold">
-        {isPending
+        {isExpired
+          ? '⏱ Approval expired / நிகழ்வு தேதி கடந்துவிட்டது'
+          : isPending
           ? '⏳ Pending Approval / அனுமதிக்காக காத்திருக்கிறது'
           : '❌ Function Rejected / செயல்பாடு நிராகரிக்கப்பட்டது'}
       </p>
       <p className="text-xs mt-1 opacity-90">
-        {isPending
+        {isExpired
+          ? 'This event was not approved before the event date. Create a past event to record moi entries.'
+          : isPending
           ? 'Your function is submitted. Admin will approve within 24 hours. Moi entry is disabled until then.'
           : 'Please review the reason below, edit your function details, and resubmit.'}
       </p>

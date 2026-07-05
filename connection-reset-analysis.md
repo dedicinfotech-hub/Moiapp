@@ -6,7 +6,7 @@
 read tcp 192.168.1.3:53588->82.25.125.106:443: read: connection reset by peer
 ```
 
-The **server (82.25.125.106 = dsitesai.com)** is actively closing the TCP connection before k6 can complete the HTTP request. This is a **server-side issue**, not a k6 problem.
+The **server** is actively closing the TCP connection before k6 can complete the HTTP request. This is a **server-side issue**, not a k6 problem.
 
 ---
 
@@ -59,7 +59,7 @@ Use lighter parameters to avoid triggering limits:
 
 ```bash
 # Very gentle test
-k6 run -e BASE_URL=https://dsitesai.com/moiapp \
+k6 run -e BASE_URL=https://moipassbook.com \
   --vus 5 \
   --duration 1m \
   --rps 10 \
@@ -80,7 +80,7 @@ export default function () {
 Limit requests per second to stay under rate limits:
 
 ```bash
-k6 run -e BASE_URL=https://dsitesai.com/moiapp \
+k6 run -e BASE_URL=https://moipassbook.com \
   --vus 10 \
   --duration 2m \
   --rps 5 \
@@ -124,7 +124,7 @@ Expected: All requests succeed, report shows green checks.
 
 ### Step 2: Single User Live Test
 ```bash
-k6 run -e BASE_URL=https://dsitesai.com/moiapp \
+k6 run -e BASE_URL=https://moipassbook.com \
   --vus 1 \
   --duration 30s \
   load-test.js
@@ -133,7 +133,7 @@ Expected: Should work (single user shouldn't trigger limits).
 
 ### Step 3: Gentle Load Test
 ```bash
-k6 run -e BASE_URL=https://dsitesai.com/moiapp \
+k6 run -e BASE_URL=https://moipassbook.com \
   --vus 5 \
   --duration 1m \
   --rps 5 \
@@ -144,10 +144,10 @@ If this fails → server is blocking even gentle traffic.
 ### Step 4: If All Fail — Use Alternative Tools
 ```bash
 # Apache Bench (simpler, often not blocked)
-ab -n 100 -c 5 https://dsitesai.com/moiapp/api/events.php?public=1
+ab -n 100 -c 5 https://moipassbook.com/api/events.php?public=1
 
 # curl in loop
-for i in {1..50}; do curl -s -o /dev/null -w "%{http_code}\n" https://dsitesai.com/moiapp/api/events.php?public=1; done
+for i in {1..50}; do curl -s -o /dev/null -w "%{http_code}\n" https://moipassbook.com/api/events.php?public=1; done
 ```
 
 ---
@@ -158,7 +158,7 @@ Once you move to DO, you control the server and won't have these issues:
 
 ```bash
 # On DO droplet, test without WAF blocking
-k6 run -e BASE_URL=https://your-domain.com/moiapp \
+k6 run -e BASE_URL=https://moipassbook.com \
   --vus 50 \
   --duration 3m \
   load-test.js
@@ -170,16 +170,16 @@ k6 run -e BASE_URL=https://your-domain.com/moiapp \
 
 ```bash
 # Test if API is reachable at all
-curl -v https://dsitesai.com/moiapp/api/auth.php?action=ping
+curl -v https://moipassbook.com/api/auth.php?action=ping
 
 # Test with browser (should work)
-# Visit: https://dsitesai.com/moiapp/api/events.php?public=1
+# Visit: https://moipassbook.com/api/events.php?public=1
 
 # Check if it's rate limiting
-for i in {1..10}; do curl -s -o /dev/null -w "%{http_code}\n" https://dsitesai.com/moiapp/api/events.php?public=1; sleep 1; done
+for i in {1..10}; do curl -s -o /dev/null -w "%{http_code}\n" https://moipassbook.com/api/events.php?public=1; sleep 1; done
 
 # Test with custom headers (sometimes helps)
-k6 run -e BASE_URL=https://dsitesai.com/moiapp \
+k6 run -e BASE_URL=https://moipassbook.com \
   --vus 5 \
   --duration 30s \
   -e USER_AGENT="Mozilla/5.0 (compatible; LoadTest/1.0)" \

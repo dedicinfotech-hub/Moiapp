@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { eventsApi, Event } from '@/lib/api';
+import { getPublicEventUrl } from '@/lib/guestUrl';
 import { CreateFlowHeader } from '@/components/event/EventLayout';
 import { useSlug } from '@/lib/useSlug';
 
@@ -13,28 +14,26 @@ export default function GuestPaymentQRScreen() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [origin, setOrigin] = useState('');
 
   useEffect(() => {
     if (!slug) return;
-    setOrigin(window.location.origin);
     eventsApi.get(slug).then(setEvent).catch(() => router.push('/dashboard')).finally(() => setLoading(false));
   }, [slug, router]);
 
-  const paymentLink = event?.guest_token ? `${origin}/g/${event.guest_token}/form` : '';
-  const qrDataUrl = paymentLink ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(paymentLink)}` : '';
+  const shareLink = event?.slug ? getPublicEventUrl(event.slug) : '';
+  const qrDataUrl = shareLink ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(shareLink)}` : '';
 
   const handleCopy = async () => {
-    if (!paymentLink) return;
-    await navigator.clipboard.writeText(paymentLink);
+    if (!shareLink) return;
+    await navigator.clipboard.writeText(shareLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShare = async () => {
-    if (!paymentLink || !navigator.share) return handleCopy();
+    if (!shareLink || !navigator.share) return handleCopy();
     try {
-      await navigator.share({ title: event?.custom_title || 'Moi', url: paymentLink });
+      await navigator.share({ title: event?.custom_title || 'Moi', url: shareLink });
     } catch { /* ignore */ }
   };
 
@@ -52,7 +51,7 @@ export default function GuestPaymentQRScreen() {
 
         <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4 shadow-sm">
           <div className="flex justify-end mb-2">
-            <button type="button" onClick={() => router.push(`/events/${slug}/dashboard`)} className="text-[10px] font-semibold text-tn-yellow border border-tn-yellow px-3 py-1 rounded-lg">Edit Event</button>
+            <button type="button" onClick={() => router.push(`/events/${slug}/dashboard`)} className="text-[10px] font-semibold text-tn-yellow border border-tn-yellow px-3 py-1 rounded-lg">Edit Function</button>
           </div>
           <div className="grid grid-cols-3 gap-3 text-center">
             <div><p className="text-[9px] text-tn-muted uppercase">Date</p><p className="text-xs font-semibold text-tn-text mt-1">{dateStr}</p></div>
@@ -62,9 +61,9 @@ export default function GuestPaymentQRScreen() {
         </div>
 
         <div className="bg-white border border-tn-border rounded-2xl p-4 mb-4">
-          <h3 className="text-sm font-bold text-tn-text mb-3">Your Guest Payment Page Link</h3>
+          <h3 className="text-sm font-bold text-tn-text mb-3">Public event page link</h3>
           <div className="flex gap-2">
-            <input readOnly value={paymentLink} className="flex-1 bg-tn-light border border-tn-border rounded-xl px-3 py-2.5 text-[10px] text-tn-muted" />
+            <input readOnly value={shareLink} className="flex-1 bg-tn-light border border-tn-border rounded-xl px-3 py-2.5 text-[10px] text-tn-muted" />
             <button onClick={handleCopy} className="px-4 py-2.5 bg-tn-yellow text-white rounded-xl text-xs font-semibold">{copied ? 'Copied!' : 'Copy Link'}</button>
           </div>
         </div>
@@ -83,7 +82,7 @@ export default function GuestPaymentQRScreen() {
           </div>
           <div className="mt-4 bg-tn-green-bg border border-tn-success/30 rounded-xl p-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-tn-success rounded-full" />
-            <p className="text-xs font-semibold text-tn-success">This QR code links to your guest payment page.</p>
+            <p className="text-xs font-semibold text-tn-success">This QR code links to your public event page with Give Moi.</p>
           </div>
         </div>
 

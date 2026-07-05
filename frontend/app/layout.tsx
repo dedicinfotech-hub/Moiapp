@@ -3,14 +3,17 @@ import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { FeaturesProvider } from '@/lib/features';
 import { LanguageProvider } from '@/lib/i18n';
+import HtmlLang from '@/components/HtmlLang';
 import ConditionalNavbar, { ConditionalBottomNav } from '@/components/ConditionalNavbar';
 import { NewEventModalProvider } from '@/lib/new-event-modal';
 import GlobalNewEventModal from '@/components/GlobalNewEventModal';
 import { Toaster } from 'react-hot-toast';
 import { assetUrl } from '@/lib/assetUrl';
 
+import { APP_FULL_NAME, APP_NAME } from '@/lib/brand';
+
 export const metadata: Metadata = {
-  title: 'Moi App – Wedding Gift Tracker',
+  title: APP_FULL_NAME,
   description: 'Track wedding moi (gift money) easily. Share with family.',
   // manifest href is injected manually in <head> below with basePath prefix
   icons: {
@@ -19,7 +22,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'MoiApp',
+    title: APP_NAME,
   },
   other: {
     'mobile-web-app-capable': 'yes',
@@ -46,8 +49,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen bg-tn-light" suppressHydrationWarning>
         <AuthProvider>
-          <LanguageProvider>
           <FeaturesProvider>
+          <LanguageProvider>
+            <HtmlLang />
             <NewEventModalProvider>
               {/* ConditionalNavbar uses usePathname() which differs between
                   static pre-render and client — suppress hydration for this subtree */}
@@ -76,8 +80,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 }}
               />
             </NewEventModalProvider>
-          </FeaturesProvider>
           </LanguageProvider>
+          </FeaturesProvider>
         </AuthProvider>
       </body>
     </html>

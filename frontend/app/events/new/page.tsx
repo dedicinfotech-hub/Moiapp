@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
-import { eventsApi, API_BASE } from '@/lib/api';
+import { eventsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
 
@@ -45,15 +45,7 @@ export default function NewEventPage() {
 
       // 2. Upload cover photo if selected
       if (coverFile) {
-        const token = localStorage.getItem('moi_token');
-        const fd = new FormData();
-        fd.append('event_id', String(res.id));
-        fd.append('cover', coverFile);
-        await fetch(`${API_BASE}/events.php?action=cover`, {
-          method: 'POST',
-          headers: { 'X-Auth-Token': `Bearer ${token}` },
-          body: fd,
-        });
+        await eventsApi.uploadCover(res.id, coverFile);
       }
 
       router.push(`/events/${res.slug}`);

@@ -14,6 +14,27 @@ function refValues($arr) {
     return $arr;
 }
 
+/** Keep approval state consistent: past events auto-approved; stale pending expires after event date. */
+function syncEventApprovalStates(mysqli $db): void {
+    $db->query("
+        UPDATE events
+        SET approval_status = 'approved', approval_reason = NULL
+        WHERE event_mode = 'past'
+          AND approval_status = 'pending'
+          AND is_active = 1
+    ");
+
+    $db->query("
+        UPDATE events
+        SET approval_status = 'rejected',
+            approval_reason = 'Event date passed before admin approval. Create a past event to record moi instead.'
+        WHERE event_mode = 'new'
+          AND approval_status = 'pending'
+          AND wedding_date < CURDATE()
+          AND is_active = 1
+    ");
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
 $slug   = $_GET['slug']   ?? '';
 $id     = intval($_GET['id'] ?? 0);
@@ -72,6 +93,7 @@ $action = $_GET['action'] ?? '';
     move_uploaded_file($file['tmp_name'], $uploadDir . $filename);
 
     $appUrl    = rtrim(env('APP_URL', 'http://localhost:8888/MoiApp'), '/');
+    $appUrl    = preg_replace('#^https://www\.#i', 'https://', $appUrl);
     $coverUrl  = $appUrl . '/uploads/' . $subDir . '/' . $filename;
 
     $stmt = $db->prepare('UPDATE events SET cover_photo = ? WHERE id = ?');
@@ -85,6 +107,7 @@ $action = $_GET['action'] ?? '';
 // ── GET all events PUBLIC listing ─────────────────────────────────────────────
 if ($method === 'GET' && $public === '1') {
     $db   = getDB();
+    syncEventApprovalStates($db);
     $stmt = $db->prepare(
         "SELECT e.id, e.slug, e.event_type, e.bride_name, e.groom_name,
                 e.birthday_person_name, e.birthday_person_age, e.parent1_name, e.parent2_name,
@@ -155,6 +178,7 @@ if ($method === 'GET' && $guestToken) {
 // ── GET single event by slug (PUBLIC — no auth needed) ────────────────────────
 if ($method === 'GET' && $slug) {
     $db   = getDB();
+    syncEventApprovalStates($db);
     $stmt = $db->prepare(
         'SELECT e.*, u.name as creator_name,
                 u.upi_id, u.bank_name, u.account_number, u.ifsc_code, u.account_holder, u.phone as organizer_phone
@@ -194,6 +218,7 @@ if ($method === 'GET' && $action === 'pending') {
     if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
     $db = getDB();
+    syncEventApprovalStates($db);
     $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
     $stmtRole->bind_param('i', $user['id']);
     $stmtRole->execute();
@@ -389,6 +414,7 @@ if ($method === 'GET') {
     if (!$user) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
     $db   = getDB();
+    syncEventApprovalStates($db);
     // Fetch user role
     $stmtRole = $db->prepare('SELECT role FROM users WHERE id = ?');
     $stmtRole->bind_param('i', $user['id']);

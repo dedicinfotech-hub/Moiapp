@@ -29,7 +29,7 @@ test.describe('Host User Complete Flow', () => {
     await expect(page.locator('text=Live Dashboard')).toBeVisible();
     
     // Footer
-    await expect(page.locator('text=MoiApp')).toBeVisible();
+    await expect(page.locator('text=Moi PassBook')).toBeVisible();
   });
 
   test('HOST-002: Login page - Phone tab default', async ({ page }) => {

@@ -42,6 +42,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // Clear local session even if server call fails
+    }
     await clearToken();
     set({ user: null, profileSetupRequired: false });
   },

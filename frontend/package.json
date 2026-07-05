@@ -5,12 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:subdomain": "cp .env.production.subdomain .env.production && next build",
     "build:moipassbook": "cp .env.production.subdomain .env.production && next build",
-    "build:main": "cp .env.production.main .env.production && next build",
     "start": "npx serve@latest out",
     "start:next": "next start",
     "lint": "next lint",
+    "sync-i18n": "node scripts/sync-web-i18n.mjs",
     "cap:add:android": "npx cap add android",
     "build:apk": "APK_BUILD=true npm run build && node scripts/apk-postbuild.mjs && npx cap sync android",
     "cap:sync": "npx cap sync android",

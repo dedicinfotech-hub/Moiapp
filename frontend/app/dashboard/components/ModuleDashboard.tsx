@@ -5,6 +5,7 @@ import Icon, { type IconName } from '@/components/ui/Icon';
 import { DashboardEntry, DashboardEvent, Event, MoiEntry } from '@/lib/api';
 import { dashboardApi } from '@/lib/api';
 import EventStatusBadges from '@/components/EventStatusBadges';
+import { useTranslation, eventTypeLabel } from '@/lib/i18n';
 
 type Module = 'dashboard' | 'events' | 'moi-notebook' | 'users' | 'analytics' | 'settings' | 'organizers' | 'features';
 
@@ -56,6 +57,7 @@ const toDashboardEntry = (entry: MoiEntry): DashboardEntry => ({
 export default function ModuleDashboard({
   events, entries, onNavigate, onNewEvent,
 }: ModuleDashboardProps) {
+  const { t } = useTranslation();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [recentEntries, setRecentEntries] = useState<DashboardEntry[]>([]);
   const [recentEvents, setRecentEvents] = useState<DashboardEvent[]>([]);
@@ -115,16 +117,7 @@ export default function ModuleDashboard({
   };
 
   const getEventDisplayName = (ev: Event | DashboardEvent) => {
-    const typeLabels: Record<string, string> = {
-      wedding: 'Wedding',
-      birthday: 'Birthday',
-      engagement: 'Engagement',
-      valakaappu: 'Valakaappu',
-      housewarming: 'Housewarming',
-      graduation: 'Graduation',
-      custom: ev.custom_title || 'Custom Event',
-    };
-    const typeName = typeLabels[ev.event_type] || 'Event';
+    const typeName = eventTypeLabel(ev.event_type, t);
     const dateStr = ev.wedding_date
       ? new Date(ev.wedding_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
       : '';
@@ -132,13 +125,13 @@ export default function ModuleDashboard({
   };
 
   const stats = [
-    { label: 'Total Events',   value: String(effectiveSummary.total_events),  icon: 'wedding' as IconName, bg: 'bg-tn-yellow-bg', iconColor: 'text-tn-gold' },
-    { label: 'Total Cash',     value: `₹${effectiveSummary.total_cash.toLocaleString('en-IN')}`, icon: 'wallet' as IconName, bg: 'bg-tn-green-bg', iconColor: 'text-tn-green-soft' },
-    { label: 'Total Gold',     value: `${effectiveSummary.total_gold}g`,        icon: 'sparkle' as IconName, bg: 'bg-tn-gold-bg', iconColor: 'text-tn-gold' },
-    { label: 'Total Gifts',    value: `${effectiveSummary.total_gifts} items`,  icon: 'gift' as IconName, bg: 'bg-tn-red-bg', iconColor: 'text-tn-red-soft' },
-    { label: 'Total Guests',   value: String(effectiveSummary.total_guests), icon: 'users' as IconName, bg: 'bg-tn-blue-bg', iconColor: 'text-tn-blue-soft' },
+    { label: t('dashTotalEvents'),   value: String(effectiveSummary.total_events),  icon: 'wedding' as IconName, bg: 'bg-tn-yellow-bg', iconColor: 'text-tn-gold' },
+    { label: t('dashTotalCash'),     value: `₹${effectiveSummary.total_cash.toLocaleString('en-IN')}`, icon: 'wallet' as IconName, bg: 'bg-tn-green-bg', iconColor: 'text-tn-green-soft' },
+    { label: t('dashTotalGold'),     value: `${effectiveSummary.total_gold}g`,        icon: 'sparkle' as IconName, bg: 'bg-tn-gold-bg', iconColor: 'text-tn-gold' },
+    { label: t('dashTotalGifts'),    value: `${effectiveSummary.total_gifts} items`,  icon: 'gift' as IconName, bg: 'bg-tn-red-bg', iconColor: 'text-tn-red-soft' },
+    { label: t('dashTotalGuests'),   value: String(effectiveSummary.total_guests), icon: 'users' as IconName, bg: 'bg-tn-blue-bg', iconColor: 'text-tn-blue-soft' },
     {
-      label: 'Avg Cash Gift',
+      label: t('dashAvgCashGift'),
       value: `₹${effectiveSummary.avg_cash_gift.toLocaleString('en-IN')}`,
       icon: 'trend' as IconName,
       bg: 'bg-tn-purple-bg',
@@ -177,9 +170,9 @@ export default function ModuleDashboard({
         {/* Recent Moi Entries */}
         <div className="bg-white border border-tn-border rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-tn-border">
-            <h3 className="font-semibold text-tn-text text-sm">Recent Moi Entries</h3>
+            <h3 className="font-semibold text-tn-text text-sm">{t('dashRecentMoiEntries')}</h3>
             <button onClick={() => onNavigate('moi-notebook')} className="text-xs text-tn-yellow font-semibold hover:underline">
-              View all
+              {t('viewAll')}
             </button>
           </div>
           {loading ? (
@@ -196,7 +189,7 @@ export default function ModuleDashboard({
               ))}
             </div>
           ) : effectiveRecentEntries.length === 0 ? (
-            <div className="py-10 text-center text-tn-muted text-sm">No moi entries yet</div>
+            <div className="py-10 text-center text-tn-muted text-sm">{t('noEntriesYet')}</div>
           ) : (
             <div className="divide-y divide-tn-border">
               {effectiveRecentEntries.map((e) => {
@@ -231,9 +224,9 @@ export default function ModuleDashboard({
         {/* Recent events */}
         <div className="bg-white border border-tn-border rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-tn-border">
-            <h3 className="font-semibold text-tn-text text-sm">Recent Events</h3>
+            <h3 className="font-semibold text-tn-text text-sm">{t('dashRecentFunctions')}</h3>
             <button onClick={() => onNavigate('events')} className="text-xs text-tn-yellow font-semibold hover:underline">
-              View all
+              {t('viewAll')}
             </button>
           </div>
           {loading ? (
@@ -251,9 +244,9 @@ export default function ModuleDashboard({
             </div>
           ) : effectiveRecentEvents.length === 0 ? (
             <div className="py-10 text-center text-sm text-tn-muted">
-              No events yet.{' '}
+              {t('noEventsYet')}{' '}
               <button onClick={onNewEvent} className="text-tn-yellow font-semibold hover:underline">
-                Create one →
+                {t('createFunction')} →
               </button>
             </div>
           ) : (

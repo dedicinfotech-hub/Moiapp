@@ -15,8 +15,8 @@ function isMailConfigured(): bool {
 
 function getMailConfig(): array {
     return [
-        'from_email' => getenv('MAIL_FROM_EMAIL') ?: 'noreply@moiapp.com',
-        'from_name'  => getenv('MAIL_FROM_NAME')  ?: 'MoiApp',
+        'from_email' => getenv('MAIL_FROM_EMAIL') ?: 'noreply@moipassbook.com',
+        'from_name'  => getenv('MAIL_FROM_NAME')  ?: 'Moi PassBook',
         'smtp_host'  => getenv('MAIL_SMTP_HOST')  ?: '',
         'smtp_port'  => getenv('MAIL_SMTP_PORT')  ?: '587',
         'smtp_user'  => getenv('MAIL_SMTP_USER')  ?: '',
@@ -169,7 +169,7 @@ function sendMailSMTP(string $to, string $toName, string $subject, string $body,
 }
 
 function sendOTPEmail(string $to, string $toName, string $otp): bool {
-    return sendOtpEmailMessage($to, $toName, $otp, 'Your MoiApp OTP Code', 'Your OTP code is:');
+    return sendOtpEmailMessage($to, $toName, $otp, 'Your Moi PassBook OTP Code', 'Your OTP code is:');
 }
 
 function sendAdminOTPEmail(string $to, string $toName, string $otp): bool
@@ -178,7 +178,7 @@ function sendAdminOTPEmail(string $to, string $toName, string $otp): bool
         $to,
         $toName,
         $otp,
-        'MoiApp Admin Login — OTP Code',
+        'Moi PassBook Admin Login — OTP Code',
         'Your admin login verification code is:'
     );
 }
@@ -190,7 +190,7 @@ function sendOtpEmailMessage(string $to, string $toName, string $otp, string $su
         <html>
         <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
             <div style='background: #FFC107; padding: 20px; border-radius: 10px 10px 0 0; text-align: center;'>
-                <h1 style='color: #000; margin: 0;'>MoiApp</h1>
+                <h1 style='color: #000; margin: 0;'>Moi PassBook</h1>
             </div>
             <div style='background: #fafafa; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #eee;'>
                 <p style='color: #333; font-size: 16px;'>Hello {$safeName},</p>
@@ -209,12 +209,12 @@ function sendOtpEmailMessage(string $to, string $toName, string $otp, string $su
 }
 
 function sendPasswordResetEmail(string $to, string $toName, string $resetLink): bool {
-    $subject = 'Reset your MoiApp password';
+    $subject = 'Reset your Moi PassBook password';
     $body = "
         <html>
         <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
             <div style='background: #FFC107; padding: 20px; border-radius: 10px 10px 0 0; text-align: center;'>
-                <h1 style='color: #000; margin: 0;'>MoiApp</h1>
+                <h1 style='color: #000; margin: 0;'>Moi PassBook</h1>
             </div>
             <div style='background: #fafafa; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #eee;'>
                 <p style='color: #333; font-size: 16px;'>Hello " . htmlspecialchars($toName) . ",</p>

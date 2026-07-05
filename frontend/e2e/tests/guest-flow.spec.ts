@@ -11,15 +11,15 @@ test.describe('Guest User Complete Flow', () => {
     });
   });
 
-  test('GUEST-001: Homepage - Browse Weddings navigates to events', async ({ page }) => {
+  test('GUEST-001: Homepage - public events section visible (no Browse Weddings button)', async ({ page }) => {
     await page.goto(`${BASE_URL}/`);
-    
-    const browseBtn = page.locator('a[href="/events"]').first();
-    await expect(browseBtn).toBeVisible();
-    await expect(browseBtn).toContainText('Browse Weddings');
-    
-    await browseBtn.click();
-    await expect(page).toHaveURL(`${BASE_URL}/events`);
+
+    // Browse Weddings button was removed — events are listed on the home page instead
+    await expect(page.locator('a[href="/events"]').filter({ hasText: 'Browse Weddings' })).toHaveCount(0);
+
+    const listYourWedding = page.locator('a[href="/register"]').first();
+    await expect(listYourWedding).toBeVisible();
+    await expect(listYourWedding).toContainText('List Your Wedding');
   });
 
   test('GUEST-002: Homepage - List Your Wedding navigates to register', async ({ page }) => {

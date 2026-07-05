@@ -131,7 +131,7 @@ export const adminApi = {
         role: string | null;
         ip_address: string | null;
         user_agent: string | null;
-        status: 'success' | 'failed' | 'blocked';
+        status: 'success' | 'failed' | 'blocked' | 'logout';
         created_at: string;
       }>;
       pagination: { page: number; limit: number; total: number; pages: number };

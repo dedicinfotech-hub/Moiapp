@@ -66,7 +66,7 @@ story.append(Spacer(1, 0.1*inch))
 story.append(Paragraph("2.1 Public Guest — Viewing an Event & Adding Moi Entry", h2))
 flow1 = [
     [Paragraph("<b>Step</b>", body), Paragraph("<b>Component</b>", body), Paragraph("<b>Action</b>", body)],
-    ["1", "Browser / CDN", "User visits https://dsitesai.com/moiapp/e/wedding-slug"],
+    ["1", "Browser / CDN", "User visits https://moipassbook.com/e/wedding-slug"],
     ["2", "Nginx / Apache", "Serves static index.html or event.html from Next.js out/"],
     ["3", "Next.js Static", "Loads EventPublicClient.tsx (React hydrates)"],
     ["4", "API Call", "GET /api/events.php?slug=wedding-slug → returns event details"],

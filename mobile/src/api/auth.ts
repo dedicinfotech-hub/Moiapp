@@ -45,4 +45,10 @@ export const authApi = {
       '/auth.php?action=account',
       { method: 'DELETE' }
     ),
+
+  logout: () =>
+    request<{ success: boolean }>('/auth.php?action=logout', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
 };

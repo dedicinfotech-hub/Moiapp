@@ -1,15 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
-import { assetUrl } from '@/lib/assetUrl';
+import LogoImage from '@/components/ui/LogoImage';
+import { useTranslation } from '@/lib/i18n';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const router = useRouter();
   const [dropOpen, setDropOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -46,7 +47,7 @@ export default function Navbar() {
               pointer-events-auto
               flex items-center justify-between
               w-full max-w-7xl
-              px-4 py-2.5
+              px-3 py-2 md:px-4 md:py-2.5
               rounded-2xl
               border border-tn-yellow/30
               transition-all duration-300
@@ -59,31 +60,17 @@ export default function Navbar() {
             `}
           >
           {/* Logo */}
-          <Link href="/" onClick={closeMobile} className="flex items-center group flex-shrink-0">
-            <div className="relative w-[120px] h-[24px] lg:w-[140px] lg:h-[28px] transition-transform duration-200 group-hover:scale-105">
-              <Image
-                src={assetUrl('/logo.png')}
-                alt="MoiApp Logo"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
+          <Link href="/" onClick={closeMobile} className="flex items-center group flex-shrink-0 min-w-0 max-w-[50%] sm:max-w-none">
+            <LogoImage variant="navbar" className="transition-transform duration-200 group-hover:scale-105" />
           </Link>
 
           {/* Desktop nav links — center */}
           <div className="hidden md:flex items-center gap-0.5">
             <Link
-              href="/events"
-              className="px-4 py-2 text-sm font-medium text-tn-muted hover:text-tn-text rounded-xl hover:bg-white/60 transition-all duration-200"
-            >
-              Browse Events
-            </Link>
-            <Link
               href="/register"
               className="px-4 py-2 text-sm font-medium text-tn-muted hover:text-tn-text rounded-xl hover:bg-white/60 transition-all duration-200"
             >
-              List Event
+              {t('listEvent')}
             </Link>
           </div>
 
@@ -121,15 +108,15 @@ export default function Navbar() {
                     <div className="py-1">
                       <Link href="/dashboard" onClick={() => setDropOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-tn-muted hover:bg-tn-yellow-bg hover:text-tn-text transition-colors">
-                        <Icon name="dashboard" size={15} /> Dashboard
+                        <Icon name="dashboard" size={15} /> {t('modDashboard')}
                       </Link>
-                      <Link href="/dashboard?module=settings" onClick={() => setDropOpen(false)}
+                      <Link href="/dashboard?module=profile" onClick={() => setDropOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-tn-muted hover:bg-tn-yellow-bg hover:text-tn-text transition-colors">
-                        <Icon name="users" size={15} /> My Profile
+                        <Icon name="users" size={15} /> {t('myProfile')}
                       </Link>
                       <Link href="/events/new" onClick={() => setDropOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-tn-muted hover:bg-tn-yellow-bg hover:text-tn-text transition-colors">
-                        <Icon name="plus" size={15} /> New Event
+                        <Icon name="plus" size={15} /> {t('newEvent')}
                       </Link>
                     </div>
                     <div className="border-t border-tn-border pt-1">
@@ -137,7 +124,7 @@ export default function Navbar() {
                         onClick={() => { setDropOpen(false); logout(); router.push('/'); }}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-tn-error hover:bg-tn-error-bg transition-colors"
                       >
-                        <Icon name="lock" size={15} /> Sign Out
+                        <Icon name="lock" size={15} /> {t('signOut')}
                       </button>
                     </div>
                   </div>
@@ -148,7 +135,7 @@ export default function Navbar() {
                 className="hidden md:flex text-sm font-semibold bg-tn-yellow hover:bg-tn-yellow-2 text-tn-text rounded-xl px-4 py-2 transition-all duration-200 shadow-sm shadow-tn-yellow/30 hover:shadow-md hover:shadow-tn-yellow/30"
                 onClick={() => router.push('/login')}
               >
-                Sign In
+                {t('signIn')}
               </button>
             )}
 
@@ -165,7 +152,7 @@ export default function Navbar() {
                 className="flex md:hidden text-xs font-semibold bg-tn-yellow hover:bg-tn-yellow-2 text-tn-text rounded-xl px-3 py-1.5 transition-colors shadow-sm"
                 onClick={() => router.push('/login')}
               >
-                Sign In
+                {t('signIn')}
               </button>
             )}
 
@@ -196,24 +183,19 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden fixed inset-x-4 top-[76px] lg:top-[72px] z-40 bg-white/80 backdrop-blur-xl border border-white/50 rounded-2xl shadow-2xl shadow-black/10 overflow-hidden">
           <nav className="flex flex-col px-3 py-3 gap-1">
-            <Link href="/events" onClick={closeMobile}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-tn-muted hover:bg-tn-yellow-bg hover:text-tn-text transition-colors">
-              <Icon name="events" size={17} /> Browse Events
-            </Link>
-
             {user ? (
               <>
                 <Link href="/dashboard" onClick={closeMobile}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-tn-muted hover:bg-tn-yellow-bg hover:text-tn-text transition-colors">
-                  <Icon name="dashboard" size={17} /> Dashboard
+                  <Icon name="dashboard" size={17} /> {t('modDashboard')}
                 </Link>
                 <Link href="/events/new" onClick={closeMobile}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-tn-muted hover:bg-tn-yellow-bg hover:text-tn-text transition-colors">
-                  <Icon name="plus" size={17} /> List Event
+                  <Icon name="plus" size={17} /> {t('listEvent')}
                 </Link>
                 <Link href="/dashboard?module=events" onClick={closeMobile}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-tn-muted hover:bg-tn-yellow-bg hover:text-tn-text transition-colors">
-                  <Icon name="upload" size={17} /> Import
+                  <Icon name="upload" size={17} /> {t('import')}
                 </Link>
                 <div className="border-t border-tn-border mt-1 pt-1">
                   <div className="px-4 py-2.5">
@@ -224,7 +206,7 @@ export default function Navbar() {
                       onClick={() => { closeMobile(); logout(); router.push('/'); }}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-tn-error hover:bg-tn-error-bg transition-colors"
                     >
-                    <Icon name="lock" size={17} /> Sign Out
+                    <Icon name="lock" size={17} /> {t('signOut')}
                   </button>
                 </div>
               </>
@@ -232,14 +214,14 @@ export default function Navbar() {
               <>
                 <Link href="/register" onClick={closeMobile}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-tn-muted hover:bg-tn-yellow-bg hover:text-tn-text transition-colors">
-                  <Icon name="wedding" size={17} /> List Your Wedding
+                  <Icon name="wedding" size={17} /> {t('listYourWedding')}
                 </Link>
                 <div className="px-3 pb-2 pt-1">
                   <button
                     className="w-full text-sm font-semibold bg-tn-yellow hover:bg-tn-yellow-2 rounded-xl px-4 py-3 text-tn-text transition-colors shadow-sm"
                     onClick={() => { closeMobile(); router.push('/login'); }}
                   >
-                    Sign In
+                    {t('signIn')}
                   </button>
                 </div>
               </>

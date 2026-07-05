@@ -23,7 +23,7 @@ if (!$tableExists) {
         role VARCHAR(20) NULL,
         ip_address VARCHAR(45) NULL,
         user_agent TEXT NULL,
-        status ENUM('success', 'failed', 'blocked') NOT NULL,
+        status ENUM('success', 'failed', 'blocked', 'logout') NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
     )";

@@ -234,9 +234,25 @@ CREATE TABLE IF NOT EXISTS login_logs (
     role VARCHAR(20) NULL,
     ip_address VARCHAR(45) NULL,
     user_agent TEXT NULL,
-    status ENUM('success', 'failed', 'blocked') NOT NULL,
+    status ENUM('success', 'failed', 'blocked', 'logout') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Server-side auth sessions (token revocation on logout)
+CREATE TABLE IF NOT EXISTS auth_sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    jti VARCHAR(64) NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_jti (jti),
+    KEY idx_user_id (user_id),
+    KEY idx_expires (expires_at),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Password reset tokens

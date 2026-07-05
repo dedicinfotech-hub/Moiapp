@@ -19,7 +19,7 @@ import { colors } from '../theme';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: ['moiapp://', 'https://moipassbook.com', 'https://dsitesai.com/moiapp', 'http://localhost:8081'],
+  prefixes: ['moiapp://', 'https://moipassbook.com', 'https://www.moipassbook.com', 'http://localhost:8081'],
   config: {
     screens: {
       PublicFlow: {

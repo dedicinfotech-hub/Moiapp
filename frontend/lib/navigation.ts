@@ -9,6 +9,7 @@ export type AppModule =
   | 'users'
   | 'analytics'
   | 'features'
+  | 'profile'
   | 'settings'
   | 'admin-dashboard'
   | 'admin-users'
@@ -28,12 +29,13 @@ export interface AppNavItem {
 
 export const APP_NAV: AppNavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { id: 'events', label: 'Events', icon: 'wedding' },
+  { id: 'events', label: 'Functions', icon: 'wedding' },
   { id: 'organizers', label: 'Organizers', icon: 'users', feature: 'multi_organizer' },
   { id: 'moi-notebook', label: 'Moi Notebook', icon: 'wallet' },
   { id: 'users', label: 'Guests', icon: 'users' },
   { id: 'analytics', label: 'Analytics', icon: 'trend' },
   { id: 'features', label: 'Features', icon: 'features' },
+  { id: 'profile', label: 'Profile', icon: 'users' },
   { id: 'settings', label: 'Settings', icon: 'settings' },
 ];
 
@@ -50,12 +52,13 @@ export const ADMIN_NAV_IDS: AppModule[] = [
 
 export const ADMIN_NAV_LABELS: Record<AppModule, string> = {
   dashboard: 'Dashboard',
-  events: 'Events',
+  events: 'Functions',
   organizers: 'Organizers',
   'moi-notebook': 'Moi Notebook',
   users: 'Guests',
   analytics: 'Analytics',
   features: 'Features',
+  profile: 'Profile',
   settings: 'Settings',
   'admin-dashboard': 'Admin Dashboard',
   'admin-approvals': 'Approvals',
@@ -76,6 +79,7 @@ export function getAdminIcon(module: AppModule): IconName {
     users: 'users',
     analytics: 'trend',
     features: 'features',
+    profile: 'users',
     settings: 'settings',
     'admin-dashboard': 'dashboard',
     'admin-approvals': 'approval',

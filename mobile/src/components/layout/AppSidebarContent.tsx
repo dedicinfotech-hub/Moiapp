@@ -17,7 +17,7 @@ import { useScaledTheme } from '../../theme/useScaledTheme';
 import { navigateToModule, registerModuleNavigateListener } from '../../navigation/navigationRef';
 import { useSidebar } from '../../context/SidebarContext';
 import { LogoImage } from '../ui/LogoImage';
-import { colors, fontSize, radius, spacing } from '../../theme';
+import { APP_NAME } from '../../constants/brand';
 
 interface AppSidebarContentProps {
   activeModule?: string | null;
@@ -85,7 +85,7 @@ export function AppSidebarContent({ activeModule, onItemPress, onLogout }: AppSi
           <Text style={styles.avatarText}>{user?.name?.charAt(0).toUpperCase() || 'M'}</Text>
         </View>
         <View style={styles.footerInfo}>
-          <Text style={styles.footerName} numberOfLines={1}>{user?.name || 'MoiApp User'}</Text>
+          <Text style={styles.footerName} numberOfLines={1}>{user?.name || `${APP_NAME} User`}</Text>
           <Text style={styles.footerEmail} numberOfLines={1}>{user?.email || 'Account'}</Text>
         </View>
         {onLogout ? (

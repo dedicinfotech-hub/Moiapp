@@ -21,7 +21,8 @@ export function useFeatures() {
   const isEnabled = useCallback(
     (key: string) => {
       const t = toggles.find((x) => x.feature_key === key);
-      return t ? t.is_enabled === 1 : false;
+      if (!t) return key === 'language_conversion';
+      return t.is_enabled === 1;
     },
     [toggles]
   );

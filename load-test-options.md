@@ -2,7 +2,7 @@
 
 ## 1. Terminal Output (Default)
 ```bash
-k6 run -e BASE_URL=https://dsitesai.com/moiapp load-test.js
+k6 run -e BASE_URL=https://moipassbook.com load-test.js
 ```
 Shows real-time stats in terminal:
 ```
@@ -20,7 +20,7 @@ Shows real-time stats in terminal:
 
 ## 2. JSON Output (For Custom Reports)
 ```bash
-k6 run -e BASE_URL=https://dsitesai.com/moiapp --out json=results.json load-test.js
+k6 run -e BASE_URL=https://moipassbook.com --out json=results.json load-test.js
 ```
 Then generate HTML:
 ```bash
@@ -29,18 +29,18 @@ k6 html-report results.json --output report.html
 
 ## 3. Built-in HTML Report (k6 v0.45+)
 ```bash
-k6 run -e BASE_URL=https://dsitesai.com/moiapp --out html=report.html load-test.js
+k6 run -e BASE_URL=https://moipassbook.com --out html=report.html load-test.js
 ```
 
 ## 4. InfluxDB + Grafana (Ongoing Monitoring)
 ```bash
-k6 run -e BASE_URL=https://dsitesai.com/moiapp --out influxdb=http://localhost:8086/k6 load-test.js
+k6 run -e BASE_URL=https://moipassbook.com --out influxdb=http://localhost:8086/k6 load-test.js
 ```
 
 ## Quick Start Script
 ```bash
 # Run test and save results
-./run-load-test.sh https://dsitesai.com/moiapp 3m 50
+./run-load-test.sh https://moipassbook.com 3m 50
 
 # Results saved to: load-test-results/
 # - results_YYYYMMDD_HHMMSS.json

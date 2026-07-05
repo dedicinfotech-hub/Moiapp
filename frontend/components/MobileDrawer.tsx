@@ -46,7 +46,7 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
       >
         {/* Header */}
         <div className="h-16 bg-gradient-to-r from-tn-purple to-tn-purple-2 flex items-center justify-between px-4">
-          <h2 className="text-white font-bold text-lg">MoiApp</h2>
+          <h2 className="text-white font-bold text-lg">Moi PassBook</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 text-white"
